@@ -71,7 +71,4 @@ st.html(f"""
 """)
 
 # 3. Base de données des plages
-donnees_plages = [
-    {"Nom": "Plage de la Passagère", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
-    {"Nom": "Plage des Fours à Chaux", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
-    {"Nom": "Plage Saint-Père (Solidor)", "Secteur": "Saint-Malo / St-Servan
+donnees_plages =
