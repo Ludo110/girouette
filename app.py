@@ -6,15 +6,11 @@ import urllib.parse
 # 1. Configuration de la page en mode LARGE pour la grille
 st.set_page_config(page_title="Girouette - Abri Plages", page_icon="🏖️", layout="wide")
 
-# Style de fond : Le bleu-vert canard exact (#568E94) + Couleur crème pour le texte de l'expander
+# Style de fond : Le bleu-vert canard exact (#568E94)
 st.html("""
 <style>
     .stApp {
         background-color: #568E94 !important;
-    }
-    /* Applique la couleur crème au titre du volet Options et Mode Manuel */
-    .stExpander details summary p {
-        color: #ffedd5 !important;
     }
 </style>
 """)
@@ -45,8 +41,8 @@ def get_current_wind():
 
 wind_dir, wind_speed = get_current_wind()
 
-# Options et Mode Manuel
-with st.expander("⚙️ Options et Mode Manuel"):
+# Options et Mode Manuel (Couleur modifiée en crème #ffedd5)
+with st.expander(":style[⚙️ Options et Mode Manuel]{color:#ffedd5}"):
     auto_mode = st.checkbox("Utiliser la météo en direct", value=True)
     if not auto_mode:
         wind_dir = st.slider("Direction du vent (degrés)", 0, 360, int(wind_dir))
@@ -71,4 +67,101 @@ vent_cardinal = directions_texte[index_dir]
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
             background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid #d2f3ee;
+            border-left: 5px solid #d2f3ee;
+            font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
+        🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
+    </div>
+    <div style="border-left: 1px solid #d2f3ee; height: 25px; opacity: 0.5;"></div>
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
+        🚀 Vitesse : <span style="font-weight: 700; color: #451a03;">{int(wind_speed)} km/h</span>
+    </div>
+</div>
+""")
+
+# 3. Base de données des plages
+donnees_plages = [
+    {
+        "Nom": "Plage de la Passagère",
+        "Secteur": "Saint-Malo / St-Servan",
+        "Orientation": "Sud-Ouest",
+        "Min": 315,
+        "Max": 135,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage des Fours à Chaux",
+        "Secteur": "Saint-Malo / St-Servan",
+        "Orientation": "Sud-Ouest",
+        "Min": 315,
+        "Max": 135,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage Saint-Père (Solidor)",
+        "Secteur": "Saint-Malo / St-Servan",
+        "Orientation": "Sud-Ouest",
+        "Min": 315,
+        "Max": 135,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage des Sablons",
+        "Secteur": "Saint-Malo / St-Servan",
+        "Orientation": "Nord-Ouest",
+        "Min": 45,
+        "Max": 225,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage de Bon-Secours",
+        "Secteur": "Saint-Malo (Remparts)",
+        "Orientation": "Ouest",
+        "Min": 360,
+        "Max": 180,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage de l'Éventail",
+        "Secteur": "Saint-Malo (Remparts)",
+        "Orientation": "Ouest",
+        "Min": 360,
+        "Max": 180,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage du Sillon",
+        "Secteur": "Saint-Malo (Paramé)",
+        "Orientation": "Nord-Ouest",
+        "Min": 45,
+        "Max": 225,
+        "Ville": "Saint-Malo",
+    },
+    {
+        "Nom": "Plage du Val",
+        "Secteur": "Rothéneuf",
+        "Orientation": "Nord-Ouest",
+        "Min": 45,
+        "Max": 225,
+        "Ville": "Rothéneuf",
+    },
+    {
+        "Nom": "Plage des Chevrets",
+        "Secteur": "Rothéneuf / St-Coulomb",
+        "Orientation": "Nord-Nord-Ouest",
+        "Min": 22,
+        "Max": 202,
+        "Ville": "Saint-Coulomb",
+    },
+    {
+        "Nom": "Plage de la Touesse",
+        "Secteur": "Saint-Coulomb",
+        "Orientation": "Nord",
+        "Min": 90,
+        "Max": 270,
+        "Ville": "Saint-Coulomb",
+    },
+    {
+        "Nom": "Anse du Guesclin",
+        "S
