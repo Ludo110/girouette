@@ -10,20 +10,20 @@ st.set_page_config(
     layout="wide"
 )
 
-# Style de fond : Le gris-vert/sable doux exact de ton image
+# Style de fond : Le bleu-vert canard exact demandé (#568E94)
 st.html("""
 <style>
     .stApp {
-        background-color: #f0f2f6 !important;
+        background-color: #568E94 !important;
     }
 </style>
 """)
 
-# En-tête minimaliste et chic
+# En-tête adapté (Texte blanc et crème pour ressortir sur le fond coloré)
 st.html("""
 <div style="font-family: 'Inter', sans-serif; margin-bottom: 30px; padding-left: 10px;">
-    <h1 style="color: #451a03; font-size: 36px; font-weight: 800; margin-bottom: 5px;">🏖️ Girouette</h1>
-    <p style="color: #7c2d12; font-size: 16px; margin: 0; opacity: 0.7;">Trouvez la plage idéale à l'abri du vent</p>
+    <h1 style="color: #ffffff; font-size: 36px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">🏖️ Girouette</h1>
+    <p style="color: #ffedd5; font-size: 16px; margin: 0; opacity: 0.9;">Trouvez la plage idéale à l'abri du vent</p>
 </div>
 """)
 
@@ -53,18 +53,18 @@ directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-# Bandeau météo avec fine bordure terracotta élégante
+# Bandeau météo blanc avec fine bordure terracotta
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
             background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border: 1px solid rgba(255,255,255,0.5);
             border-left: 4px solid #7c2d12;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px; color: #7c2d12; font-weight: 500; opacity: 0.9;">
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
         🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
     </div>
     <div style="border-left: 1px solid #e2e8f0; height: 25px;"></div>
-    <div style="font-size: 16px; color: #7c2d12; font-weight: 500; opacity: 0.9;">
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
         🚀 Vitesse : <span style="font-weight: 700; color: #451a03;">{int(wind_speed)} km/h</span>
     </div>
 </div>
@@ -96,11 +96,12 @@ def est_abritee(row, angle, vitesse):
 
 df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir, wind_speed), axis=1)
 
+# Message d'information si vent faible (Fond sable chaud)
 if wind_speed < 10.0:
-    st.html('<div style="background-color: #fff7ed; border: 1px solid #ffedd5; color: #9a3412; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500;">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
+    st.html('<div style="background-color: #ffffff; border-left: 4px solid #9a3412; color: #9a3412; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
 
-# 4. GRILLE DES PLAGES CONSEILLÉES
-st.markdown("### 🟢 Plages à l'abri conseillées")
+# 4. GRILLE DES PLAGES CONSEILLÉES (Avec texte marron-terracotta sombre)
+st.markdown("<h3 style='color: #ffffff; font-family: sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.1);'>🟢 Plages à l'abri conseillées</h3>", unsafe_allow_html=True)
 abritees = df[df['Protégée'] == True].reset_index(drop=True)
 
 if not abritees.empty:
@@ -116,14 +117,14 @@ if not abritees.empty:
                 with cols[j]:
                     st.html(f"""
                     <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
-                                border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; min-height: 180px;
+                                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08); 
+                                border: 1px solid rgba(255,255,255,0.7); font-family: 'Inter', sans-serif; min-height: 180px;
                                 display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                         <div>
                             <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px;">
                                 📌 {p['Nom']}
                             </a>
-                            <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.7;">
+                            <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.85;">
                                 🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
                             </span>
                         </div>
@@ -152,14 +153,14 @@ if not exposees.empty:
                     with cols_exp[j]:
                         st.html(f"""
                         <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); 
+                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
                                     border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; min-height: 180px;
                                     display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                             <div>
-                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.6;">
+                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.75;">
                                     💨 {p['Nom']}
                                 </a>
-                                <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.5;">
+                                <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.65;">
                                     🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
                                 </span>
                             </div>
