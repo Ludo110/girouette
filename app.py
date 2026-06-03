@@ -10,20 +10,20 @@ st.set_page_config(
     layout="wide"
 )
 
-# Style de fond gris clair pour détacher les cartes blanches
+# Style de fond personnalisé avec les tons Terracotta et Sable de ton image
 st.html("""
 <style>
     .stApp {
-        background-color: #f8fafc !important;
+        background-color: #fcf8f5 !important;
     }
 </style>
 """)
 
-# En-tête épuré
+# En-tête épuré aux tons terracotta
 st.html("""
 <div style="font-family: 'Inter', sans-serif; margin-bottom: 30px; padding-left: 10px;">
-    <h1 style="color: #0f172a; font-size: 36px; font-weight: 800; margin-bottom: 5px;">🏖️ Girouette</h1>
-    <p style="color: #64748b; font-size: 16px; margin: 0;">Trouvez la plage idéale à l'abri du vent</p>
+    <h1 style="color: #b45309; font-size: 36px; font-weight: 800; margin-bottom: 5px;">🏖️ Girouette</h1>
+    <p style="color: #78350f; font-size: 16px; margin: 0; opacity: 0.8;">Trouvez la plage idéale à l'abri du vent</p>
 </div>
 """)
 
@@ -53,18 +53,19 @@ directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-# Bandeau météo horizontal moderne
+# Bandeau météo horizontal moderne (Fond blanc avec bordure terracotta discrète)
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
             background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(120, 53, 15, 0.03); border: 1px solid #f3e8ff;
+            border-left: 4px solid #b45309;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px; color: #334155; font-weight: 500;">
-        🌬️ Vent actuel : <span style="font-weight: 700; color: #0f172a;">{vent_cardinal} ({int(wind_dir)}°)</span>
+    <div style="font-size: 16px; color: #78350f; font-weight: 500;">
+        🌬️ Vent actuel : <span style="font-weight: 700; color: #b45309;">{vent_cardinal} ({int(wind_dir)}°)</span>
     </div>
-    <div style="border-left: 1px solid #e2e8f0; height: 25px;"></div>
-    <div style="font-size: 16px; color: #334155; font-weight: 500;">
-        🚀 Vitesse : <span style="font-weight: 700; color: #0f172a;">{int(wind_speed)} km/h</span>
+    <div style="border-left: 1px solid #fed7aa; height: 25px;"></div>
+    <div style="font-size: 16px; color: #78350f; font-weight: 500;">
+        🚀 Vitesse : <span style="font-weight: 700; color: #b45309;">{int(wind_speed)} km/h</span>
     </div>
 </div>
 """)
@@ -96,16 +97,15 @@ def est_abritee(row, angle, vitesse):
 
 df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir, wind_speed), axis=1)
 
-# Message d'information si vent faible
+# Message d'information si vent faible (Fond sable chaud clair)
 if wind_speed < 10.0:
-    st.html('<div style="background-color: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500;">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
+    st.html('<div style="background-color: #ffedd5; border: 1px solid #fed7aa; color: #9a3412; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500;">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
 
 # 4. AFFICHAGE DES PLAGES CONSEILLÉES EN GRILLE (3 COLONNES)
 st.markdown("### 🟢 Plages à l'abri conseillées")
 abritees = df[df['Protégée'] == True].reset_index(drop=True)
 
 if not abritees.empty:
-    # On crée des lignes de 3 colonnes dynamiquement
     for i in range(0, len(abritees), 3):
         cols = st.columns(3)
         for j in range(3):
@@ -118,14 +118,14 @@ if not abritees.empty:
                 with cols[j]:
                     st.html(f"""
                     <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
-                                border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; min-height: 180px;
+                                box-shadow: 0 4px 14px rgba(120, 53, 15, 0.04); 
+                                border: 1px solid #f3e8ff; font-family: 'Inter', sans-serif; min-height: 180px;
                                 display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                         <div>
-                            <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #1e3a8a; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px;">
+                            <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #b45309; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px;">
                                 📌 {p['Nom']}
                             </a>
-                            <span style="color: #64748b; font-size: 13px; display: block; line-height: 1.4;">
+                            <span style="color: #78350f; font-size: 13px; display: block; line-height: 1.4; opacity: 0.8;">
                                 🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
                             </span>
                         </div>
@@ -139,7 +139,7 @@ else:
 
 st.write("")
 
-# 5. AFFICHAGE DES PLAGES EXPOSÉES DANS LE VOLET DÉPLIANT (3 COLONNES AUSSI)
+# 5. AFFICHAGE DES PLAGES EXPOSÉES DANS LE VOLET DÉPLIANT (3 COLONNES)
 exposees = df[df['Protégée'] == False].reset_index(drop=True)
 if not exposees.empty:
     with st.expander("🔴 Voir les plages exposées (Vent de face)"):
@@ -154,16 +154,16 @@ if not exposees.empty:
                     with cols_exp[j]:
                         st.html(f"""
                         <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
-                                    border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; min-height: 180px;
+                                    box-shadow: 0 4px 14px rgba(120, 53, 15, 0.04); 
+                                    border: 1px solid #f3e8ff; font-family: 'Inter', sans-serif; min-height: 180px;
                                     display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                             <div>
-                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #1e3a8a; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px;">
+                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #78350f; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.7;">
                                     💨 {p['Nom']}
                                 </a>
-                                <span style="color: #64748b; font-size: 13px; display: block; line-height: 1.4;">
+                                <span style="color: #78350f; font-size: 13px; display: block; line-height: 1.4; opacity: 0.6;">
                                     🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
-                                 profile       </span>
+                                </span>
                             </div>
                             <div style="margin-top: 15px; background-color: #fce8e6; color: #c5221f; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px;">
                                 ❌ EXPOSÉE
