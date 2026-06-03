@@ -6,11 +6,15 @@ import urllib.parse
 # 1. Configuration de la page en mode LARGE pour la grille
 st.set_page_config(page_title="Girouette - Abri Plages", page_icon="🏖️", layout="wide")
 
-# Style de fond : Le bleu-vert canard exact (#568E94)
+# Style de fond : Le bleu-vert canard exact (#568E94) + Couleur crème pour l'expander
 st.html("""
 <style>
     .stApp {
         background-color: #568E94 !important;
+    }
+    /* Change uniquement la couleur du texte du volet Options et mode manuel */
+    .stExpander details summary p {
+        color: #ffedd5 !important;
     }
 </style>
 """)
@@ -41,8 +45,8 @@ def get_current_wind():
 
 wind_dir, wind_speed = get_current_wind()
 
-# Options et Mode Manuel (Couleur modifiée en crème #ffedd5)
-with st.expander(":style[⚙️ Options et Mode Manuel]{color:#ffedd5}"):
+# Options et Mode Manuel
+with st.expander("⚙️ Options et Mode Manuel"):
     auto_mode = st.checkbox("Utiliser la météo en direct", value=True)
     if not auto_mode:
         wind_dir = st.slider("Direction du vent (degrés)", 0, 360, int(wind_dir))
@@ -81,87 +85,4 @@ st.html(f"""
 """)
 
 # 3. Base de données des plages
-donnees_plages = [
-    {
-        "Nom": "Plage de la Passagère",
-        "Secteur": "Saint-Malo / St-Servan",
-        "Orientation": "Sud-Ouest",
-        "Min": 315,
-        "Max": 135,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage des Fours à Chaux",
-        "Secteur": "Saint-Malo / St-Servan",
-        "Orientation": "Sud-Ouest",
-        "Min": 315,
-        "Max": 135,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage Saint-Père (Solidor)",
-        "Secteur": "Saint-Malo / St-Servan",
-        "Orientation": "Sud-Ouest",
-        "Min": 315,
-        "Max": 135,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage des Sablons",
-        "Secteur": "Saint-Malo / St-Servan",
-        "Orientation": "Nord-Ouest",
-        "Min": 45,
-        "Max": 225,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage de Bon-Secours",
-        "Secteur": "Saint-Malo (Remparts)",
-        "Orientation": "Ouest",
-        "Min": 360,
-        "Max": 180,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage de l'Éventail",
-        "Secteur": "Saint-Malo (Remparts)",
-        "Orientation": "Ouest",
-        "Min": 360,
-        "Max": 180,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage du Sillon",
-        "Secteur": "Saint-Malo (Paramé)",
-        "Orientation": "Nord-Ouest",
-        "Min": 45,
-        "Max": 225,
-        "Ville": "Saint-Malo",
-    },
-    {
-        "Nom": "Plage du Val",
-        "Secteur": "Rothéneuf",
-        "Orientation": "Nord-Ouest",
-        "Min": 45,
-        "Max": 225,
-        "Ville": "Rothéneuf",
-    },
-    {
-        "Nom": "Plage des Chevrets",
-        "Secteur": "Rothéneuf / St-Coulomb",
-        "Orientation": "Nord-Nord-Ouest",
-        "Min": 22,
-        "Max": 202,
-        "Ville": "Saint-Coulomb",
-    },
-    {
-        "Nom": "Plage de la Touesse",
-        "Secteur": "Saint-Coulomb",
-        "Orientation": "Nord",
-        "Min": 90,
-        "Max": 270,
-        "Ville": "Saint-Coulomb",
-    },
-    {
-        "Nom": "Anse du Guesclin",
-        "S
+donnees_plages =
