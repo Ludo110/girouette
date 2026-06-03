@@ -6,15 +6,11 @@ import urllib.parse
 # 1. Configuration de la page en mode LARGE pour la grille
 st.set_page_config(page_title="Girouette - Abri Plages", page_icon="🏖️", layout="wide")
 
-# Style de fond : Le bleu-vert canard exact (#568E94) + Couleur crème pour le texte du volet
+# Style de fond : Le bleu-vert canard exact (#568E94)
 st.html("""
 <style>
     .stApp {
         background-color: #568E94 !important;
-    }
-    /* Cible le texte du volet pour le mettre en crème */
-    .stExpander summary {
-        color: #ffedd5 !important;
     }
 </style>
 """)
@@ -22,7 +18,7 @@ st.html("""
 # En-tête (Texte blanc et crème pour ressortir sur le fond coloré)
 st.html("""
 <div style="font-family: 'Inter', sans-serif; margin-bottom: 30px; padding-left: 10px;">
-    <h1 style="color: #ffffff; font-size: 36px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">🏖️ Girouette malouine</h1>
+    <h1 style="color: #ffffff; font-size: 36px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">🏖️ Girouette Malouine</h1>
     <p style="color: #ffedd5; font-size: 16px; margin: 0; opacity: 0.9;">Trouvez la plage idéale à l'abri du vent</p>
 </div>
 """)
@@ -84,7 +80,4 @@ st.html(f"""
 </div>
 """)
 
-# 3. Base de données des plages
-donnees_plages = [
-    {"Nom": "Plage de la Passagère", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
-    {"Nom": "Plage des Fours à Chaux", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-M
+#
