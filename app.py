@@ -60,4 +60,9 @@ st.html(f"""
             box-shadow: 0 4px 12px rgba(69, 26, 3, 0.02); border: 1px solid #f5f0eb;
             border-left: 4px solid #7c2d12;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500; opacity: 0.9;">
+        🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
+    </div>
+    <div style="border-left: 1px solid #f5f0eb; height: 25px;"></div>
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500; opacity: 0.9;">
+        🚀 Vitesse : <span style="font-weight:
