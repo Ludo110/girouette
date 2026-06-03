@@ -10,11 +10,11 @@ st.set_page_config(
     layout="wide"
 )
 
-# Style de fond : Sable ultra-léger, lumineux et doux
+# Style de fond : Le gris-vert/sable doux exact de ton image
 st.html("""
 <style>
     .stApp {
-        background-color: #fdfbf7 !important;
+        background-color: #f0f2f6 !important;
     }
 </style>
 """)
@@ -57,13 +57,13 @@ vent_cardinal = directions_texte[index_dir]
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
             background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 4px 12px rgba(69, 26, 3, 0.02); border: 1px solid #f5f0eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); border: 1px solid #e2e8f0;
             border-left: 4px solid #7c2d12;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
     <div style="font-size: 16px; color: #7c2d12; font-weight: 500; opacity: 0.9;">
         🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
     </div>
-    <div style="border-left: 1px solid #f5f0eb; height: 25px;"></div>
+    <div style="border-left: 1px solid #e2e8f0; height: 25px;"></div>
     <div style="font-size: 16px; color: #7c2d12; font-weight: 500; opacity: 0.9;">
         🚀 Vitesse : <span style="font-weight: 700; color: #451a03;">{int(wind_speed)} km/h</span>
     </div>
@@ -116,8 +116,8 @@ if not abritees.empty:
                 with cols[j]:
                     st.html(f"""
                     <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                box-shadow: 0 4px 12px rgba(69, 26, 3, 0.03); 
-                                border: 1px solid #f5f0eb; font-family: 'Inter', sans-serif; min-height: 180px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
+                                border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; min-height: 180px;
                                 display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                         <div>
                             <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px;">
@@ -152,8 +152,8 @@ if not exposees.empty:
                     with cols_exp[j]:
                         st.html(f"""
                         <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                    box-shadow: 0 4px 12px rgba(69, 26, 3, 0.02); 
-                                    border: 1px solid #f5f0eb; font-family: 'Inter', sans-serif; min-height: 180px;
+                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02); 
+                                    border: 1px solid #e2e8f0; font-family: 'Inter', sans-serif; min-height: 180px;
                                     display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                             <div>
                                 <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.6;">
