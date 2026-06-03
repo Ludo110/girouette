@@ -23,12 +23,12 @@ def get_current_wind():
             return float(data['current']['wind_direction_10m']), float(data['current']['wind_speed_10m'])
     except Exception:
         pass
-    return 270.0, 15.0 # Si internet coupe, on met un vent d'Ouest (270°) par défaut pour que ça fonctionne
+    return 270.0, 15.0 # Valeurs de secours si internet coupe
 
 # On initialise avec les valeurs internet
 wind_dir, wind_speed = get_current_wind()
 
-# Options et Mode Manuel (Case TOUJOURS cliquable maintenant !)
+# Options et Mode Manuel
 with st.expander("⚙️ Options et Mode Manuel"):
     auto_mode = st.checkbox("Utiliser la météo en direct", value=True)
     
@@ -68,13 +68,19 @@ donnees_plages = [
 ]
 df = pd.DataFrame(donnees_plages)
 
-def est_abritee(row, angle):
+# LOGIQUE AMÉLIORÉE : Si la vitesse est < 10 km/h, TOUTES les plages sont considérées comme protégées
+def est_abritee(row, angle, vitesse):
+    if vitesse < 10.0:
+        return True # Pas de vent désagréable, tout est validé !
     mn, mx = row['Min'], row['Max']
     return (mn <= angle <= mx) if (mn <= mx) else (angle >= mn or angle <= mx)
 
-df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir), axis=1)
+df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir, wind_speed), axis=1)
 
 # 4. Affichage des fiches individuelles
+if wind_speed < 10.0:
+    st.info("✨ **Pas ou très peu de vent aujourd'hui !** Toutes les plages de la région sont excellentes pour poser la serviette.")
+
 st.write("### 🟢 Plages à l'abri conseillées")
 abritees = df[df['Protégée'] == True]
 
@@ -90,23 +96,27 @@ if not abritees.empty:
                 st.caption(f"🌊 {p['Secteur']} • Face mer : {p['Orientation']}")
             with col_badge:
                 st.write("")
-                st.markdown('<span style="background-color:#e6f4ea; color:#137333; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">✔ ABRITÉE</span>', unsafe_allow_html=True)
+                # Si le vent est faible, on adapte le badge pour dire "Idéal" plutôt que "Abrité"
+                badge_texte = "✔ IDÉALE" if wind_speed < 10.0 else "✔ ABRITÉE"
+                st.markdown(f'<span style="background-color:#e6f4ea; color:#137333; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">{badge_texte}</span>', unsafe_allow_html=True)
 else:
     st.info("Aucun abri idéal trouvé pour le moment.")
 
 st.write("")
 
-with st.expander("🔴 Voir les plages exposées (Vent de face)"):
-    exposees = df[df['Protégée'] == False]
-    for _, p in exposees.iterrows():
-        texte_recherche = f"{p['Nom']} {p['Ville']}"
-        lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(texte_recherche)}"
-        
-        with st.container(border=True):
-            col_plage, col_badge = st.columns([3, 1])
-            with col_plage:
-                st.markdown(f"💨 **[{p['Nom']}]({lien_maps})**")
-                st.caption(f"🌊 {p['Secteur']} • Face mer : {p['Orientation']}")
-            with col_badge:
-                st.write("")
-                st.markdown('<span style="background-color:#fce8e6; color:#c5221f; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">❌ EXPOSÉE</span>', unsafe_allow_html=True)
+# Section des plages exposées (qui restera vide s'il fait moins de 10 km/h de vent)
+exposees = df[df['Protégée'] == False]
+if not exposees.empty:
+    with st.expander("🔴 Voir les plages exposées (Vent de face)"):
+        for _, p in exposees.iterrows():
+            texte_recherche = f"{p['Nom']} {p['Ville']}"
+            lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(texte_recherche)}"
+            
+            with st.container(border=True):
+                col_plage, col_badge = st.columns([3, 1])
+                with col_plage:
+                    st.markdown(f"💨 **[{p['Nom']}]({lien_maps})**")
+                    st.caption(f"🌊 {p['Secteur']} • Face mer : {p['Orientation']}")
+                with col_badge:
+                    st.write("")
+                    st.markdown('<span style="background-color:#fce8e6; color:#c5221f; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">❌ EXPOSÉE</span>', unsafe_allow_html=True)
