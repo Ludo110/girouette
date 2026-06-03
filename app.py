@@ -13,34 +13,35 @@ st.set_page_config(
 st.title("🏖️ Girouette")
 st.subheader("Trouvez la plage idéale à l'abri du vent")
 
-# 2. Récupération de la météo en direct (version ultra-compatible)
-@st.cache_data(ttl=900)
+# 2. Récupération de la météo avec secours automatique
 def get_current_wind():
     try:
         url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m&timezone=Europe%2FParis"
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
-            return float(data['current']['wind_direction_10m']), float(data['current']['wind_speed_10m']), True
+            return float(data['current']['wind_direction_10m']), float(data['current']['wind_speed_10m'])
     except Exception:
         pass
-    return 0.0, 15.0, False # Valeurs de secours réalistes si l'API ne répond pas temporairement
+    return 270.0, 15.0 # Si internet coupe, on met un vent d'Ouest (270°) par défaut pour que ça fonctionne
 
-wind_dir, wind_speed, meteo_dispo = get_current_wind()
+# On initialise avec les valeurs internet
+wind_dir, wind_speed = get_current_wind()
 
-# Options et Mode Manuel
+# Options et Mode Manuel (Case TOUJOURS cliquable maintenant !)
 with st.expander("⚙️ Options et Mode Manuel"):
-    auto_mode = st.checkbox("Météo en direct", value=meteo_dispo, disabled=not meteo_dispo)
+    auto_mode = st.checkbox("Utiliser la météo en direct", value=True)
+    
     if not auto_mode:
-        wind_dir = st.slider("Direction (degrés)", 0, 360, int(wind_dir))
-        wind_speed = st.slider("Vitesse (km/h)", 0, 80, int(wind_speed))
+        wind_dir = st.slider("Direction du vent (degrés)", 0, 360, int(wind_dir))
+        wind_speed = st.slider("Vitesse du vent (km/h)", 0, 80, int(wind_speed))
 
 # Calcul de la direction cardinale
 directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖️", "Sud ⬆️", "Sud-Ouest ↗️", "Ouest ➡️", "Nord-Ouest ↘️", "Nord ⬇️"]
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-# Affichage des statistiques du vent
+# Affichage de la météo
 col_m1, col_m2 = st.columns(2)
 with col_m1:
     st.metric(label="💨 Direction du vent", value=vent_cardinal, delta=f"{int(wind_dir)}°")
