@@ -59,16 +59,4 @@ st.html(f"""
             background-color: #dde2c5; padding: 15px 25px; border-radius: 14px; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255,255,255,0.1);
             border-left: 5px solid #ffedd5;
-            font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px; color: #ffffff; font-weight: 500;">
-        🌬️ Vent actuel : <span style="font-weight: 700; color: #ffedd5;">{vent_cardinal} ({int(wind_dir)}°)</span>
-    </div>
-    <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 25px;"></div>
-    <div style="font-size: 16px; color: #ffffff; font-weight: 500;">
-        🚀 Vitesse : <span style="font-weight: 700; color: #ffedd5;">{int(wind_speed)} km/h</span>
-    </div>
-</div>
-""")
-
-# 3. Base de données des plages
-donnees_plages =
+            font-family: 'Inter', sans-serif
