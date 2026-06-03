@@ -63,12 +63,12 @@ directions_texte = [
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-# Bandeau météo blanc avec la bordure modifiée en #d2f3ee
+# Bandeau météo blanc avec toutes les bordures modifiées en #d2f3ee (gauche comprise !)
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
             background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid #d2f3ee;
-            border-left: 5px solid #7c2d12;
+            border-left: 5px solid #d2f3ee;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
     <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
         🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
@@ -204,7 +204,7 @@ df["Protégée"] = df.apply(
 # Message d'information si vent faible
 if wind_speed < 10.0:
     st.html(
-        '<div style="background-color: #ffffff; border-left: 4px solid #9a3412; border-right: 1px solid #d2f3ee; border-top: 1px solid #d2f3ee; border-bottom: 1px solid #d2f3ee; color: #9a3412; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>'
+        '<div style="background-color: #ffffff; border-left: 4px solid #d2f3ee; border-right: 1px solid #d2f3ee; border-top: 1px solid #d2f3ee; border-bottom: 1px solid #d2f3ee; color: #9a3412; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>'
     )
 
 # 4. GRILLE DES PLAGES CONSEILLÉES (Cadre blanc, bordure modifiée en #d2f3ee)
@@ -270,7 +270,7 @@ if not exposees.empty:
                                 <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.75;">
                                     💨 {p['Nom']}
                                 </a>
-                                <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.65;">
+                                <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.75;">
                                     🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
                                 </span>
                             </div>
