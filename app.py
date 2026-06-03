@@ -53,19 +53,19 @@ directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-# Bandeau météo blanc avec bordure subtile #6b9394
+# Bandeau météo en couleur #6b9394 (Fini le blanc !)
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
-            background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid #6b9394;
-            border-left: 5px solid #7c2d12;
+            background-color: #6b9394; padding: 15px 25px; border-radius: 14px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-left: 5px solid #ffedd5;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
-        🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
+    <div style="font-size: 16px; color: #ffffff; font-weight: 500;">
+        🌬️ Vent actuel : <span style="font-weight: 700; color: #ffedd5;">{vent_cardinal} ({int(wind_dir)}°)</span>
     </div>
-    <div style="border-left: 1px solid #6b9394; height: 25px; opacity: 0.5;"></div>
-    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
-        🚀 Vitesse : <span style="font-weight: 700; color: #451a03;">{int(wind_speed)} km/h</span>
+    <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 25px;"></div>
+    <div style="font-size: 16px; color: #ffffff; font-weight: 500;">
+        🚀 Vitesse : <span style="font-weight: 700; color: #ffedd5;">{int(wind_speed)} km/h</span>
     </div>
 </div>
 """)
@@ -98,9 +98,9 @@ df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir, wind_speed), 
 
 # Message d'information si vent faible
 if wind_speed < 10.0:
-    st.html('<div style="background-color: #ffffff; border-left: 4px solid #9a3412; border-right: 1px solid #6b9394; border-top: 1px solid #6b9394; border-bottom: 1px solid #6b9394; color: #9a3412; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
+    st.html('<div style="background-color: #6b9394; border-left: 4px solid #ffedd5; color: #ffffff; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
 
-# 4. GRILLE DES PLAGES CONSEILLÉES
+# 4. GRILLE DES PLAGES CONSEILLÉES (Fonds colorés en #6b9394)
 st.markdown("<h3 style='color: #ffffff; font-family: sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.1);'>🟢 Plages à l'abri conseillées</h3>", unsafe_allow_html=True)
 abritees = df[df['Protégée'] == True].reset_index(drop=True)
 
@@ -116,19 +116,19 @@ if not abritees.empty:
                 
                 with cols[j]:
                     st.html(f"""
-                    <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06); 
-                                border: 1px solid #6b9394; font-family: 'Inter', sans-serif; min-height: 180px;
+                    <div style="background-color: #6b9394; border-radius: 16px; padding: 20px;
+                                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05); 
+                                border: 1px solid rgba(255,255,255,0.1); font-family: 'Inter', sans-serif; min-height: 180px;
                                 display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                         <div>
-                            <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px;">
+                            <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #ffffff; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">
                                 📌 {p['Nom']}
                             </a>
-                            <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.85;">
+                            <span style="color: #ffedd5; font-size: 13px; display: block; line-height: 1.4; opacity: 0.9;">
                                 🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
                             </span>
                         </div>
-                        <div style="margin-top: 15px; background-color: #e6f4ea; color: #137333; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px;">
+                        <div style="margin-top: 15px; background-color: #e6f4ea; color: #137333; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                             {badge_txt}
                         </div>
                     </div>
@@ -138,7 +138,7 @@ else:
 
 st.write("")
 
-# 5. GRILLE DES PLAGES EXPOSÉES
+# 5. GRILLE DES PLAGES EXPOSÉES (Fonds colorés en #6b9394)
 exposees = df[df['Protégée'] == False].reset_index(drop=True)
 if not exposees.empty:
     with st.expander("🔴 Voir les plages exposées (Vent de face)"):
@@ -152,19 +152,19 @@ if not exposees.empty:
                     
                     with cols_exp[j]:
                         st.html(f"""
-                        <div style="background-color: #ffffff; border-radius: 16px; padding: 20px;
-                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); 
-                                    border: 1px solid #6b9394; font-family: 'Inter', sans-serif; min-height: 180px;
+                        <div style="background-color: #6b9394; border-radius: 16px; padding: 20px;
+                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
+                                    border: 1px solid rgba(255,255,255,0.1); font-family: 'Inter', sans-serif; min-height: 180px;
                                     display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
                             <div>
-                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #451a03; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.75;">
+                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #ffffff; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.9; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">
                                     💨 {p['Nom']}
                                 </a>
-                                <span style="color: #7c2d12; font-size: 13px; display: block; line-height: 1.4; opacity: 0.65;">
+                                <span style="color: #ffedd5; font-size: 13px; display: block; line-height: 1.4; opacity: 0.75;">
                                     🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
                                 </span>
                             </div>
-                            <div style="margin-top: 15px; background-color: #fce8e6; color: #c5221f; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px;">
+                            <div style="margin-top: 15px; background-color: #fce8e6; color: #c5221f; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
                                 ❌ EXPOSÉE
                             </div>
                         </div>
