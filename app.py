@@ -13,29 +13,34 @@ st.set_page_config(
 st.title("🏖️ Girouette")
 st.subheader("Trouvez la plage idéale à l'abri du vent")
 
-# 2. Récupération de la météo en direct
+# 2. Récupération de la météo en direct (version ultra-compatible)
 @st.cache_data(ttl=900)
 def get_current_wind():
-    url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m&timezone=Europe%2FParis"
-    response = requests.get(url).json()
-    return response['current']['wind_direction_10m'], response['current']['wind_speed_10m']
+    try:
+        url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m&timezone=Europe%2FParis"
+        response = requests.get(url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            return float(data['current']['wind_direction_10m']), float(data['current']['wind_speed_10m']), True
+    except Exception:
+        pass
+    return 0.0, 15.0, False # Valeurs de secours réalistes si l'API ne répond pas temporairement
 
-try:
-    wind_dir, wind_speed = get_current_wind()
-    meteo_dispo = True
-except Exception:
-    wind_dir, wind_speed = 0, 0
-    meteo_dispo = False
+wind_dir, wind_speed, meteo_dispo = get_current_wind()
 
+# Options et Mode Manuel
 with st.expander("⚙️ Options et Mode Manuel"):
     auto_mode = st.checkbox("Météo en direct", value=meteo_dispo, disabled=not meteo_dispo)
     if not auto_mode:
         wind_dir = st.slider("Direction (degrés)", 0, 360, int(wind_dir))
         wind_speed = st.slider("Vitesse (km/h)", 0, 80, int(wind_speed))
 
+# Calcul de la direction cardinale
 directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖️", "Sud ⬆️", "Sud-Ouest ↗️", "Ouest ➡️", "Nord-Ouest ↘️", "Nord ⬇️"]
-vent_cardinal = directions_texte[round(((wind_dir % 360) / 45))]
+index_dir = int(round(((wind_dir % 360) / 45)))
+vent_cardinal = directions_texte[index_dir]
 
+# Affichage des statistiques du vent
 col_m1, col_m2 = st.columns(2)
 with col_m1:
     st.metric(label="💨 Direction du vent", value=vent_cardinal, delta=f"{int(wind_dir)}°")
@@ -44,7 +49,7 @@ with col_m2:
 
 st.markdown("---")
 
-# 3. Données des plages (sans liens complexes, plus de risque de coupure de ligne !)
+# 3. Données des plages
 donnees_plages = [
     {"Nom": "Plage de la Passagère", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
     {"Nom": "Plage des Fours à Chaux", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
@@ -68,13 +73,12 @@ def est_abritee(row, angle):
 
 df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir), axis=1)
 
-# 4. Affichage sous forme de fiches individuelles
+# 4. Affichage des fiches individuelles
 st.write("### 🟢 Plages à l'abri conseillées")
 abritees = df[df['Protégée'] == True]
 
 if not abritees.empty:
     for _, p in abritees.iterrows():
-        # Génération automatique et sécurisée du vrai lien Google Maps
         texte_recherche = f"{p['Nom']} {p['Ville']}"
         lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(texte_recherche)}"
         
@@ -85,7 +89,7 @@ if not abritees.empty:
                 st.caption(f"🌊 {p['Secteur']} • Face mer : {p['Orientation']}")
             with col_badge:
                 st.write("")
-                st.html('<span style="background-color:#e6f4ea; color:#137333; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">✔ ABRITÉE</span>')
+                st.markdown('<span style="background-color:#e6f4ea; color:#137333; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">✔ ABRITÉE</span>', unsafe_allow_html=True)
 else:
     st.info("Aucun abri idéal trouvé pour le moment.")
 
@@ -104,4 +108,4 @@ with st.expander("🔴 Voir les plages exposées (Vent de face)"):
                 st.caption(f"🌊 {p['Secteur']} • Face mer : {p['Orientation']}")
             with col_badge:
                 st.write("")
-                st.html('<span style="background-color:#fce8e6; color:#c5221f; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">❌ EXPOSÉE</span>')
+                st.markdown('<span style="background-color:#fce8e6; color:#c5221f; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:12px; display:inline-block; text-align:center; width:100px;">❌ EXPOSÉE</span>', unsafe_allow_html=True)
