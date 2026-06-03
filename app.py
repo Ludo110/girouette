@@ -71,4 +71,101 @@ st.html(f"""
 """)
 
 # 3. Base de données des plages
-donnees_plages =
+donnees_plages = [
+    {"Nom": "Plage de la Passagère", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
+    {"Nom": "Plage des Fours à Chaux", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
+    {"Nom": "Plage Saint-Père (Solidor)", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
+    {"Nom": "Plage des Sablons", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Nord-Ouest", "Min": 45, "Max": 225, "Ville": "Saint-Malo"},
+    {"Nom": "Plage de Bon-Secours", "Secteur": "Saint-Malo (Remparts)", "Orientation": "Ouest", "Min": 360, "Max": 180, "Ville": "Saint-Malo"},
+    {"Nom": "Plage de l'Éventail", "Secteur": "Saint-Malo (Remparts)", "Orientation": "Ouest", "Min": 360, "Max": 180, "Ville": "Saint-Malo"},
+    {"Nom": "Plage du Sillon", "Secteur": "Saint-Malo (Paramé)", "Orientation": "Nord-Ouest", "Min": 45, "Max": 225, "Ville": "Saint-Malo"},
+    {"Nom": "Plage du Val", "Secteur": "Rothéneuf", "Orientation": "Nord-Ouest", "Min": 45, "Max": 225, "Ville": "Rothéneuf"},
+    {"Nom": "Plage des Chevrets", "Secteur": "Rothéneuf / St-Coulomb", "Orientation": "Nord-Nord-Ouest", "Min": 22, "Max": 202, "Ville": "Saint-Coulomb"},
+    {"Nom": "Plage de la Touesse", "Secteur": "Saint-Coulomb", "Orientation": "Nord", "Min": 90, "Max": 270, "Ville": "Saint-Coulomb"},
+    {"Nom": "Anse du Guesclin", "Secteur": "Saint-Coulomb", "Orientation": "Nord-Ouest", "Min": 45, "Max": 225, "Ville": "Saint-Coulomb"},
+    {"Nom": "Plage du Verger", "Secteur": "Saint-Coulomb", "Orientation": "Nord-Ouest", "Min": 45, "Max": 225, "Ville": "Saint-Coulomb"},
+    {"Nom": "Plage de Port Mer", "Secteur": "Cancale", "Orientation": "Est", "Min": 180, "Max": 360, "Ville": "Cancale"}
+]
+df = pd.DataFrame(donnees_plages)
+
+def est_abritee(row, angle, vitesse):
+    if vitesse < 10.0:
+        return True
+    mn, mx = row['Min'], row['Max']
+    return (mn <= angle <= mx) if (mn <= mx) else (angle >= mn or angle <= mx)
+
+df['Protégée'] = df.apply(lambda row: est_abritee(row, wind_dir, wind_speed), axis=1)
+
+# Message d'information si vent faible
+if wind_speed < 10.0:
+    st.html('<div style="background-color: #dde2c5; border-left: 4px solid #ffedd5; color: #ffffff; padding: 15px; border-radius: 12px; font-family: \'Inter\', sans-serif; font-size: 15px; margin-bottom: 25px; margin-left: 10px; margin-right: 10px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">✨ <b>Pas ou très peu de vent aujourd\'hui !</b> Toutes les plages de la région sont excellentes pour poser la serviette.</div>')
+
+# 4. GRILLE DES PLAGES CONSEILLÉES (Fonds colorés en #dde2c5)
+st.markdown("<h3 style='color: #ffffff; font-family: sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.1);'>🟢 Plages à l'abri conseillées</h3>", unsafe_allow_html=True)
+abritees = df[df['Protégée'] == True].reset_index(drop=True)
+
+if not abritees.empty:
+    for i in range(0, len(abritees), 3):
+        cols = st.columns(3)
+        for j in range(3):
+            if i + j < len(abritees):
+                p = abritees.iloc[i + j]
+                texte_recherche = f"{p['Nom']} {p['Ville']}"
+                lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(texte_recherche)}"
+                badge_txt = "✔ IDÉALE" if wind_speed < 10.0 else "✔ ABRITÉE"
+                
+                with cols[j]:
+                    st.html(f"""
+                    <div style="background-color: #dde2c5; border-radius: 16px; padding: 20px;
+                                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05); 
+                                border: 1px solid rgba(255,255,255,0.1); font-family: 'Inter', sans-serif; min-height: 180px;
+                                display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
+                        <div>
+                            <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #ffffff; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">
+                                📌 {p['Nom']}
+                            </a>
+                            <span style="color: #ffedd5; font-size: 13px; display: block; line-height: 1.4; opacity: 0.9;">
+                                🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
+                            </span>
+                        </div>
+                        <div style="margin-top: 15px; background-color: #e6f4ea; color: #137333; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            {badge_txt}
+                        </div>
+                    </div>
+                    """)
+else:
+    st.info("Aucun abri idéal trouvé pour le moment.")
+
+st.write("")
+
+# 5. GRILLE DES PLAGES EXPOSÉES (Fonds colorés en #dde2c5)
+exposees = df[df['Protégée'] == False].reset_index(drop=True)
+if not exposees.empty:
+    with st.expander("🔴 Voir les plages exposées (Vent de face)"):
+        for i in range(0, len(exposees), 3):
+            cols_exp = st.columns(3)
+            for j in range(3):
+                if i + j < len(exposees):
+                    p = exposees.iloc[i + j]
+                    texte_recherche = f"{p['Nom']} {p['Ville']}"
+                    lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(texte_recherche)}"
+                    
+                    with cols_exp[j]:
+                        st.html(f"""
+                        <div style="background-color: #dde2c5; border-radius: 16px; padding: 20px;
+                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
+                                    border: 1px solid rgba(255,255,255,0.1); font-family: 'Inter', sans-serif; min-height: 180px;
+                                    display: flex; flex-direction: column; justify-content: space-between; margin-bottom: 15px;">
+                            <div>
+                                <a href="{lien_maps}" target="_blank" style="text-decoration: none; color: #ffffff; font-weight: 800; font-size: 18px; display: block; margin-bottom: 8px; opacity: 0.9; text-shadow: 0 1px 1px rgba(0,0,0,0.1);">
+                                    💨 {p['Nom']}
+                                </a>
+                                <span style="color: #ffedd5; font-size: 13px; display: block; line-height: 1.4; opacity: 0.75;">
+                                    🌊 {p['Secteur']}<br>🧭 Face mer : {p['Orientation']}
+                                </span>
+                            </div>
+                            <div style="margin-top: 15px; background-color: #fce8e6; color: #c5221f; padding: 6px 0; border-radius: 20px; font-weight: 700; font-size: 12px; letter-spacing: 0.5px; text-align: center; width: 100px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                ❌ EXPOSÉE
+                            </div>
+                        </div>
+                        """)
