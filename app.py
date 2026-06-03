@@ -22,7 +22,7 @@ st.html("""
 # En-tête (Texte blanc et crème pour ressortir sur le fond coloré)
 st.html("""
 <div style="font-family: 'Inter', sans-serif; margin-bottom: 30px; padding-left: 10px;">
-    <h1 style="color: #ffffff; font-size: 36px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">🏖️ Girouette</h1>
+    <h1 style="color: #ffffff; font-size: 36px; font-weight: 800; margin-bottom: 5px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">🏖️ Girouette Malouine</h1>
     <p style="color: #ffedd5; font-size: 16px; margin: 0; opacity: 0.9;">Trouvez la plage idéale à l'abri du vent</p>
 </div>
 """)
