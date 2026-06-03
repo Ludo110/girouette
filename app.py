@@ -53,22 +53,28 @@ directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-# Bandeau météo en couleur #dde2c5 (Texte blanc)
+# Bandeau météo blanc avec la bordure modifiée en #dde2c5
 st.html(f"""
 <div style="display: flex; justify-content: flex-start; gap: 40px; align-items: center; 
-            background-color: #dde2c5; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-left: 5px solid #ffedd5;
+            background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid #dde2c5;
+            border-left: 5px solid #7c2d12;
             font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px; color: #ffffff; font-weight: 500;">
-        🌬️ Vent actuel : <span style="font-weight: 700; color: #ffedd5;">{vent_cardinal} ({int(wind_dir)}°)</span>
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
+        🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
     </div>
-    <div style="border-left: 1px solid rgba(255,255,255,0.2); height: 25px;"></div>
-    <div style="font-size: 16px; color: #ffffff; font-weight: 500;">
-        🚀 Vitesse : <span style="font-weight: 700; color: #ffedd5;">{int(wind_speed)} km/h</span>
+    <div style="border-left: 1px solid #dde2c5; height: 25px; opacity: 0.5;"></div>
+    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
+        🚀 Vitesse : <span style="font-weight: 700; color: #451a03;">{int(wind_speed)} km/h</span>
     </div>
 </div>
 """)
 
 # 3. Base de données des plages
-donnees_plages =
+donnees_plages = [
+    {"Nom": "Plage de la Passagère", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
+    {"Nom": "Plage des Fours à Chaux", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
+    {"Nom": "Plage Saint-Père (Solidor)", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Sud-Ouest", "Min": 315, "Max": 135, "Ville": "Saint-Malo"},
+    {"Nom": "Plage des Sablons", "Secteur": "Saint-Malo / St-Servan", "Orientation": "Nord-Ouest", "Min": 45, "Max": 225, "Ville": "Saint-Malo"},
+    {"Nom": "Plage de Bon-Secours", "Secteur": "Saint-Malo (Remparts)", "Orientation": "Ouest", "Min": 360, "Max": 180, "Ville": "Saint-Malo"},
+    {"Nom": "Pl
