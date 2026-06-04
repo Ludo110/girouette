@@ -6,7 +6,7 @@ import urllib.parse
 # Configuration
 st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
 
-# Style : Fond bleu-gris et style des rectangles crème
+# Style
 st.html("""
 <style>
     .stApp { background-color: #5d7689 !important; }
@@ -57,12 +57,21 @@ st.html(f"""
 </div>
 """)
 
-# Liste plages
+# Liste complète des plages
 donnees_plages = [
-    {"Nom": "Sillon", "Ville": "Saint-Malo", "Secteur": "Paramé", "Min": 45, "Max": 225},
+    {"Nom": "La Passagère", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 315, "Max": 135},
+    {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 315, "Max": 135},
+    {"Nom": "Saint-Père", "Ville": "Saint-Malo", "Secteur": "Solidor", "Min": 315, "Max": 135},
+    {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 45, "Max": 225},
     {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Secteur": "Remparts", "Min": 360, "Max": 180},
-    {"Nom": "Port Mer", "Ville": "Cancale", "Secteur": "Cancale", "Min": 180, "Max": 360},
-    {"Nom": "Chevrets", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 22, "Max": 202}
+    {"Nom": "L'Éventail", "Ville": "Saint-Malo", "Secteur": "Remparts", "Min": 360, "Max": 180},
+    {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Secteur": "Paramé", "Min": 45, "Max": 225},
+    {"Nom": "Le Val", "Ville": "Rothéneuf", "Secteur": "Rothéneuf", "Min": 45, "Max": 225},
+    {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 22, "Max": 202},
+    {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 90, "Max": 270},
+    {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 45, "Max": 225},
+    {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 45, "Max": 225},
+    {"Nom": "Port Mer", "Ville": "Cancale", "Secteur": "Cancale", "Min": 180, "Max": 360}
 ]
 
 def est_abritee(p, angle, vitesse):
@@ -76,27 +85,14 @@ exposees = [p for p in donnees_plages if not est_abritee(p, wind_dir, wind_speed
 
 # Affichage protégées
 st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
-cols = st.columns(max(len(abritees), 1))
-for i, p in enumerate(abritees):
-    with cols[i]:
-        lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
-        
-        # Logique pour éviter la répétition du nom de la ville
-        info_secteur = f"<br>{p['Secteur']}" if p['Secteur'] and p['Secteur'] != p['Ville'] else ""
-        
-        st.html(f"""
-        <a href="{lien_maps}" target="_blank" style="text-decoration: none;">
-            <div class="plage-card">
-                <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
-                <p style="color: #555; font-size: 0.9em;">{p['Ville']}{info_secteur}</p>
-                <div style="color: #2d5a27; font-weight: bold;">✔ IDÉALE</div>
-            </div>
-        </a>
-        """)
 
-# Affichage exposées
-if exposees:
-    st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-    for p in exposees:
+# Pour éviter que les colonnes soient trop petites, on utilise 3 ou 4 colonnes max
+cols_per_row = 4
+for i in range(0, len(abritees), cols_per_row):
+    row_cols = st.columns(cols_per_row)
+    for j, p in enumerate(abritees[i:i+cols_per_row]):
         lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
-        st.markdown(f"<div style='text-align: center;'><a href='{lien_maps}' target='_blank' style='color: #ffffff; text-decoration: none;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+        info_secteur = f"<br>{p['Secteur']}" if p['Secteur'] and p['Secteur'] != p['Ville'] else ""
+        with row_cols[j]:
+            st.html(f"""
+            <a href="{lien_maps}" target="_blank" style="text-decoration: none;">
