@@ -11,16 +11,28 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. En-tête et Météo
+# 2. En-tête
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color: #e2dfd7; text-align: center;'>Trouvez la plage idéale à l'abri du vent</p>", unsafe_allow_html=True)
 
+# Récupération automatique
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
-    vitesse, angle = int(data["current"]["wind_speed_10m"]), data["current"]["wind_direction_10m"]
-except: vitesse, angle = 15, 270
+    auto_vitesse, auto_angle = int(data["current"]["wind_speed_10m"]), data["current"]["wind_direction_10m"]
+except:
+    auto_vitesse, auto_angle = 15, 270
 
+# 3. Options manuelles (Expander)
+with st.expander("⚙️ Mode Manuel (Forcer les conditions)"):
+    use_manual = st.checkbox("Activer le mode manuel")
+    man_vitesse = st.slider("Vitesse du vent (km/h)", 0, 80, auto_vitesse)
+    man_angle = st.slider("Direction du vent (°)", 0, 360, int(auto_angle))
+
+vitesse = man_vitesse if use_manual else auto_vitesse
+angle = float(man_angle if use_manual else auto_angle)
+
+# Affichage météo
 directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 orientation = directions[int(round((angle % 360) / 45))]
 
@@ -30,7 +42,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 3. Données
+# 4. Données
 plages = [
     {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
     {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
@@ -47,7 +59,7 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 4. Tri
+# 5. Tri et Affichage
 abritees = []
 exposees = []
 for p in plages:
@@ -55,16 +67,12 @@ for p in plages:
     if est_ok: abritees.append(p)
     else: exposees.append(p)
 
-# 5. Affichage
 st.markdown("<h3 style='color: white; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
 if abritees:
-    # On découpe les plages par groupes de 4
     for i in range(0, len(abritees), 4):
         groupe = abritees[i:i+4]
         cols = st.columns(len(groupe))
-        # Si on n'a qu'une colonne, on force un petit offset pour centrer manuellement si besoin,
-        # mais st.columns(1) dans layout="wide" est correct.
         for j, p in enumerate(groupe):
             query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
             cols[j].markdown(f"""
