@@ -1,71 +1,60 @@
-import pandas as pd
-import requests
 import streamlit as st
+import requests
 import urllib.parse
 
-# Configuration
-st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
-
-# Style : Fond bleu-gris et style des rectangles crème
+# 1. Configuration et Style
+st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    .plage-card {
-        background-color: #e2dfd7;
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        height: 200px;
-        margin: 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
+    .plage-card { background-color: #e2dfd7; padding: 20px; border-radius: 15px; text-align: center; height: 180px; margin: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
-# En-tête
-st.markdown("""
-<div style="text-align: center; margin-bottom: 30px; font-family: sans-serif;">
-    <h1 style="color: #ffffff; font-size: 50px; font-weight: 300;">Girouette Malouine</h1>
-    <p style="color: #e2dfd7; font-size: 20px;">Trouvez la plage idéale à l'abri du vent</p>
-</div>
-""", unsafe_allow_html=True)
+# 2. Titre et Météo
+st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color: #e2dfd7; text-align: center;'>Trouvez la plage idéale</p>", unsafe_allow_html=True)
 
-# Météo
-def get_current_wind():
-    try:
-        url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m&timezone=Europe%2FParis"
-        response = requests.get(url, timeout=5)
-        if response.status_code == 200:
-            data = response.json()
-            return float(data["current"]["wind_direction_10m"]), float(data["current"]["wind_speed_10m"])
-    except: pass
-    return 270.0, 15.0
+try:
+    url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
+    data = requests.get(url, timeout=5).json()
+    vitesse = int(data["current"]["wind_speed_10m"])
+    angle = data["current"]["wind_direction_10m"]
+except:
+    vitesse, angle = 15, 270
 
-wind_dir, wind_speed = get_current_wind()
+st.markdown(f"<div style='background:#e2dfd7; padding:10px; border-radius:10px; text-align:center;'>Vent: {vitesse} km/h - Angle: {angle}°</div>", unsafe_allow_html=True)
 
-# Bandeau météo
-directions_texte = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
-index_dir = int(round(((wind_dir % 360) / 45)))
-vent_cardinal = directions_texte[index_dir]
+# 3. Données
+plages = [
+    {"Nom": "Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225},
+    {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180},
+    {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360},
+    {"Nom": "Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202}
+]
 
-st.markdown(f"""
-<div style="text-align: center; background-color: #e2dfd7; padding: 15px; border-radius: 12px; margin-bottom: 30px; font-family: sans-serif; color: #333;">
-    🌬️ <b>Vent :</b> {vent_cardinal} ({int(wind_dir)}°) | 🚀 <b>Vitesse :</b> {int(wind_speed)} km/h
-</div>
-""", unsafe_allow_html=True)
+# 4. Logique et Affichage
+abritees = []
+exposees = []
+for p in plages:
+    est_ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
+    if est_ok: abritees.append(p)
+    else: exposees.append(p)
 
-# Liste complète
-donnees_plages = [
-    {"Nom": "La Passagère", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 315, "Max": 135},
-    {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 315, "Max": 135},
-    {"Nom": "Saint-Père", "Ville": "Saint-Malo", "Secteur": "Solidor", "Min": 315, "Max": 135},
-    {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 45, "Max": 225},
-    {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Secteur": "Remparts", "Min": 360, "Max": 180},
-    {"Nom": "L'Éventail", "Ville": "Saint-Malo", "Secteur": "Remparts", "Min": 360, "Max": 180},
-    {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Secteur": "Paramé", "Min": 45, "Max": 225},
-    {"Nom": "Le Val", "Ville": "Rothéneuf", "Secteur": "Rothéneuf", "Min": 45, "Max": 225},
-    {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 22, "Max": 202},
-    {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 90, "Max": 270},
+st.subheader("🟢 À l'abri")
+cols = st.columns(4)
+for i, p in enumerate(abritees):
+    with cols[i % 4]:
+        query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
+        st.markdown(f"""
+        <a href='http://google.com/search?q={query}' style='text-decoration:none;'>
+            <div class='plage-card'>
+                <h3 style='color:#333;'>{p['Nom']}</h3>
+                <p style='color:#555;'>{p['Ville']}</p>
+                <b style='color:green;'>✔ IDÉALE</b>
+            </div>
+        </a>""", unsafe_allow_html=True)
+
+st.subheader("🔴 Exposées")
+for p in exposees:
+    st.markdown(f"<div style='color:white;'>💨 {p['Nom']} ({p['Ville']})</div>", unsafe_allow_html=True)
