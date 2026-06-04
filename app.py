@@ -48,6 +48,16 @@ html_a += "</div>"
 st.markdown(html_a, unsafe_allow_html=True)
 
 st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>Exposees</h3>", unsafe_allow_html=True)
-for p in exposees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>{p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+
+# Découpage en deux colonnes pour les exposées
+col1, col2 = st.columns(2)
+milieu = len(exposees) // 2
+
+def afficher_colonne(liste_plages, colonne):
+    with colonne:
+        for p in liste_plages:
+            q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+            st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><a href='https://google.com/search?q={q}' style='color:white;'>{p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+
+afficher_colonne(exposees[:milieu], col1)
+afficher_colonne(exposees[milieu:], col2)
