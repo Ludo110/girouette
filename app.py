@@ -7,11 +7,10 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    /* Le conteneur parent qui centre tout */
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
     .plage-card { background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; width: 200px; height: 250px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .card-title { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
-    .card-text { width: 100%; color: #5d7689 !important; margin: 0 0 10px 0; font-size: 0.9em; }
+    .card-title { width: 100%; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
+    .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
     a::after { content: none !important; }
 </style>
 """, unsafe_allow_html=True)
@@ -32,7 +31,6 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# Météo
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
@@ -56,11 +54,11 @@ exposees = [p for p in plages if p not in abritees]
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Affichage groupé pour éviter les coupures de rendu
 html_abritees = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    html_abritees += f"<div class='plage-card'><a href='https://google.com/search?q={q}' style='text-decoration:none; color:inherit;'><h3 class='card-title'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
+    # Couleur changée ici : style='color: #5d7689;'
+    html_abritees += f"<div class='plage-card'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
 html_abritees += "</div>"
 st.markdown(html_abritees, unsafe_allow_html=True)
 
