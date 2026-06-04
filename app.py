@@ -16,10 +16,10 @@ st.html("""
         border-radius: 15px;
         text-align: center;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        height: 250px;
+        height: 200px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
     }
 </style>
 """)
@@ -58,19 +58,26 @@ def est_abritee(row, angle, vitesse):
     mn, mx = row["Min"], row["Max"]
     return (mn <= angle <= mx) if (mn <= mx) else (angle >= mn or angle <= mx)
 
-# Affichage des colonnes côte à côte
-cols = st.columns(len(donnees_plages))
+# Séparation des plages
+abritees = [p for p in donnees_plages if est_abritee(p, wind_dir, wind_speed)]
+exposees = [p for p in donnees_plages if not est_abritee(p, wind_dir, wind_speed)]
 
-for i, p in enumerate(donnees_plages):
-    est_ok = est_abritee(p, wind_dir, wind_speed)
-    badge = "✔ IDÉALE" if est_ok else "❌ EXPOSÉE"
-    couleur_b = "#2d5a27" if est_ok else "#8b0000"
-    
+# Affichage des plages protégées (Rectangles)
+st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 Plages à l'abri</h3>", unsafe_allow_html=True)
+cols = st.columns(max(len(abritees), 1))
+
+for i, p in enumerate(abritees):
     with cols[i]:
         st.html(f"""
         <div class="plage-card">
             <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
             <p style="color: #555; font-size: 0.9em;">{p['Ville']}<br>{p['Secteur']}</p>
-            <div style="color: {couleur_b}; font-weight: bold; font-size: 1.1em;">{badge}</div>
+            <div style="color: #2d5a27; font-weight: bold;">✔ IDÉALE</div>
         </div>
         """)
+
+# Affichage des plages exposées (Liste simple)
+if exposees:
+    st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Plages exposées</h3>", unsafe_allow_html=True)
+    for p in exposees:
+        st.markdown(f"<div style='text-align: center; color: #ffffff;'>💨 {p['Nom']} ({p['Ville']})</div>", unsafe_allow_html=True)
