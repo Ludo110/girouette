@@ -7,13 +7,17 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
+    /* Conteneur parent pour le centrage */
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .plage-card { 
-        background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; 
-        width: 200px; height: 250px; display: flex; flex-direction: column; 
-        justify-content: flex-start; align-items: center; 
-        /* Ombre légère portée */
+    /* Style commun pour les rectangles (cartes et météo) */
+    .rect-style { 
+        background-color: #e2dfd7; 
+        border-radius: 15px; 
         box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+    }
+    .plage-card { 
+        padding: 20px 10px; text-align: center; width: 200px; height: 250px; 
+        display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
     }
     .card-title { width: 100%; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
@@ -53,7 +57,9 @@ with st.expander("⚙️ Options"):
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+
+# Rectangle météo avec ombre (classe 'rect-style')
+st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
@@ -63,7 +69,7 @@ st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", u
 html_abritees = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    html_abritees += f"<div class='plage-card'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
+    html_abritees += f"<div class='plage-card rect-style'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
 html_abritees += "</div>"
 st.markdown(html_abritees, unsafe_allow_html=True)
 
