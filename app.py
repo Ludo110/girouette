@@ -8,8 +8,11 @@ st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     
-    /* Couleur du texte de l'expander simplifiée */
-    .stExpanderHeader p { color: #e2dfd7 !important; font-weight: bold; }
+    /* Cible le texte de l'expander de façon radicale */
+    div[data-testid="stExpander"] button div p { 
+        color: #e2dfd7 !important; 
+        font-weight: bold !important; 
+    }
     
     /* Conteneur parent pour le centrage */
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
@@ -30,27 +33,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-plages = [
-    {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
-    {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
-    {"Nom": "Saint-Père", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
-    {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225},
-    {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180},
-    {"Nom": "L'Éventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180},
-    {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225},
-    {"Nom": "Le Val", "Ville": "Rothéneuf", "Min": 45, "Max": 225},
-    {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202},
-    {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270},
-    {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225},
-    {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225},
-    {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
-]
+plages = [{"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135}, {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135}, {"Nom": "Saint-Père", "Ville": "Saint-Malo", "Min": 315, "Max": 135}, {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225}, {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180}, {"Nom": "L'Éventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180}, {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225}, {"Nom": "Le Val", "Ville": "Rothéneuf", "Min": 45, "Max": 225}, {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202}, {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270}, {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225}, {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225}, {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}]
 
 try:
-    url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
-    data = requests.get(url, timeout=5).json()
-    auto_v = int(data["current"]["wind_speed_10m"])
-    auto_a = float(data["current"]["wind_direction_10m"])
+    r = requests.get("https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m", timeout=5).json()
+    auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
