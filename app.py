@@ -8,11 +8,8 @@ st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     
-    /* Couleur du texte "Options" forcée */
-    div[data-testid="stExpander"] button p { 
-        color: #e2dfd7 !important; 
-        font-weight: bold !important; 
-    }
+    /* Couleur du texte de l'expander simplifiée */
+    .stExpanderHeader p { color: #e2dfd7 !important; font-weight: bold; }
     
     /* Conteneur parent pour le centrage */
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
@@ -49,7 +46,6 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# Récupération Météo
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
@@ -61,4 +57,27 @@ st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h
 
 with st.expander("⚙️ Options"):
     use_manual = st.checkbox("Activer le mode manuel")
-    vitesse = st.slider
+    vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
+    angle = float(st.slider("Direction vent (°)", 0, 360, int(auto_a))) if use_manual else auto_a
+
+dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+ori = dirs[int(round((angle % 360) / 45))]
+
+st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+
+abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
+exposees = [p for p in plages if p not in abritees]
+
+st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
+
+html_a = "<div class='centrage-fixe'>"
+for p in abritees:
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    html_a += f"<div class='plage-card rect-style'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
+html_a += "</div>"
+st.markdown(html_a, unsafe_allow_html=True)
+
+st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
+for p in exposees:
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
