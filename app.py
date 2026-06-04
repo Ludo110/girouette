@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style (Dimensions fixes ici)
+# 1. Configuration et Style (Alignement fixe en haut)
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
@@ -17,7 +17,8 @@ st.markdown("""
         margin: 10px auto; 
         display: flex; 
         flex-direction: column; 
-        justify-content: center;
+        justify-content: flex-start; /* Aligne le contenu vers le haut */
+        align-items: center;        /* Centre horizontalement */
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 </style>
@@ -70,13 +71,12 @@ for p in plages:
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Affichage centré
 for i in range(0, len(abritees), 4):
     groupe = abritees[i:i+4]
-    cols = st.columns(4) # Toujours 4 colonnes pour garder la grille fixe
+    cols = st.columns(4)
     for j, p in enumerate(groupe):
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-        cols[j].markdown("<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>" + p['Nom'] + "</h3><p style='color:#555;'>" + p['Ville'] + "</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
+        cols[j].markdown("<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>" + p['Nom'] + "</h3><p style='color:#555; margin:5px 0;'>" + p['Ville'] + "</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
 for p in exposees:
