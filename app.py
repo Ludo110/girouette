@@ -8,7 +8,13 @@ st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .plage-card { background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; width: 200px; height: 250px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .plage-card { 
+        background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; 
+        width: 200px; height: 250px; display: flex; flex-direction: column; 
+        justify-content: flex-start; align-items: center; 
+        /* Ombre légère portée */
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+    }
     .card-title { width: 100%; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
     a::after { content: none !important; }
@@ -57,7 +63,6 @@ st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", u
 html_abritees = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    # Couleur changée ici : style='color: #5d7689;'
     html_abritees += f"<div class='plage-card'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
 html_abritees += "</div>"
 st.markdown(html_abritees, unsafe_allow_html=True)
