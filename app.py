@@ -3,10 +3,10 @@ import requests
 import streamlit as st
 import urllib.parse
 
-# 1. Configuration de la page
+# Configuration
 st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
 
-# Style : Fond bleu-gris et style des cartes
+# CSS pour le fond bleu-gris et les rectangles crème
 st.html("""
 <style>
     .stApp { background-color: #5d7689 !important; }
@@ -17,24 +17,23 @@ st.html("""
         text-align: center;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         height: 200px;
+        margin: 10px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        margin: 10px;
     }
-    .stExpander summary { color: #ffedd5 !important; }
 </style>
 """)
 
 # En-tête
 st.html("""
 <div style="text-align: center; margin-bottom: 30px; font-family: sans-serif;">
-    <h1 style="color: #ffffff; font-size: 60px; font-weight: 300;">Girouette Malouine</h1>
+    <h1 style="color: #ffffff; font-size: 50px; font-weight: 300;">Girouette Malouine</h1>
     <p style="color: #e2dfd7; font-size: 20px;">Trouvez la plage idéale à l'abri du vent</p>
 </div>
 """)
 
-# 2. Récupération de la météo
+# Météo
 def get_current_wind():
     try:
         url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m&timezone=Europe%2FParis"
@@ -47,35 +46,7 @@ def get_current_wind():
 
 wind_dir, wind_speed = get_current_wind()
 
-# Volet options
-with st.expander("⚙️ Options et Mode Manuel"):
-    auto_mode = st.checkbox("Utiliser la météo en direct", value=True)
-    if not auto_mode:
-        wind_dir = st.slider("Direction du vent (degrés)", 0, 360, int(wind_dir))
-        wind_speed = st.slider("Vitesse du vent (km/h)", 0, 80, int(wind_speed))
-
-directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖️", "Sud ⬆️", "Sud-Ouest ↗️", "Ouest ➡️", "Nord-Ouest ↘️", "Nord ⬇️"]
-index_dir = int(round(((wind_dir % 360) / 45)))
-vent_cardinal = directions_texte[index_dir]
-
-# Bandeau météo (Le même que notre code de base)
-st.html(f"""
-<div style="display: flex; justify-content: center; gap: 40px; align-items: center; 
-            background-color: #ffffff; padding: 15px 25px; border-radius: 14px; 
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid #d2f3ee;
-            border-left: 5px solid #d2f3ee;
-            font-family: 'Inter', sans-serif; margin-bottom: 35px; margin-left: 10px; margin-right: 10px;">
-    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
-        🌬️ Vent actuel : <span style="font-weight: 700; color: #451a03;">{vent_cardinal} ({int(wind_dir)}°)</span>
-    </div>
-    <div style="border-left: 1px solid #d2f3ee; height: 25px; opacity: 0.5;"></div>
-    <div style="font-size: 16px; color: #7c2d12; font-weight: 500;">
-        🚀 Vitesse : <span style="font-weight: 700; color: #451a03;">{int(wind_speed)} km/h</span>
-    </div>
-</div>
-""")
-
-# 3. Base de données
+# Liste plages
 donnees_plages = [
     {"Nom": "Sillon", "Ville": "Saint-Malo", "Secteur": "Paramé", "Min": 45, "Max": 225},
     {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Secteur": "Remparts", "Min": 360, "Max": 180},
@@ -83,5 +54,20 @@ donnees_plages = [
     {"Nom": "Chevrets", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 22, "Max": 202}
 ]
 
-def est_abritee(row, angle, vitesse):
-    if
+def est_abritee(p, angle, vitesse):
+    if vitesse < 10.0: return True
+    mn, mx = p["Min"], p["Max"]
+    return (mn <= angle <= mx) if (mn <= mx) else (angle >= mn or angle <= mx)
+
+# Tri
+abritees = [p for p in donnees_plages if est_abritee(p, wind_dir, wind_speed)]
+exposees = [p for p in donnees_plages if not est_abritee(p, wind_dir, wind_speed)]
+
+# Affichage protégées
+st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
+cols = st.columns(max(len(abritees), 1))
+for i, p in enumerate(abritees):
+    with cols[i]:
+        st.html(f"""
+        <div class="plage-card">
+            <h3 style="color: #333
