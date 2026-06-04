@@ -7,9 +7,34 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    .cards-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }
-    .box { background-color: #e2dfd7; border-radius: 15px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; }
-    .plage-card { width: 200px; height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+    
+    /* Conteneur principal qui force le centrage de tout ce qu'il contient */
+    .cards-container { 
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        gap: 20px; 
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .box { 
+        background-color: #e2dfd7; 
+        border-radius: 15px; 
+        padding: 20px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+        text-align: center;
+    }
+    
+    .plage-card { 
+        width: 200px; 
+        height: 230px; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: space-between; 
+    }
+    
     .card-title { color: #5d7689; font-size: 1.2em; text-decoration: underline; margin-bottom: 5px; }
     a { text-decoration: none !important; color: inherit; }
 </style>
@@ -53,19 +78,21 @@ ori = dirs[int(round((angle % 360) / 45))]
 # Affichage météo centré
 st.markdown(f"<div class='box' style='max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
+# Logique
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
+# Affichage des cartes centrées
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 st.markdown("<div class='cards-container'>", unsafe_allow_html=True)
-
 for p in abritees:
     q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
     st.markdown(f"<div class='box plage-card'><a href='https://google.com/search?q={q}'><div class='card-title'>{p['Nom']}</div><div style='color:#555;'>{p['Ville']}</div></a><div style='color:#2d5a27; font-weight:bold;'>✔ IDÉALE</div></div>", unsafe_allow_html=True)
-
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
+st.markdown("<div class='cards-container'>", unsafe_allow_html=True)
 for p in exposees:
     q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='box plage-card'><a href='https://google.com/search?q={q}'><div class='card-title' style='color:white;'>{p['Nom']}</div><div style='color:#555;'>{p['Ville']}</div></a></div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
