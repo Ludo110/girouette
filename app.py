@@ -4,12 +4,13 @@ import urllib.parse
 
 # 1. Configuration et Style
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
+
 st.markdown("""
-<style>
+    <style>
     .stApp { background-color: #5d7689 !important; }
     .plage-card { background-color: #e2dfd7; padding: 20px; border-radius: 15px; text-align: center; height: 180px; margin: 10px; display: flex; flex-direction: column; justify-content: center; }
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 
 # 2. Données des plages
 plages = [
@@ -28,7 +29,7 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 3. Récupération Météo automatique
+# 3. Météo avec Mode Manuel
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
@@ -37,7 +38,6 @@ try:
 except:
     auto_v, auto_a = 15, 270.0
 
-# 4. En-tête et Options manuelles
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
 
 with st.expander("⚙️ Options et réglage manuel du vent"):
@@ -45,17 +45,16 @@ with st.expander("⚙️ Options et réglage manuel du vent"):
     vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
     angle = float(st.slider("Direction vent (°)", 0, 360, int(auto_a))) if use_manual else auto_a
 
-directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
-ori = directions[int(round((angle % 360) / 45))]
+dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+ori = dirs[int(round((angle % 360) / 45))]
 
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+st.markdown("<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: " + str(vitesse) + " km/h - 🧭 <b>" + ori + " (" + str(int(angle)) + "°)</b></div>", unsafe_allow_html=True)
 
-# 5. Calcul et Affichage
-abritees = []
-exposees = []
+# 4. Calcul et Affichage
+abritees, exposees = [], []
 for p in plages:
-    est_ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
-    if est_ok: abritees.append(p)
+    ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
+    if ok: abritees.append(p)
     else: exposees.append(p)
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
@@ -63,7 +62,10 @@ for i in range(0, len(abritees), 4):
     groupe = abritees[i:i+4]
     cols = st.columns(len(groupe))
     for j, p in enumerate(groupe):
-        q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-        cols[j].markdown(f"<a href='https://google.com/search?q={q}' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>{p['Nom']}</h3><p style='color:#555;'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
+        q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+        cols[j].markdown("<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>" + p['Nom'] + "</h3><p style='color:#555;'>" + p['Ville'] + "</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
 
-st.markdown("<h3 style='color:#e2dfd7; text-align:center
+st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
+for p in exposees:
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    st.markdown("<div style='text-align:center;'><a href='https://google.com/search?q=" + q + "' style='color:white;'>💨 " + p['Nom'] + " (" + p['Ville'] + ")</a></div>", unsafe_allow_html=True)
