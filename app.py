@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration
+# 1. Configuration et Style
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
@@ -11,7 +11,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. Données et Météo
+# 2. Données des plages
 plages = [
     {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
     {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
@@ -28,25 +28,29 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
+# 3. Récupération Météo automatique
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
     auto_v = int(data["current"]["wind_speed_10m"])
     auto_a = float(data["current"]["wind_direction_10m"])
-except: auto_v, auto_a = 15, 270.0
+except:
+    auto_v, auto_a = 15, 270.0
 
-# 3. Interface simple pour rafraîchir le calcul immédiatement
+# 4. En-tête et Options manuelles
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
-c1, c2 = st.columns(2)
-vitesse = c1.slider("Vitesse vent (km/h)", 0, 80, auto_v)
-angle = float(c2.slider("Direction vent (°)", 0, 360, int(auto_a)))
+
+with st.expander("⚙️ Options et réglage manuel du vent"):
+    use_manual = st.checkbox("Activer le mode manuel")
+    vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
+    angle = float(st.slider("Direction vent (°)", 0, 360, int(auto_a))) if use_manual else auto_a
 
 directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = directions[int(round((angle % 360) / 45))]
 
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center;'>Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
-# 4. Calcul et Affichage
+# 5. Calcul et Affichage
 abritees = []
 exposees = []
 for p in plages:
@@ -56,12 +60,10 @@ for p in plages:
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 for i in range(0, len(abritees), 4):
-    cols = st.columns(4)
-    for j, p in enumerate(abritees[i:i+4]):
+    groupe = abritees[i:i+4]
+    cols = st.columns(len(groupe))
+    for j, p in enumerate(groupe):
         q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
         cols[j].markdown(f"<a href='https://google.com/search?q={q}' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>{p['Nom']}</h3><p style='color:#555;'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
 
-st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-for p in exposees:
-    q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#e2dfd7; text-align:center
