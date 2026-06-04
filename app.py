@@ -6,7 +6,7 @@ import urllib.parse
 # Configuration
 st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
 
-# Style
+# Style : Fond bleu-gris et style des rectangles crème
 st.html("""
 <style>
     .stApp { background-color: #5d7689 !important; }
@@ -86,13 +86,20 @@ exposees = [p for p in donnees_plages if not est_abritee(p, wind_dir, wind_speed
 # Affichage protégées
 st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Pour éviter que les colonnes soient trop petites, on utilise 3 ou 4 colonnes max
+# Utilisation de colonnes pour les cartes protégées
 cols_per_row = 4
 for i in range(0, len(abritees), cols_per_row):
     row_cols = st.columns(cols_per_row)
     for j, p in enumerate(abritees[i:i+cols_per_row]):
         lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
-        info_secteur = f"<br>{p['Secteur']}" if p['Secteur'] and p['Secteur'] != p['Ville'] else ""
+        
+        # Correction : on affiche le secteur UNIQUEMENT s'il est différent de la ville
+        secteur_str = p['Secteur'] if p['Secteur'] != p['Ville'] else ""
+        ligne_secteur = f"<br>{secteur_str}" if secteur_str else ""
+        
         with row_cols[j]:
             st.html(f"""
             <a href="{lien_maps}" target="_blank" style="text-decoration: none;">
+                <div class="plage-card">
+                    <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
+                    <p style="color: #5
