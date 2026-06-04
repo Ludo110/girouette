@@ -57,11 +57,11 @@ st.html(f"""
 </div>
 """)
 
-# Liste plages
+# Liste plages (Secteur unique pour Port Mer)
 donnees_plages = [
     {"Nom": "Sillon", "Ville": "Saint-Malo", "Secteur": "Paramé", "Min": 45, "Max": 225},
     {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Secteur": "Remparts", "Min": 360, "Max": 180},
-    {"Nom": "Port Mer", "Ville": "Cancale", "Secteur": "Cancale", "Min": 180, "Max": 360},
+    {"Nom": "Port Mer", "Ville": "Cancale", "Secteur": "", "Min": 180, "Max": 360},
     {"Nom": "Chevrets", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 22, "Max": 202}
 ]
 
@@ -79,13 +79,13 @@ st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 À l'abri</h3>
 cols = st.columns(max(len(abritees), 1))
 for i, p in enumerate(abritees):
     with cols[i]:
-        # Lien Google Maps généré ici
         lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
+        secteur_affichage = p['Secteur'] if p['Secteur'] else p['Ville']
         st.html(f"""
         <a href="{lien_maps}" target="_blank" style="text-decoration: none;">
             <div class="plage-card">
                 <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
-                <p style="color: #555; font-size: 0.9em;">{p['Ville']}<br>{p['Secteur']}</p>
+                <p style="color: #555; font-size: 0.9em;">{p['Ville']}<br>{secteur_affichage}</p>
                 <div style="color: #2d5a27; font-weight: bold;">✔ IDÉALE</div>
             </div>
         </a>
