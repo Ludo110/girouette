@@ -7,19 +7,22 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
+    /* Centrer le conteneur des colonnes */
+    [data-testid="column"] { display: flex; justify-content: center; }
+    
     .plage-card { 
         background-color: #e2dfd7; 
         padding: 20px; 
         border-radius: 15px; 
         text-align: center; 
-        width: 100%; 
+        width: 200px; 
         height: 200px; 
         display: flex; 
         flex-direction: column; 
         justify-content: center; 
         align-items: center; 
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
+        margin: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -65,21 +68,9 @@ exposees = [p for p in plages if p not in abritees]
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Découpage en colonnes pour garder la disposition horizontale
 for i in range(0, len(abritees), 4):
-    ligne = abritees[i:i+4]
-    cols = st.columns(4)
-    for j, p in enumerate(ligne):
+    groupe = abritees[i:i+4]
+    cols = st.columns(4) # Toujours 4 colonnes
+    for j, p in enumerate(groupe):
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
         cols[j].markdown(
-            "<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'>"
-            "<div class='plage-card'>"
-            "<h3 style='color:#333; margin:0;'>" + p['Nom'] + "</h3>"
-            "<p style='color:#555; margin:5px 0 0 0;'>" + p['Ville'] + "</p>"
-            "<b style='color:#2d5a27;'>✔ IDÉALE</b>"
-            "</div></a>", unsafe_allow_html=True)
-
-st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-for p in exposees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    st.markdown("<div style='text-align:center;'><a href='https://google.com/search?q=" + q + "' style='color:white;'>💨 " + p['Nom'] + " (" + p['Ville'] + ")</a></div>", unsafe_allow_html=True)
