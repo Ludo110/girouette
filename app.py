@@ -1,12 +1,12 @@
 import pandas as pd
 import requests
 import streamlit as st
-import urllib.parse
+import urllib.parse  # C'est cette ligne qui manquait !
 
 # Configuration
 st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
 
-# CSS pour le fond bleu-gris et les rectangles crème
+# Style : Fond bleu-gris et style des rectangles crème
 st.html("""
 <style>
     .stApp { background-color: #5d7689 !important; }
@@ -70,4 +70,14 @@ for i, p in enumerate(abritees):
     with cols[i]:
         st.html(f"""
         <div class="plage-card">
-            <h3 style="color: #333
+            <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
+            <p style="color: #555; font-size: 0.9em;">{p['Ville']}<br>{p['Secteur']}</p>
+            <div style="color: #2d5a27; font-weight: bold;">✔ IDÉALE</div>
+        </div>
+        """)
+
+# Affichage exposées
+if exposees:
+    st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
+    for p in exposees:
+        st.markdown(f"<div style='text-align: center; color: #ffffff;'>💨 {p['Nom']} ({p['Ville']})</div>", unsafe_allow_html=True)
