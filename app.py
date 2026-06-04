@@ -11,7 +11,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 2. Données (Placées au début)
+# 2. Données et Météo
 plages = [
     {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
     {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
@@ -28,55 +28,36 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 3. Récupération Météo
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
-    auto_vitesse = int(data["current"]["wind_speed_10m"])
-    auto_angle = float(data["current"]["wind_direction_10m"])
-except:
-    auto_vitesse, auto_angle = 15, 270.0
+    auto_v = int(data["current"]["wind_speed_10m"])
+    auto_a = float(data["current"]["wind_direction_10m"])
+except: auto_v, auto_a = 15, 270.0
 
-# 4. Interface et Calculs (en temps réel)
+# 3. Interface simple pour rafraîchir le calcul immédiatement
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
-
-with st.expander("⚙️ Mode Manuel"):
-    use_manual = st.checkbox("Activer le mode manuel")
-    man_vitesse = st.slider("Vitesse (km/h)", 0, 80, auto_vitesse)
-    man_angle = st.slider("Direction (°)", 0, 360, int(auto_angle))
-
-# C'est ici que le calcul se fait en fonction des choix
-vitesse = man_vitesse if use_manual else auto_vitesse
-angle = float(man_angle if use_manual else auto_angle)
+c1, c2 = st.columns(2)
+vitesse = c1.slider("Vitesse vent (km/h)", 0, 80, auto_v)
+angle = float(c2.slider("Direction vent (°)", 0, 360, int(auto_a)))
 
 directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
-orientation = directions[int(round((angle % 360) / 45))]
+ori = directions[int(round((angle % 360) / 45))]
 
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{orientation} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center;'>Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
-# 5. Tri immédiat
+# 4. Calcul et Affichage
 abritees = []
 exposees = []
 for p in plages:
-    # Logique de calcul
-    if vitesse < 10:
-        est_ok = True
-    else:
-        # Normalisation pour gérer le passage du cap 360/0
-        if p["Min"] <= p["Max"]:
-            est_ok = p["Min"] <= angle <= p["Max"]
-        else:
-            est_ok = (angle >= p["Min"]) or (angle <= p["Max"])
-            
+    est_ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
     if est_ok: abritees.append(p)
     else: exposees.append(p)
 
-# 6. Affichage
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 for i in range(0, len(abritees), 4):
-    groupe = abritees[i:i+4]
-    cols = st.columns(len(groupe))
-    for j, p in enumerate(groupe):
+    cols = st.columns(4)
+    for j, p in enumerate(abritees[i:i+4]):
         q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
         cols[j].markdown(f"<a href='https://google.com/search?q={q}' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>{p['Nom']}</h3><p style='color:#555;'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
 
