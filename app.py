@@ -10,7 +10,7 @@ st.markdown("""
     /* Le conteneur parent qui centre tout */
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
     .plage-card { background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; width: 200px; height: 250px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
+    .card-title { width: 100%; color: #5d7689; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
     a::after { content: none !important; }
 </style>
