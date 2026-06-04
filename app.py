@@ -14,6 +14,9 @@ st.markdown("""
     .card-title { width: 100%; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
     a::after { content: none !important; }
+    
+    /* Centrage spécifique pour le titre avec icône */
+    .title-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; color: white; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -31,32 +34,4 @@ with st.expander("Options"):
     vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
     angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
 
-dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
-ori = dirs[int(round((angle % 360) / 45))]
-
-st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
-
-abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
-exposees = [p for p in plages if p not in abritees]
-
-st.markdown("<br>", unsafe_allow_html=True)
-col1, col2 = st.columns([0.05, 0.95])
-with col1:
-    try:
-        st.image("Palmier.png", width=40)
-    except:
-        st.write("🌴")
-with col2:
-    st.markdown("<h3 style='color:white; margin-top:5px;'>A l'abri</h3>", unsafe_allow_html=True)
-
-html_a = "<div class='centrage-fixe'>"
-for p in abritees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    html_a += f"<div class='plage-card rect-style'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
-html_a += "</div>"
-st.markdown(html_a, unsafe_allow_html=True)
-
-st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>Exposees</h3>", unsafe_allow_html=True)
-for p in exposees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>{p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord
