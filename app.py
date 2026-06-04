@@ -2,15 +2,26 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style
+# 1. Configuration et Style (Dimensions fixes ici)
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
-
 st.markdown("""
-    <style>
+<style>
     .stApp { background-color: #5d7689 !important; }
-    .plage-card { background-color: #e2dfd7; padding: 20px; border-radius: 15px; text-align: center; height: 180px; margin: 10px; display: flex; flex-direction: column; justify-content: center; }
-    </style>
-    """, unsafe_allow_html=True)
+    .plage-card { 
+        background-color: #e2dfd7; 
+        padding: 20px; 
+        border-radius: 15px; 
+        text-align: center; 
+        width: 200px; 
+        height: 250px; 
+        margin: 10px auto; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # 2. Données des plages
 plages = [
@@ -29,7 +40,7 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 3. Météo avec Mode Manuel
+# 3. Météo
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
@@ -50,7 +61,7 @@ ori = dirs[int(round((angle % 360) / 45))]
 
 st.markdown("<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: " + str(vitesse) + " km/h - 🧭 <b>" + ori + " (" + str(int(angle)) + "°)</b></div>", unsafe_allow_html=True)
 
-# 4. Calcul et Affichage
+# 4. Tri et Affichage
 abritees, exposees = [], []
 for p in plages:
     ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
@@ -58,9 +69,11 @@ for p in plages:
     else: exposees.append(p)
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
+
+# Affichage centré
 for i in range(0, len(abritees), 4):
     groupe = abritees[i:i+4]
-    cols = st.columns(len(groupe))
+    cols = st.columns(4) # Toujours 4 colonnes pour garder la grille fixe
     for j, p in enumerate(groupe):
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
         cols[j].markdown("<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>" + p['Nom'] + "</h3><p style='color:#555;'>" + p['Ville'] + "</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
