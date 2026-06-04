@@ -56,7 +56,7 @@ exposees = [p for p in plages if p not in abritees]
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Ici on génère tout le bloc HTML d'un coup pour éviter que Streamlit ne le fragmente
+# Affichage groupé pour éviter les coupures de rendu
 html_abritees = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
