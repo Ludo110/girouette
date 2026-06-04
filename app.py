@@ -8,10 +8,11 @@ st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     
-    /* Conteneur parent pour le centrage */
+    /* Couleur du texte "Options" */
+    div[data-testid="stExpander"] button p { color: #e2dfd7 !important; font-weight: bold !important; }
+    
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
     
-    /* Style commun pour les rectangles */
     .rect-style { 
         background-color: #e2dfd7; 
         border-radius: 15px; 
@@ -52,8 +53,7 @@ except: auto_v, auto_a = 15, 270.0
 
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
 
-# Expander avec span pour forcer la couleur
-with st.expander("<span style='color: #e2dfd7;'>⚙️ Options</span>"):
+with st.expander("⚙️ Options"):
     use_manual = st.checkbox("Activer le mode manuel")
     vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
     angle = float(st.slider("Direction vent (°)", 0, 360, int(auto_a))) if use_manual else auto_a
@@ -61,7 +61,6 @@ with st.expander("<span style='color: #e2dfd7;'>⚙️ Options</span>"):
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
 
-# Rectangle météo avec ombre
 st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
@@ -72,4 +71,11 @@ st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", u
 html_abritees = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    html_abritees += f"<div class='plage-card rect-style'><a
+    html_abritees += f"<div class='plage-card rect-style'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
+html_abritees += "</div>"
+st.markdown(html_abritees, unsafe_allow_html=True)
+
+st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
+for p in exposees:
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
