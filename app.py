@@ -39,8 +39,16 @@ st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; ma
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
-# Utilisation de l'emoji palmier pour éviter l'erreur de fichier image
-st.markdown("<h3 style='color:white; text-align:center;'>🌴 A l'abri</h3>", unsafe_allow_html=True)
+# Affichage du titre avec le Palmier.png (note la majuscule)
+st.markdown("<br>", unsafe_allow_html=True)
+col1, col2 = st.columns([0.05, 0.95])
+with col1:
+    try:
+        st.image("Palmier.png", width=40)
+    except:
+        st.write("🌴")
+with col2:
+    st.markdown("<h3 style='color:white; margin-top:5px;'>A l'abri</h3>", unsafe_allow_html=True)
 
 html_a = "<div class='centrage-fixe'>"
 for p in abritees:
