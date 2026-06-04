@@ -8,23 +8,23 @@ st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     
-    /* Couleur du texte "Options" */
-    div[data-testid="stExpander"] button p { color: #e2dfd7 !important; font-weight: bold !important; }
+    /* Conteneur principal pour centrer les éléments */
+    .cards-container { 
+        display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; 
+    }
     
-    .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    
-    .rect-style { 
+    /* Style épuré pour les cartes et la météo */
+    .box { 
         background-color: #e2dfd7; 
         border-radius: 15px; 
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2); 
+        padding: 20px; 
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+        text-align: center;
     }
-    .plage-card { 
-        padding: 20px 10px; text-align: center; width: 200px; height: 250px; 
-        display: flex; flex-direction: column; justify-content: flex-start; align-items: center; 
-    }
-    .card-title { width: 100%; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
-    .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
-    a::after { content: none !important; }
+    
+    .plage-card { width: 200px; height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+    .card-title { color: #5d7689; font-size: 1.2em; text-decoration: underline; margin-bottom: 5px; }
+    a { text-decoration: none !important; color: inherit; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -44,12 +44,14 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
+# Données météo
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
     auto_v = int(data["current"]["wind_speed_10m"])
     auto_a = float(data["current"]["wind_direction_10m"])
-except: auto_v, auto_a = 15, 270.0
+except:
+    auto_v, auto_a = 15, 270.0
 
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
 
@@ -61,21 +63,22 @@ with st.expander("⚙️ Options"):
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
 
-st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+# Affichage météo
+st.markdown(f"<div class='box' style='max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
+# Logique de tri
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
+# Affichage
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
-
-html_abritees = "<div class='centrage-fixe'>"
+st.markdown("<div class='cards-container'>", unsafe_allow_html=True)
 for p in abritees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    html_abritees += f"<div class='plage-card rect-style'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>"
-html_abritees += "</div>"
-st.markdown(html_abritees, unsafe_allow_html=True)
-
-st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-for p in exposees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+    q = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
+    st.markdown(f"""
+        <div class='box plage-card'>
+            <a href='https://google.com/search?q={q}'>
+                <div class='card-title'>{p['Nom']}</div>
+                <div style='color:#555;'>{p['Ville']}</div>
+            </a>
+            <div style='color:#2d5a27; font-weight:bold;'>✔ ID
