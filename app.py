@@ -46,7 +46,7 @@ def get_current_wind():
 
 wind_dir, wind_speed = get_current_wind()
 
-# Bandeau météo rajouté
+# Bandeau météo
 directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖️", "Sud ⬆️", "Sud-Ouest ↗️", "Ouest ➡️", "Nord-Ouest ↘️", "Nord ⬇️"]
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
@@ -79,16 +79,21 @@ st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 À l'abri</h3>
 cols = st.columns(max(len(abritees), 1))
 for i, p in enumerate(abritees):
     with cols[i]:
+        # Lien Google Maps généré ici
+        lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
         st.html(f"""
-        <div class="plage-card">
-            <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
-            <p style="color: #555; font-size: 0.9em;">{p['Ville']}<br>{p['Secteur']}</p>
-            <div style="color: #2d5a27; font-weight: bold;">✔ IDÉALE</div>
-        </div>
+        <a href="{lien_maps}" target="_blank" style="text-decoration: none;">
+            <div class="plage-card">
+                <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
+                <p style="color: #555; font-size: 0.9em;">{p['Ville']}<br>{p['Secteur']}</p>
+                <div style="color: #2d5a27; font-weight: bold;">✔ IDÉALE</div>
+            </div>
+        </a>
         """)
 
 # Affichage exposées
 if exposees:
     st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
     for p in exposees:
-        st.markdown(f"<div style='text-align: center; color: #ffffff;'>💨 {p['Nom']} ({p['Ville']})</div>", unsafe_allow_html=True)
+        lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
+        st.markdown(f"<div style='text-align: center;'><a href='{lien_maps}' target='_blank' style='color: #ffffff; text-decoration: none;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
