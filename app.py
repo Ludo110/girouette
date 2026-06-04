@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 import streamlit as st
-import urllib.parse  # C'est cette ligne qui manquait !
+import urllib.parse
 
 # Configuration
 st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
@@ -45,6 +45,17 @@ def get_current_wind():
     return 270.0, 15.0
 
 wind_dir, wind_speed = get_current_wind()
+
+# Bandeau météo rajouté
+directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖️", "Sud ⬆️", "Sud-Ouest ↗️", "Ouest ➡️", "Nord-Ouest ↘️", "Nord ⬇️"]
+index_dir = int(round(((wind_dir % 360) / 45)))
+vent_cardinal = directions_texte[index_dir]
+
+st.html(f"""
+<div style="text-align: center; background-color: #e2dfd7; padding: 15px; border-radius: 12px; margin-bottom: 30px; font-family: sans-serif; color: #333;">
+    🌬️ <b>Vent :</b> {vent_cardinal} ({int(wind_dir)}°) | 🚀 <b>Vitesse :</b> {int(wind_speed)} km/h
+</div>
+""")
 
 # Liste plages
 donnees_plages = [
