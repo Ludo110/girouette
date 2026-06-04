@@ -2,14 +2,14 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style (Alignement fixe en haut)
+# 1. Configuration et Style (Alignement fixe en haut avec marges équilibrées)
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     .plage-card { 
         background-color: #e2dfd7; 
-        padding: 20px; 
+        padding: 20px 10px; 
         border-radius: 15px; 
         text-align: center; 
         width: 200px; 
@@ -17,10 +17,12 @@ st.markdown("""
         margin: 10px auto; 
         display: flex; 
         flex-direction: column; 
-        justify-content: flex-start; /* Aligne le contenu vers le haut */
-        align-items: center;        /* Centre horizontalement */
+        justify-content: flex-start;
+        align-items: center;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+    .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; }
+    .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -71,12 +73,19 @@ for p in plages:
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
+# Affichage centré
 for i in range(0, len(abritees), 4):
     groupe = abritees[i:i+4]
     cols = st.columns(4)
     for j, p in enumerate(groupe):
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-        cols[j].markdown("<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'><div class='plage-card'><h3 style='color:#333; margin:0;'>" + p['Nom'] + "</h3><p style='color:#555; margin:5px 0;'>" + p['Ville'] + "</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
+        cols[j].markdown(
+            "<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'>"
+            "<div class='plage-card'>"
+            "<h3 class='card-title'>" + p['Nom'] + "</h3>"
+            "<p class='card-text'>" + p['Ville'] + "</p>"
+            "<b style='color:#2d5a27;'>✔ IDÉALE</b>"
+            "</div></a>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
 for p in exposees:
