@@ -2,38 +2,45 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style
+# 1. Configuration et Style global
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    .plage-card { background-color: #e2dfd7; padding: 20px; border-radius: 15px; text-align: center; height: 180px; margin: 10px; }
+    .plage-card { background-color: #e2dfd7; padding: 20px; border-radius: 15px; text-align: center; height: 180px; margin: 10px; display: flex; flex-direction: column; justify-content: center; }
 </style>
 """, unsafe_allow_html=True)
 
-# 2. Titre et Météo
+# 2. En-tête et Météo
 st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
-st.markdown("<p style='color: #e2dfd7; text-align: center;'>Trouvez la plage idéale</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #e2dfd7; text-align: center;'>Trouvez la plage idéale à l'abri du vent</p>", unsafe_allow_html=True)
 
 try:
     url = "https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m"
     data = requests.get(url, timeout=5).json()
-    vitesse = int(data["current"]["wind_speed_10m"])
-    angle = data["current"]["wind_direction_10m"]
-except:
-    vitesse, angle = 15, 270
+    vitesse, angle = int(data["current"]["wind_speed_10m"]), data["current"]["wind_direction_10m"]
+except: vitesse, angle = 15, 270
 
-st.markdown(f"<div style='background:#e2dfd7; padding:10px; border-radius:10px; text-align:center;'>Vent: {vitesse} km/h - Angle: {angle}°</div>", unsafe_allow_html=True)
+st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width: 400px; margin: 0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - Direction: {angle}°</div>", unsafe_allow_html=True)
 
-# 3. Données
+# 3. Liste complète des plages
 plages = [
-    {"Nom": "Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225},
+    {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
+    {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
+    {"Nom": "Saint-Père", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
+    {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225},
     {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180},
-    {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360},
-    {"Nom": "Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202}
+    {"Nom": "L'Éventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180},
+    {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225},
+    {"Nom": "Le Val", "Ville": "Rothéneuf", "Min": 45, "Max": 225},
+    {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202},
+    {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270},
+    {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225},
+    {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225},
+    {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 4. Logique et Affichage
+# 4. Tri et Affichage
 abritees = []
 exposees = []
 for p in plages:
@@ -41,20 +48,23 @@ for p in plages:
     if est_ok: abritees.append(p)
     else: exposees.append(p)
 
-st.subheader("🟢 À l'abri")
-cols = st.columns(4)
-for i, p in enumerate(abritees):
-    with cols[i % 4]:
+st.markdown("<h3 style='color: white; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
+
+# Affichage des cartes sur 4 colonnes pour un rendu centré et ordonné
+for i in range(0, len(abritees), 4):
+    cols = st.columns(4)
+    for j, p in enumerate(abritees[i:i+4]):
         query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-        st.markdown(f"""
-        <a href='http://google.com/search?q={query}' style='text-decoration:none;'>
+        cols[j].markdown(f"""
+        <a href='https://www.google.com/maps/search/{query}' style='text-decoration:none;'>
             <div class='plage-card'>
-                <h3 style='color:#333;'>{p['Nom']}</h3>
+                <h3 style='color:#333; margin:0;'>{p['Nom']}</h3>
                 <p style='color:#555;'>{p['Ville']}</p>
-                <b style='color:green;'>✔ IDÉALE</b>
+                <b style='color:#2d5a27;'>✔ IDÉALE</b>
             </div>
         </a>""", unsafe_allow_html=True)
 
-st.subheader("🔴 Exposées")
+st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
 for p in exposees:
-    st.markdown(f"<div style='color:white;'>💨 {p['Nom']} ({p['Ville']})</div>", unsafe_allow_html=True)
+    query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
+    st.markdown(f"<div style='text-align: center;'><a href='https://www.google.com/maps/search/{query}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
