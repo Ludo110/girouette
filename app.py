@@ -8,7 +8,7 @@ st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     .plage-card { background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; width: 200px; height: 250px; margin: 10px auto; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; }
+    .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
     a::after { content: none !important; }
     [data-testid='column'] { display: flex; justify-content: center; }
@@ -47,22 +47,4 @@ with st.expander("⚙️ Options"):
     angle = float(st.slider("Direction vent (°)", 0, 360, int(auto_a))) if use_manual else auto_a
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
-ori = dirs[int(round((angle % 360) / 45))]
-
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
-
-abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
-exposees = [p for p in plages if p not in abritees]
-
-st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
-
-for i in range(0, len(abritees), 4):
-    cols = st.columns(4)
-    for j, p in enumerate(abritees[i:i+4]):
-        q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-        cols[j].markdown(f"<a href='https://google.com/search?q={q}'><div class='plage-card'><h3 class='card-title'>{p['Nom']}</h3><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div></a>", unsafe_allow_html=True)
-
-st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-for p in exposees:
-    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+ori = dirs[int(round((angle % 360) /
