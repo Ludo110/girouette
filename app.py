@@ -7,8 +7,9 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    /* Couleur du texte de l'expander */
-    .streamlit-expanderHeader { color: #e2dfd7 !important; font-weight: bold; }
+    /* Force la couleur du texte de l'expander */
+    .st-expander, .st-expander div[role="button"], .st-expander p { color: #e2dfd7 !important; font-weight: bold; }
+    
     /* Conteneur parent pour le centrage */
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
     /* Style commun pour les rectangles (cartes et météo) */
@@ -60,7 +61,6 @@ with st.expander("⚙️ Options"):
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
 
-# Rectangle météo avec ombre
 st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
