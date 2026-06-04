@@ -7,7 +7,7 @@ import urllib.parse
 st.set_page_config(page_title="Girouette Malouine", page_icon="🏖️", layout="wide")
 
 # Style : Fond bleu-gris et style des rectangles crème
-st.html("""
+st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
     .plage-card {
@@ -23,15 +23,15 @@ st.html("""
         justify-content: center;
     }
 </style>
-""")
+""", unsafe_allow_html=True)
 
 # En-tête
-st.html("""
+st.markdown("""
 <div style="text-align: center; margin-bottom: 30px; font-family: sans-serif;">
     <h1 style="color: #ffffff; font-size: 50px; font-weight: 300;">Girouette Malouine</h1>
     <p style="color: #e2dfd7; font-size: 20px;">Trouvez la plage idéale à l'abri du vent</p>
 </div>
-""")
+""", unsafe_allow_html=True)
 
 # Météo
 def get_current_wind():
@@ -47,17 +47,17 @@ def get_current_wind():
 wind_dir, wind_speed = get_current_wind()
 
 # Bandeau météo
-directions_texte = ["Nord ⬇️", "Nord-Est ↙️", "Est ⬅️", "Sud-Est ↖️", "Sud ⬆️", "Sud-Ouest ↗️", "Ouest ➡️", "Nord-Ouest ↘️", "Nord ⬇️"]
+directions_texte = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 index_dir = int(round(((wind_dir % 360) / 45)))
 vent_cardinal = directions_texte[index_dir]
 
-st.html(f"""
+st.markdown(f"""
 <div style="text-align: center; background-color: #e2dfd7; padding: 15px; border-radius: 12px; margin-bottom: 30px; font-family: sans-serif; color: #333;">
     🌬️ <b>Vent :</b> {vent_cardinal} ({int(wind_dir)}°) | 🚀 <b>Vitesse :</b> {int(wind_speed)} km/h
 </div>
-""")
+""", unsafe_allow_html=True)
 
-# Liste complète des plages
+# Liste complète
 donnees_plages = [
     {"Nom": "La Passagère", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 315, "Max": 135},
     {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Secteur": "St-Servan", "Min": 315, "Max": 135},
@@ -69,37 +69,3 @@ donnees_plages = [
     {"Nom": "Le Val", "Ville": "Rothéneuf", "Secteur": "Rothéneuf", "Min": 45, "Max": 225},
     {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 22, "Max": 202},
     {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 90, "Max": 270},
-    {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 45, "Max": 225},
-    {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Secteur": "St-Coulomb", "Min": 45, "Max": 225},
-    {"Nom": "Port Mer", "Ville": "Cancale", "Secteur": "Cancale", "Min": 180, "Max": 360}
-]
-
-def est_abritee(p, angle, vitesse):
-    if vitesse < 10.0: return True
-    mn, mx = p["Min"], p["Max"]
-    return (mn <= angle <= mx) if (mn <= mx) else (angle >= mn or angle <= mx)
-
-# Tri
-abritees = [p for p in donnees_plages if est_abritee(p, wind_dir, wind_speed)]
-exposees = [p for p in donnees_plages if not est_abritee(p, wind_dir, wind_speed)]
-
-# Affichage protégées
-st.markdown("<h3 style='color: #ffffff; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
-
-# Utilisation de colonnes pour les cartes protégées
-cols_per_row = 4
-for i in range(0, len(abritees), cols_per_row):
-    row_cols = st.columns(cols_per_row)
-    for j, p in enumerate(abritees[i:i+cols_per_row]):
-        lien_maps = f"https://www.google.com/maps/search/?api=1&query={urllib.parse.quote(f'{p['Nom']} {p['Ville']}')}"
-        
-        # Correction : on affiche le secteur UNIQUEMENT s'il est différent de la ville
-        secteur_str = p['Secteur'] if p['Secteur'] != p['Ville'] else ""
-        ligne_secteur = f"<br>{secteur_str}" if secteur_str else ""
-        
-        with row_cols[j]:
-            st.html(f"""
-            <a href="{lien_maps}" target="_blank" style="text-decoration: none;">
-                <div class="plage-card">
-                    <h3 style="color: #333; margin: 0;">{p['Nom']}</h3>
-                    <p style="color: #5
