@@ -7,27 +7,9 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    /* Conteneur principal qui centre ses éléments enfants */
-    .flex-container { 
-        display: flex; 
-        flex-wrap: wrap; 
-        justify-content: center; 
-        gap: 20px; 
-        margin-top: 20px; 
-    }
-    .plage-card { 
-        background-color: #e2dfd7; 
-        padding: 20px 10px; 
-        border-radius: 15px; 
-        text-align: center; 
-        width: 200px; 
-        height: 250px; 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: flex-start; 
-        align-items: center; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-    }
+    /* Force le centrage des colonnes */
+    [data-testid="column"] { display: flex !important; justify-content: center !important; }
+    .plage-card { background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; width: 200px; height: 250px; margin: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
     a::after { content: none !important; }
@@ -57,8 +39,7 @@ try:
     auto_a = float(data["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
-st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
-
+st.title("Girouette Malouine")
 with st.expander("⚙️ Options"):
     use_manual = st.checkbox("Activer le mode manuel")
     vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
@@ -66,14 +47,19 @@ with st.expander("⚙️ Options"):
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
+st.write(f"### 🌬️ Vent: {vitesse} km/h - 🧭 {ori} ({int(angle)}°)")
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
-st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
+st.markdown("### 🟢 À l'abri")
+# Affichage ligne par ligne pour bien contrôler le centrage
+for i in range(0, len(abritees), 4):
+    cols = st.columns(4)
+    for j, p in enumerate(abritees[i:i+4]):
+        q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+        cols[j].markdown(f"<div class='plage-card'><a href='https://google.com/search?q={q}' style='text-decoration:none; color:inherit;'><h3 class='card-title'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>", unsafe_allow_html=True)
 
-# Affichage des cartes avec le conteneur flex
-st.markdown("<div class='flex-container'>", unsafe_allow_html=True)
-for p in abritees:
-    q = urllib.parse
+st.markdown("### 🔴 Exposées")
+for p in exposees:
+    st.write(f"💨 {p['Nom']} ({p['Ville']})")
