@@ -2,24 +2,16 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style (Alignement fixe en haut avec marges équilibrées)
+# 1. Configuration et Style (Centrage forcé par CSS)
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
+    .card-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
     .plage-card { 
-        background-color: #e2dfd7; 
-        padding: 20px 10px; 
-        border-radius: 15px; 
-        text-align: center; 
-        width: 200px; 
-        height: 250px; 
-        margin: 10px auto; 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: flex-start;
-        align-items: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; 
+        width: 200px; height: 250px; display: flex; flex-direction: column; 
+        justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; }
     .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
@@ -61,31 +53,28 @@ with st.expander("⚙️ Options et réglage manuel du vent"):
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
-
 st.markdown("<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: " + str(vitesse) + " km/h - 🧭 <b>" + ori + " (" + str(int(angle)) + "°)</b></div>", unsafe_allow_html=True)
 
-# 4. Tri et Affichage
+# 4. Tri
 abritees, exposees = [], []
 for p in plages:
     ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
     if ok: abritees.append(p)
     else: exposees.append(p)
 
+# 5. Affichage centré sans colonnes (utilisation du conteneur CSS card-container)
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
-
-# Affichage centré
-for i in range(0, len(abritees), 4):
-    groupe = abritees[i:i+4]
-    cols = st.columns(4)
-    for j, p in enumerate(groupe):
-        q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-        cols[j].markdown(
-            "<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'>"
-            "<div class='plage-card'>"
-            "<h3 class='card-title'>" + p['Nom'] + "</h3>"
-            "<p class='card-text'>" + p['Ville'] + "</p>"
-            "<b style='color:#2d5a27;'>✔ IDÉALE</b>"
-            "</div></a>", unsafe_allow_html=True)
+st.markdown("<div class='card-container'>", unsafe_allow_html=True)
+for p in abritees:
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    st.markdown(
+        "<a href='https://google.com/search?q=" + q + "' style='text-decoration:none;'>"
+        "<div class='plage-card'>"
+        "<h3 class='card-title'>" + p['Nom'] + "</h3>"
+        "<p class='card-text'>" + p['Ville'] + "</p>"
+        "<b style='color:#2d5a27;'>✔ IDÉALE</b>"
+        "</div></a>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
 for p in exposees:
