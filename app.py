@@ -2,11 +2,14 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style (Alignement fixe en haut avec marges équilibrées)
+# 1. Configuration et Style (Correction pour supprimer l'icône de lien)
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
+    /* Supprime l'icône de lien externe qui décale le centrage */
+    a::after { content: none !important; }
+    
     .plage-card { 
         background-color: #e2dfd7; 
         padding: 20px 10px; 
@@ -73,7 +76,6 @@ for p in plages:
 
 st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Affichage centré
 for i in range(0, len(abritees), 4):
     groupe = abritees[i:i+4]
     cols = st.columns(4)
