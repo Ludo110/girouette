@@ -7,7 +7,7 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
     .stApp { background-color: #5d7689 !important; }
-    /* Force le centrage des colonnes */
+    /* Centrage des colonnes et des cartes */
     [data-testid="column"] { display: flex !important; justify-content: center !important; }
     .plage-card { background-color: #e2dfd7; padding: 20px 10px; border-radius: 15px; text-align: center; width: 200px; height: 250px; margin: 10px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .card-title { width: 100%; color: #333; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
@@ -37,9 +37,11 @@ try:
     data = requests.get(url, timeout=5).json()
     auto_v = int(data["current"]["wind_speed_10m"])
     auto_a = float(data["current"]["wind_direction_10m"])
-except: auto_v, auto_a = 15, 270.0
+except:
+    auto_v, auto_a = 15, 270.0
 
-st.title("Girouette Malouine")
+st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+
 with st.expander("⚙️ Options"):
     use_manual = st.checkbox("Activer le mode manuel")
     vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
@@ -47,19 +49,21 @@ with st.expander("⚙️ Options"):
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
-st.write(f"### 🌬️ Vent: {vitesse} km/h - 🧭 {ori} ({int(angle)}°)")
+
+st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - 🧭 <b>{ori} ({int(angle)}°)</b></div>", unsafe_allow_html=True)
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
-st.markdown("### 🟢 À l'abri")
-# Affichage ligne par ligne pour bien contrôler le centrage
+st.markdown("<h3 style='color:white; text-align:center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
+
 for i in range(0, len(abritees), 4):
     cols = st.columns(4)
     for j, p in enumerate(abritees[i:i+4]):
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
         cols[j].markdown(f"<div class='plage-card'><a href='https://google.com/search?q={q}' style='text-decoration:none; color:inherit;'><h3 class='card-title'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>✔ IDÉALE</b></div>", unsafe_allow_html=True)
 
-st.markdown("### 🔴 Exposées")
+st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
 for p in exposees:
-    st.write(f"💨 {p['Nom']} ({p['Ville']})")
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    st.markdown(f"<div style='text-align:center;'><a href='https://google.com/search?q={q}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
