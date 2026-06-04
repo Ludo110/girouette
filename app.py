@@ -21,7 +21,6 @@ try:
     vitesse, angle = int(data["current"]["wind_speed_10m"]), data["current"]["wind_direction_10m"]
 except: vitesse, angle = 15, 270
 
-# Calcul de l'orientation texte
 directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 orientation = directions[int(round((angle % 360) / 45))]
 
@@ -31,7 +30,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# 3. Liste des plages
+# 3. Données
 plages = [
     {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
     {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
@@ -60,6 +59,24 @@ for p in plages:
 st.markdown("<h3 style='color: white; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
 if abritees:
-    cols = st.columns(min(len(abritees), 4))
-    for i, p in enumerate(abritees):
-        query = urllib.parse.quote(f"{p['Nom']} {p['
+    # On découpe les plages par groupes de 4
+    for i in range(0, len(abritees), 4):
+        groupe = abritees[i:i+4]
+        cols = st.columns(len(groupe))
+        # Si on n'a qu'une colonne, on force un petit offset pour centrer manuellement si besoin,
+        # mais st.columns(1) dans layout="wide" est correct.
+        for j, p in enumerate(groupe):
+            query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
+            cols[j].markdown(f"""
+            <a href='http://google.com/search?q={query}' style='text-decoration:none;'>
+                <div class='plage-card'>
+                    <h3 style='color:#333; margin:0;'>{p['Nom']}</h3>
+                    <p style='color:#555;'>{p['Ville']}</p>
+                    <b style='color:#2d5a27;'>✔ IDÉALE</b>
+                </div>
+            </a>""", unsafe_allow_html=True)
+
+st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
+for p in exposees:
+    query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
+    st.markdown(f"<div style='text-align: center;'><a href='http://google.com/search?q={query}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
