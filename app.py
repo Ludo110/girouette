@@ -23,16 +23,17 @@ try:
 except:
     auto_vitesse, auto_angle = 15, 270
 
-# 3. Options manuelles (Expander)
+# 3. Options manuelles
 with st.expander("⚙️ Mode Manuel (Forcer les conditions)"):
     use_manual = st.checkbox("Activer le mode manuel")
     man_vitesse = st.slider("Vitesse du vent (km/h)", 0, 80, auto_vitesse)
     man_angle = st.slider("Direction du vent (°)", 0, 360, int(auto_angle))
 
+# Définition des valeurs finales (utilisées pour les calculs qui suivent)
 vitesse = man_vitesse if use_manual else auto_vitesse
 angle = float(man_angle if use_manual else auto_angle)
 
-# Affichage météo
+# Affichage météo (calculé avec les valeurs finales)
 directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 orientation = directions[int(round((angle % 360) / 45))]
 
@@ -59,7 +60,7 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 5. Tri et Affichage
+# 5. Tri et Affichage (Calculé après le choix des curseurs)
 abritees = []
 exposees = []
 for p in plages:
@@ -84,7 +85,4 @@ if abritees:
                 </div>
             </a>""", unsafe_allow_html=True)
 
-st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-for p in exposees:
-    query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-    st.markdown(f"<div style='text-align: center;'><a href='http://google.com/search?q={query}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+st.markdown("<h3 style='color: #e2dfd7;
