@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import urllib.parse
 
-# 1. Configuration et Style global
+# 1. Configuration et Style
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 st.markdown("""
 <style>
@@ -23,7 +23,7 @@ except: vitesse, angle = 15, 270
 
 st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width: 400px; margin: 0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - Direction: {angle}°</div>", unsafe_allow_html=True)
 
-# 3. Liste complète des plages
+# 3. Liste des plages
 plages = [
     {"Nom": "La Passagère", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
     {"Nom": "Fours à Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135},
@@ -40,22 +40,23 @@ plages = [
     {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}
 ]
 
-# 4. Tri et Affichage
-abritees = []
-exposees = []
-for p in plages:
-    est_ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
-    if est_ok: abritees.append(p)
-    else: exposees.append(p)
+# 4. Tri
+abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
+exposees = [p for p in plages if p not in abritees]
 
+# 5. Affichage centré
 st.markdown("<h3 style='color: white; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Affichage des cartes sur 4 colonnes pour un rendu centré et ordonné
-for i in range(0, len(abritees), 4):
-    cols = st.columns(4)
-    for j, p in enumerate(abritees[i:i+4]):
+# Créer des colonnes centrées dynamiquement
+num_abritees = len(abritees)
+if num_abritees > 0:
+    # On limite à 4 colonnes max par ligne
+    cols_count = min(num_abritees, 4)
+    # Pour centrer : on crée des colonnes vides autour si besoin
+    cols = st.columns(cols_count)
+    for i, p in enumerate(abritees):
         query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-        cols[j].markdown(f"""
+        cols[i % 4].markdown(f"""
         <a href='https://www.google.com/maps/search/{query}' style='text-decoration:none;'>
             <div class='plage-card'>
                 <h3 style='color:#333; margin:0;'>{p['Nom']}</h3>
