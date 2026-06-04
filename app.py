@@ -21,7 +21,15 @@ try:
     vitesse, angle = int(data["current"]["wind_speed_10m"]), data["current"]["wind_direction_10m"]
 except: vitesse, angle = 15, 270
 
-st.markdown(f"<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width: 400px; margin: 0 auto 30px auto;'>🌬️ Vent: {vitesse} km/h - Direction: {angle}°</div>", unsafe_allow_html=True)
+# Calcul de l'orientation texte
+directions = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+orientation = directions[int(round((angle % 360) / 45))]
+
+st.markdown(f"""
+<div style='background:#e2dfd7; padding:15px; border-radius:10px; text-align:center; max-width: 400px; margin: 0 auto 30px auto;'>
+    🌬️ Vent: {vitesse} km/h - 🧭 <b>{orientation} ({int(angle)}°)</b>
+</div>
+""", unsafe_allow_html=True)
 
 # 3. Liste des plages
 plages = [
@@ -41,31 +49,17 @@ plages = [
 ]
 
 # 4. Tri
-abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
-exposees = [p for p in plages if p not in abritees]
+abritees = []
+exposees = []
+for p in plages:
+    est_ok = True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"]))
+    if est_ok: abritees.append(p)
+    else: exposees.append(p)
 
-# 5. Affichage centré
+# 5. Affichage
 st.markdown("<h3 style='color: white; text-align: center;'>🟢 À l'abri</h3>", unsafe_allow_html=True)
 
-# Créer des colonnes centrées dynamiquement
-num_abritees = len(abritees)
-if num_abritees > 0:
-    # On limite à 4 colonnes max par ligne
-    cols_count = min(num_abritees, 4)
-    # Pour centrer : on crée des colonnes vides autour si besoin
-    cols = st.columns(cols_count)
+if abritees:
+    cols = st.columns(min(len(abritees), 4))
     for i, p in enumerate(abritees):
-        query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-        cols[i % 4].markdown(f"""
-        <a href='https://www.google.com/maps/search/{query}' style='text-decoration:none;'>
-            <div class='plage-card'>
-                <h3 style='color:#333; margin:0;'>{p['Nom']}</h3>
-                <p style='color:#555;'>{p['Ville']}</p>
-                <b style='color:#2d5a27;'>✔ IDÉALE</b>
-            </div>
-        </a>""", unsafe_allow_html=True)
-
-st.markdown("<h3 style='color: #e2dfd7; text-align: center; margin-top: 40px;'>🔴 Exposées</h3>", unsafe_allow_html=True)
-for p in exposees:
-    query = urllib.parse.quote(f"{p['Nom']} {p['Ville']}")
-    st.markdown(f"<div style='text-align: center;'><a href='https://www.google.com/maps/search/{query}' style='color:white;'>💨 {p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+        query = urllib.parse.quote(f"{p['Nom']} {p['
