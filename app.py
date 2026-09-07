@@ -8,10 +8,8 @@ from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
-# Gestion du fuseau horaire local (Saint-Malo / France)
 tz_france = zoneinfo.ZoneInfo("Europe/Paris")
 
-# Initialisation des états dans le session_state
 if "onglet" not in st.session_state:
     st.session_state["onglet"] = "bronzette"
 
@@ -22,13 +20,23 @@ if "heure_selectionnee_str" not in st.session_state:
 def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
 
-# Styles dynamiques pour les boutons d'onglets
+def evaluer_confort(temp_air, vitesse_vent, rad, est_abrite):
+    vent_ressenti = 0 if est_abrite else vitesse_vent
+
+    if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
+        return "☀️ TOP CONDITION", "#2d5a27"
+    elif temp_air >= 17 and vent_ressenti < 20 and rad > 50:
+        return "😎 AGREABLE", "#38761d"
+    elif temp_air >= 14 and vent_ressenti < 25:
+        return "⛅ UN PEU JUSTE", "#e69138"
+    else:
+        return "💨 TROP FRAIS", "#cc0000"
+
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 
 st.markdown(f"""
 <style>
-    /* Masquer le header, le footer et le menu Streamlit */
     #MainMenu {{visibility: hidden;}}
     footer {{visibility: hidden;}}
     header {{visibility: hidden;}}
@@ -183,7 +191,6 @@ st.markdown(f"""
 
 LAT_SM, LON_SM = 48.6493, -2.0089
 
-# Rose des vents à 16 directions (abréviations courtes)
 dirs_code_16 = [
     "N", "NNE", "NE", "ENE",
     "E", "ESE", "SE", "SSE",
@@ -191,7 +198,6 @@ dirs_code_16 = [
     "W", "WNW", "NW", "NNW", "N"
 ]
 
-# Correspondances et tolérances pour les 16 directions cardinales
 adjacents = {
     "N": ["N", "NNE", "NNW"],
     "NNE": ["NNE", "N", "NE"],
@@ -295,6 +301,10 @@ try:
 except:
     temp_mer = 16.0
 
+# Récupération temporaire / simulation marées (A remplacer par API du SHOM ou scraping)
+haute_mer = "--:--"
+basse_mer = "--:--"
+
 if use_manual:
     with st.expander("⚙️ Options & Horaire de simulation", expanded=True):
         vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v)
@@ -325,7 +335,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -333,11 +343,12 @@ if st.session_state["onglet"] == "bronzette":
     st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>A l'abri</h3></div>", unsafe_allow_html=True)
     html_a = "<div class='centrage-fixe'>"
     for p in abritees:
+        badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, est_abrite=True)
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
         target_url = f"https://google.com/search?q={q}"
         img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
         palmier_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
-        html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{p['Nom']}</div><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
+        html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{p['Nom']}</div><p class='card-text'>{p['Ville']}</p><b style='color:{badge_color};'>{badge_txt}</b></div>"
     html_a += "</div>"
     st.markdown(html_a, unsafe_allow_html=True)
 
@@ -362,7 +373,7 @@ elif st.session_state["onglet"] == "apero":
     sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
     sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
@@ -385,19 +396,14 @@ elif st.session_state["onglet"] == "apero":
                 spots_valides.append(s)
 
         st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>Top Spots Apéro</h3></div>", unsafe_allow_html=True)
-        
-        # Adaptation dynamique du libellé selon l'ensoleillement effectif
-        if rad > 150:
-            badge_txt = "☀️ AU SOLEIL & À L'ABRI 🍹"
-        else:
-            badge_txt = "🍹 À L'ABRI DU VENT ☁️"
 
         if spots_valides:
             html_apero = "<div class='centrage-fixe'>"
             for s in spots_valides:
+                badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, est_abrite=True)
                 q = urllib.parse.quote(s['nom'] + " Saint-Malo")
                 target_url = f"https://google.com/search?q={q}"
-                html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{s['nom']}</div><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>{badge_txt}</b></div>"
+                html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{s['nom']}</div><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:{badge_color};'>{badge_txt} 🍹</b></div>"
             html_apero += "</div>"
             st.markdown(html_apero, unsafe_allow_html=True)
         else:
