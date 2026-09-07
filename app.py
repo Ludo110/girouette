@@ -24,12 +24,19 @@ def reinitialiser_heure():
 def evaluer_confort(temp_air, vitesse_vent, rad, est_abrite):
     vent_ressenti = 0 if est_abrite else vitesse_vent
 
+    # 1. TOP CONDITION : Chaud + Grand soleil + Vent nul/faible
     if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
         return "☀️ TOP CONDITION", "#2d5a27"
-    elif temp_air >= 17 and vent_ressenti < 20 and rad > 50:
+
+    # 2. AGREABLE : Chaud même nuageux, ou très doux avec du soleil
+    elif (temp_air >= 20 and vent_ressenti < 15) or (temp_air >= 17 and vent_ressenti < 20 and rad > 50):
         return "😎 AGREABLE", "#38761d"
+
+    # 3. UN PEU JUSTE : Températures plus fraîches ou vent sensible
     elif temp_air >= 14 and vent_ressenti < 25:
         return "⛅ UN PEU JUSTE", "#e69138"
+
+    # 4. TROP FRAIS : Froid ou vent fort
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
@@ -41,11 +48,9 @@ def récupérer_marées_réelles(dt_cible):
         resp = requests.get(url, headers=headers, timeout=5)
         html = resp.text
         
-        # Isolation du tableau principal de maree.info
         tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
         if tableau_match:
             tableau_html = tableau_match.group(1)
-            # Extrait uniquement les cellules d'heures (format XXhXX)
             pms = re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)
             bms = re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)
         else:
