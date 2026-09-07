@@ -3,15 +3,26 @@ import requests
 import urllib.parse
 import json
 from datetime import datetime, timezone, time
+import zoneinfo
 from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
-# Initialisation de l'onglet actif dans le state
+# Gestion du fuseau horaire local (Saint-Malo / France)
+tz_france = zoneinfo.ZoneInfo("Europe/Paris")
+
+# Initialisation des états dans le session_state
 if "onglet" not in st.session_state:
     st.session_state["onglet"] = "bronzette"
 
-# Détermination des styles dynamiques pour l'onglet actif vs inactif
+if "heure_simulee" not in st.session_state:
+    st.session_state["heure_simulee"] = datetime.now(tz_france).time()
+
+# Callback pour réinitialiser l'heure à l'heure locale actuelle
+def reinitialiser_heure():
+    st.session_state["heure_simulee"] = datetime.now(tz_france).time()
+
+# Styles dynamiques pour les boutons d'onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 
@@ -169,25 +180,28 @@ with nav_col2:
 
 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
 
-# Récupération de l'heure cible (par défaut heure actuelle)
-now_local = datetime.now()
+# Expander de configuration horaire & météo
 with st.expander("⚙️ Options & Horaire de simulation"):
-    if st.button("🔄 Réinitialiser à l'heure actuelle", use_container_width=True):
-        st.rerun()
+    st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
     
-    heure_cible = st.time_input("Choisir une heure pour la simulation", value=now_local.time())
+    heure_selectionnee = st.time_input(
+        "Choisir une heure pour la simulation", 
+        key="heure_simulee"
+    )
     use_manual = st.checkbox("Activer le mode météo manuelle")
 
-# Date/heure complète à simuler
-dt_cible = datetime.combine(now_local.date(), heure_cible).replace(tzinfo=timezone.utc)
+# Date/heure locale complète pour la simulation
+now_france = datetime.now(tz_france)
+dt_local = datetime.combine(now_france.date(), heure_selectionnee).replace(tzinfo=tz_france)
+dt_utc = dt_local.astimezone(timezone.utc)
 
 # Requête météo horaire Open-Meteo
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation", timeout=5).json()
     
-    # Trouver l'index correspondant à l'heure sélectionnée
+    # Trouver l'index de l'heure correspondante
     heures = [datetime.fromisoformat(t).hour for t in r["hourly"]["time"]]
-    idx = heures.index(heure_cible.hour) if heure_cible.hour in heures else 0
+    idx = heures.index(heure_selectionnee.hour) if heure_selectionnee.hour in heures else 0
     
     auto_v = int(r["hourly"]["wind_speed_10m"][idx])
     auto_a = float(r["hourly"]["wind_direction_10m"][idx])
@@ -243,7 +257,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -276,10 +290,10 @@ if st.session_state["onglet"] == "bronzette":
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "apero":
-    sol_alt = get_altitude(LAT_SM, LON_SM, dt_cible)
-    sol_azi = get_azimuth(LAT_SM, LON_SM, dt_cible)
+    sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
+    sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions Apéro pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions Apéro pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
