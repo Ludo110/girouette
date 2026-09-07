@@ -39,6 +39,21 @@ st.markdown("""
         background-color: rgba(255, 255, 255, 0.15) !important;
         border-color: white !important;
     }
+
+    /* Style des encadrés de titres */
+    .title-box {
+        background-color: #f0ede6;
+        border-radius: 12px;
+        padding: 10px 20px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        max-width: 350px;
+        margin: 0 auto;
+    }
+    .title-box h1, .title-box h3 {
+        margin: 0 !important;
+        color: #436e64 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -63,10 +78,10 @@ try:
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
-# En-tête avec colonnes serrées pour coller le bouton au titre
+# En-tête avec titre encadré et bouton rafraîchir à côté
 c1, c2 = st.columns([6, 1])
 with c1:
-    st.markdown("<h1 style='color: white; margin: 0; font-size: 1.6em; padding-top: 4px;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+    st.markdown("<div class='title-box'><h1 style='font-size: 1.5em;'>Girouette Malouine</h1></div>", unsafe_allow_html=True)
 with c2:
     if st.button("🔄", help="Rafraîchir"):
         st.rerun()
@@ -84,7 +99,7 @@ st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; ma
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
-st.markdown("<h3 style='color:white; text-align:center;'>A l'abri</h3>", unsafe_allow_html=True)
+st.markdown("<div class='title-box' style='margin-bottom: 20px;'><h3 style='font-size: 1.2em;'>A l'abri</h3></div>", unsafe_allow_html=True)
 html_a = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
@@ -94,7 +109,7 @@ for p in abritees:
 html_a += "</div>"
 st.markdown(html_a, unsafe_allow_html=True)
 
-st.markdown("<h3 style='color:#f0ede6; text-align:center; margin-top:30px;'>Exposees</h3>", unsafe_allow_html=True)
+st.markdown("<div class='title-box' style='margin-top: 30px; margin-bottom: 20px;'><h3 style='font-size: 1.2em;'>Exposées</h3></div>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 milieu = len(exposees) // 2
