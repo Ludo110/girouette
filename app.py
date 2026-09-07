@@ -6,6 +6,11 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
 st.markdown("""
 <style>
+    /* Masquer le header, le footer et le menu Streamlit pour éliminer les bandes blanches */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
     .stApp { background-color: #64978b !important; }
     div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
@@ -39,7 +44,13 @@ try:
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
-st.markdown("<h1 style='color: white; text-align: center;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+# En-tête avec titre et bouton de rafraîchissement côte à côte
+c1, c2 = st.columns([3, 1])
+with c1:
+    st.markdown("<h1 style='color: white; margin: 0; font-size: 1.8em;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+with c2:
+    if st.button("🔄 Rafraîchir", use_container_width=True):
+        st.rerun()
 
 with st.expander("Options"):
     use_manual = st.checkbox("Activer le mode manuel")
@@ -49,7 +60,7 @@ with st.expander("Options"):
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
 
-st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto; color:#333;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:400px; margin:15px auto 25px auto; color:#333;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
@@ -64,7 +75,7 @@ for p in abritees:
 html_a += "</div>"
 st.markdown(html_a, unsafe_allow_html=True)
 
-st.markdown("<h3 style='color:#f0ede6; text-align:center; margin-top:40px;'>Exposees</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#f0ede6; text-align:center; margin-top:30px;'>Exposees</h3>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 milieu = len(exposees) // 2
