@@ -28,16 +28,19 @@ st.markdown("""
         width: 100%;
     }
 
-    /* Encadré principal parfaitement centré en bloc */
+    /* Encadré principal avec alignement Flexbox vertical strict */
     .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
         padding: 14px 20px;
-        text-align: center !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         width: 100%;
         max-width: 600px;
         margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
     .title-box-full h1 {
         margin: 0 !important;
@@ -45,7 +48,6 @@ st.markdown("""
         color: #436e64 !important;
         font-size: 1.35em !important;
         text-align: center !important;
-        width: 100% !important;
     }
     .title-box-full p {
         margin: 6px 0 0 0 !important;
@@ -53,7 +55,6 @@ st.markdown("""
         color: #557a70 !important;
         font-size: 0.9em !important;
         text-align: center !important;
-        width: 100% !important;
     }
 
     /* Encadrés des sections (A l'abri / Exposées) */
@@ -65,6 +66,9 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         max-width: 350px;
         margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     .title-box-section h3 {
         margin: 0 !important;
