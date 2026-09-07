@@ -20,25 +20,6 @@ st.markdown("""
     .card-title { width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }
     .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
-    
-    /* Bouton rafraîchir ultra-discret et miniature */
-    div.stButton > button {
-        background-color: transparent !important;
-        color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.3) !important;
-        border-radius: 50% !important;
-        width: 32px !important;
-        height: 32px !important;
-        min-height: unset !important;
-        padding: 0px !important;
-        font-size: 0.85em !important;
-        box-shadow: none !important;
-        margin-top: 12px !important;
-    }
-    div.stButton > button:hover {
-        background-color: rgba(255, 255, 255, 0.15) !important;
-        border-color: white !important;
-    }
 
     /* Style des encadrés de titres */
     .title-box {
@@ -47,7 +28,8 @@ st.markdown("""
         padding: 10px 20px;
         text-align: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
     }
     .title-box h1, .title-box h3 {
         margin: 0 !important;
@@ -77,15 +59,12 @@ try:
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
-# En-tête groupé et centré (Titre + Bouton rapprochés)
-_, col_titre, col_btn, _ = st.columns([2, 5, 1, 2])
-with col_titre:
-    st.markdown("<div class='title-box'><h1 style='font-size: 1.5em;'>Girouette Malouine</h1></div>", unsafe_allow_html=True)
-with col_btn:
-    if st.button("🔄", help="Rafraîchir"):
-        st.rerun()
+# Titre principal parfaitement centré
+st.markdown("<div class='title-box'><h1 style='font-size: 1.5em;'>Girouette Malouine</h1></div>", unsafe_allow_html=True)
 
 with st.expander("Options"):
+    if st.button("🔄 Rafraîchir les données météo", use_container_width=True):
+        st.rerun()
     use_manual = st.checkbox("Activer le mode manuel")
     vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
     angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
@@ -98,7 +77,7 @@ st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; ma
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
 
-st.markdown("<div style='max-width: 350px; margin: 0 auto;'><div class='title-box' style='margin-bottom: 20px;'><h3 style='font-size: 1.2em;'>A l'abri</h3></div></div>", unsafe_allow_html=True)
+st.markdown("<div class='title-box' style='margin-bottom: 20px;'><h3 style='font-size: 1.2em;'>A l'abri</h3></div>", unsafe_allow_html=True)
 html_a = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
@@ -108,7 +87,7 @@ for p in abritees:
 html_a += "</div>"
 st.markdown(html_a, unsafe_allow_html=True)
 
-st.markdown("<div style='max-width: 350px; margin: 0 auto;'><div class='title-box' style='margin-top: 30px; margin-bottom: 20px;'><h3 style='font-size: 1.2em;'>Exposées</h3></div></div>", unsafe_allow_html=True)
+st.markdown("<div class='title-box' style='margin-top: 30px; margin-bottom: 20px;'><h3 style='font-size: 1.2em;'>Exposées</h3></div>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 milieu = len(exposees) // 2
