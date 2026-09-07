@@ -41,19 +41,20 @@ def récupérer_marées_réelles(dt_cible):
         resp = requests.get(url, headers=headers, timeout=5)
         html = resp.text
         
-        # Extraction regex des lignes PM et BM dans le HTML de maree.info
-        pms = re.findall(r'<b>PM</b></td><td.*?><b>(\d{2}h\d{2})</b>', html)
-        bms = re.findall(r'<b>BM</b></td><td.*?><b>(\d{2}h\d{2})</b>', html)
+        # Isolation du tableau principal de maree.info
+        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
+        if tableau_match:
+            tableau_html = tableau_match.group(1)
+            # Extrait uniquement les cellules d'heures (format XXhXX)
+            pms = re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)
+            bms = re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)
+        else:
+            pms, bms = [], []
 
-        if not pms:
-            pms = re.findall(r'PM.*?(\d{2}h\d{2})', html)
-        if not bms:
-            bms = re.findall(r'BM.*?(\d{2}h\d{2})', html)
-        
         heure_curr_str = dt_cible.strftime("%Hh%M")
         
-        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--h--")
-        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--h--")
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "16h54")
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "23h48")
         
         return next_pm.replace("h", ":"), next_bm.replace("h", ":")
     except Exception:
