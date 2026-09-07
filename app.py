@@ -17,11 +17,20 @@ st.markdown("""
     .stApp { background-color: #64978b !important; }
     div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .rect-style { background-color: #f0ede6; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); overflow: hidden; }
+    
+    /* Encadrés secondaires avec fond semi-transparent (85% opacité) */
+    .rect-style { 
+        background-color: rgba(240, 237, 230, 0.85) !important; 
+        border-radius: 15px; 
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15); 
+        overflow: hidden; 
+        backdrop-filter: blur(5px);
+    }
+    
     .plage-card { padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
     .card-img { width: 100%; height: 140px; object-fit: cover; }
     .card-title { width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }
-    .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
+    .card-text { width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
 
     /* Conteneur global centré */
@@ -31,7 +40,7 @@ st.markdown("""
         width: 100%;
     }
 
-    /* Encadré principal */
+    /* Encadré principal (Titre restent opaque pour une lisibilité parfaite) */
     .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
@@ -60,7 +69,7 @@ st.markdown("""
         text-align: center !important;
     }
 
-    /* Encadrés des sections */
+    /* Encadrés des titres de section (A l'abri / Exposées / Top Spots) */
     .title-box-section {
         background-color: #f0ede6;
         border-radius: 12px;
@@ -171,7 +180,7 @@ if onglet == "🏖️ Bronzette":
         angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
 
     ori = dirs[int(round((angle % 360) / 45))]
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:520px; margin:15px auto 25px auto; color:#333;'>Vent : {vitesse} km/h - {ori} ({int(angle)} deg)<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:520px; margin:15px auto 25px auto; color:#222;'>Vent : {vitesse} km/h - {ori} ({int(angle)} deg)<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -217,7 +226,7 @@ elif onglet == "🍹 Apéro au Soleil":
         angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
 
     ori = dirs[int(round((angle % 360) / 45))]
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:520px; margin:15px auto 25px auto; color:#333;'>Vent : {vitesse} km/h ({ori}) — Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:520px; margin:15px auto 25px auto; color:#222;'>Vent : {vitesse} km/h ({ori}) — Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     # Chargement des spots
     try:
@@ -230,7 +239,7 @@ elif onglet == "🍹 Apéro au Soleil":
     # Filtrage
     spots_valides = []
     if sol_alt <= 2:
-        st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#333;'><b>🌙 Le soleil est couché ! Rendez-vous demain pour l'apéro.</b></div>", unsafe_allow_html=True)
+        st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil est couché ! Rendez-vous demain pour l'apéro.</b></div>", unsafe_allow_html=True)
     else:
         for s in spots:
             # Check soleil
@@ -247,12 +256,8 @@ elif onglet == "🍹 Apéro au Soleil":
             html_apero = "<div class='centrage-fixe'>"
             for s in spots_valides:
                 q = urllib.parse.quote(s['nom'] + " Saint-Malo")
-                img_name = s.get("image", "Palmier.png")
-                img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{img_name}"
-                palmier_url = "https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
-                
                 html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{s['nom']}</h3></a><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>☀️ AU SOLEIL & À L'ABRI 🍹</b></div>"
             html_apero += "</div>"
             st.markdown(html_apero, unsafe_allow_html=True)
         else:
-            st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#333;'>Aucun spot idéal trouvé actuellement pour cette orientation de vent/soleil.</div>", unsafe_allow_html=True)
+            st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'>Aucun spot idéal trouvé actuellement pour cette orientation de vent/soleil.</div>", unsafe_allow_html=True)
