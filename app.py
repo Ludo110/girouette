@@ -19,7 +19,6 @@ now_france = datetime.now(tz_france)
 if "heure_selectionnee_str" not in st.session_state:
     st.session_state["heure_selectionnee_str"] = now_france.strftime("%H:%M")
 
-# Callback pour réinitialiser à l'heure actuelle
 def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
 
@@ -36,13 +35,11 @@ st.markdown(f"""
     
     .stApp {{ background-color: #64978b !important; }}
     
-    /* Titre expander et textes internes */
     div[data-testid="stExpander"] button div p {{ color: #f0ede6 !important; font-weight: bold !important; }}
     div[data-testid="stExpander"] label p {{ color: #f0ede6 !important; font-weight: bold !important; }}
     
     .centrage-fixe {{ display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }}
     
-    /* Encadrés secondaires avec fond semi-transparent */
     .rect-style {{ 
         background-color: rgba(240, 237, 230, 0.85) !important; 
         border-radius: 15px; 
@@ -51,7 +48,6 @@ st.markdown(f"""
         backdrop-filter: blur(5px);
     }}
     
-    /* Conteneur Flexbox strict pour la carte */
     .plage-card {{ 
         padding: 0px 0px 15px 0px; 
         text-align: center !important; 
@@ -64,7 +60,6 @@ st.markdown(f"""
     
     .card-img {{ width: 100%; height: 140px; object-fit: cover; display: block; }}
     
-    /* Titre cliquable purement centré */
     .card-title-clickable {{ 
         width: 100% !important; 
         margin: 10px 0 4px 0 !important; 
@@ -80,14 +75,12 @@ st.markdown(f"""
     
     .card-text {{ width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; text-align: center !important; }}
 
-    /* Conteneur global centré */
     .title-wrapper {{
         display: flex;
         justify-content: center;
         width: 100%;
     }}
 
-    /* Encadré principal */
     .title-box-full {{
         background-color: #f0ede6;
         border-radius: 12px;
@@ -116,7 +109,6 @@ st.markdown(f"""
         text-align: center !important;
     }}
 
-    /* Encadrés des sections */
     .title-box-section {{
         background-color: #f0ede6;
         border-radius: 12px;
@@ -138,7 +130,6 @@ st.markdown(f"""
         width: 100% !important;
     }}
     
-    /* Styling ciblé uniquement pour les boutons d'onglets haut de page */
     div[data-testid="stColumn"]:nth-child(2) button {{
         {style_bronzette}
         border: 2px solid #436e64 !important;
@@ -163,7 +154,6 @@ st.markdown(f"""
         font-weight: bold !important;
     }}
 
-    /* Style du bouton de réinitialisation dans l'expander */
     div[data-testid="stExpander"] button[kind="secondary"] {{
         background-color: #f0ede6 !important;
         border: 1px solid #436e64 !important;
@@ -175,7 +165,6 @@ st.markdown(f"""
         -webkit-text-fill-color: #436e64 !important;
     }}
 
-    /* Customisation de la boîte de sélection de l'heure (fond crème, texte vert centré et gras) */
     div[data-testid="stSelectbox"] > div > div {{
         background-color: #f0ede6 !important;
         border: 1px solid #436e64 !important;
@@ -193,7 +182,20 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 LAT_SM, LON_SM = 48.6493, -2.0089
-dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+dirs_fr = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+dirs_code = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
+
+# Correspondance des vents voisins tolérés
+adjacents = {
+    "N": ["N", "NE", "NW"],
+    "NE": ["NE", "N", "E"],
+    "E": ["E", "NE", "SE"],
+    "SE": ["SE", "E", "S"],
+    "S": ["S", "SE", "SW"],
+    "SW": ["SW", "S", "W"],
+    "W": ["W", "SW", "NW"],
+    "NW": ["NW", "W", "N"]
+}
 
 # 1. En-tête principal
 st.markdown("""
@@ -220,12 +222,9 @@ with nav_col2:
 
 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
 
-# Génération des plages horaires de 00:00 à 23:45 par pas de 15 minutes
 liste_heures = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 15, 30, 45)]
 
-# Sécurité si l'heure actuelle n'est pas exacte dans la liste
 if st.session_state["heure_selectionnee_str"] not in liste_heures:
-    # Arrondi à la tranche de 15 min la plus proche
     h_curr, m_curr = map(int, st.session_state["heure_selectionnee_str"].split(":"))
     m_round = 15 * round(m_curr / 15)
     if m_round == 60:
@@ -233,7 +232,6 @@ if st.session_state["heure_selectionnee_str"] not in liste_heures:
         m_round = 0
     st.session_state["heure_selectionnee_str"] = f"{h_curr:02d}:{m_round:02d}"
 
-# Expander de configuration horaire & météo
 with st.expander("⚙️ Options & Horaire de simulation"):
     col_time, col_reset = st.columns([1, 1])
     with col_time:
@@ -247,18 +245,15 @@ with st.expander("⚙️ Options & Horaire de simulation"):
     
     use_manual = st.checkbox("Activer le mode météo manuelle")
 
-# Date/heure locale complète pour la simulation
 heure_h, heure_m = map(int, heure_str.split(":"))
 heure_selectionnee = time(heure_h, heure_m)
 
 dt_local = datetime.combine(now_france.date(), heure_selectionnee).replace(tzinfo=tz_france)
 dt_utc = dt_local.astimezone(timezone.utc)
 
-# Requête météo horaire Open-Meteo
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation", timeout=5).json()
     
-    # Trouver l'index de l'heure correspondante
     heures = [datetime.fromisoformat(t).hour for t in r["hourly"]["time"]]
     idx = heures.index(heure_selectionnee.hour) if heure_selectionnee.hour in heures else 0
     
@@ -280,7 +275,6 @@ except:
     temp_air = 18.0
     soleil_txt = "☀️ Ensoleillé"
 
-# Données mer
 try:
     rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=sea_surface_temperature", timeout=5).json()
     temp_mer = round(rm["current"]["sea_surface_temperature"], 1)
@@ -294,7 +288,9 @@ if use_manual:
 else:
     vitesse, angle = auto_v, auto_a
 
-ori = dirs[int(round((angle % 360) / 45))]
+idx_dir = int(round((angle % 360) / 45))
+ori = dirs_fr[idx_dir]
+ori_code = dirs_code[idx_dir]
 
 # -----------------------------------------------------------------------------
 # ONGLET 1 : BRONZETTE
@@ -318,7 +314,7 @@ if st.session_state["onglet"] == "bronzette":
 
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
-    abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
+    abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
 
     st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>A l'abri</h3></div>", unsafe_allow_html=True)
@@ -366,9 +362,13 @@ elif st.session_state["onglet"] == "apero":
     if sol_alt <= 2:
         st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil sera couché à cette heure-là !</b></div>", unsafe_allow_html=True)
     else:
+        # Recherche des vents tolérés pour la direction du vent actuelle
+        v_compatibles = adjacents.get(ori_code, [ori_code])
+
         for s in spots:
             au_soleil = (s["soleil_azimut_min"] <= sol_azi <= s["soleil_azimut_max"])
-            abrite_vent = True if vitesse < 10 else (ori in s["vents_abrites"])
+            # Filtre vent actif seulement au-delà de 14 km/h avec tolérance sur vents adjacents
+            abrite_vent = True if vitesse < 15 else any(vc in s["vents_abrites"] for vc in v_compatibles)
             
             if au_soleil and abrite_vent:
                 spots_valides.append(s)
