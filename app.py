@@ -6,13 +6,9 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
 st.markdown("""
 <style>
-    /* Fond vert-d'eau / sauge */
     .stApp { background-color: #64978b !important; }
-    
     div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    
-    /* Style des cartes */
     .rect-style { background-color: #f0ede6; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); overflow: hidden; }
     .plage-card { padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
     .card-img { width: 100%; height: 140px; object-fit: cover; }
@@ -63,14 +59,8 @@ html_a = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
     img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
-    html_a += f"""
-    <div class='plage-card rect-style'>
-        <img src='{img_url}' class='card-img' onerror="this.src='https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png'">
-        <a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{p['Nom']}</h3></a>
-        <p class='card-text'>{p['Ville']}</p>
-        <b style='color:#2d5a27;'>IDEALE</b>
-    </div>
-    """
+    palmier_url = "https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
+    html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
 html_a += "</div>"
 st.markdown(html_a, unsafe_allow_html=True)
 
