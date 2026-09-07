@@ -243,7 +243,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -279,7 +279,7 @@ elif st.session_state["onglet"] == "apero":
     sol_alt = get_altitude(LAT_SM, LON_SM, dt_cible)
     sol_azi = get_azimuth(LAT_SM, LON_SM, dt_cible)
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions Apéro pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions Apéro pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
