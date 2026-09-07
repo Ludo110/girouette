@@ -21,20 +21,22 @@ st.markdown("""
     .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
 
-    /* Style de l'encadré principal pleine largeur pour le titre */
+    /* Style de l'encadré principal pleine largeur pour le titre (sur une seule ligne) */
     .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
-        padding: 12px 20px;
+        padding: 12px 10px;
         text-align: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         width: 100%;
         margin-bottom: 15px;
+        overflow: hidden;
     }
     .title-box-full h1 {
         margin: 0 !important;
         color: #436e64 !important;
-        font-size: 1.6em !important;
+        font-size: 1.35em !important;
+        white-space: nowrap !important;
     }
 
     /* Style des encadrés pour les sections A l'abri / Exposées */
