@@ -6,7 +6,7 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
 st.markdown("""
 <style>
-    /* Masquer le header, le footer et le menu Streamlit pour éliminer les bandes blanches */
+    /* Masquer le header, le footer et le menu Streamlit */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -20,6 +20,23 @@ st.markdown("""
     .card-title { width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }
     .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
+    
+    /* Rendre le bouton rafraîchir compact et discret */
+    div.stButton > button {
+        background-color: transparent !important;
+        color: white !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        border-radius: 50% !important;
+        width: 38px !important;
+        height: 38px !important;
+        padding: 0px !important;
+        font-size: 1.1em !important;
+        box-shadow: none !important;
+    }
+    div.stButton > button:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        border-color: white !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -44,12 +61,12 @@ try:
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
-# En-tête avec titre et bouton de rafraîchissement côte à côte
-c1, c2 = st.columns([3, 1])
+# En-tête compact avec titre à gauche et bouton rond discret à droite
+c1, c2 = st.columns([4, 1])
 with c1:
-    st.markdown("<h1 style='color: white; margin: 0; font-size: 1.8em;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: white; margin: 0; font-size: 1.6em; padding-top: 5px;'>Girouette Malouine</h1>", unsafe_allow_html=True)
 with c2:
-    if st.button("🔄 Rafraîchir", use_container_width=True):
+    if st.button("🔄", help="Rafraîchir"):
         st.rerun()
 
 with st.expander("Options"):
