@@ -99,13 +99,22 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Données météo Open-Meteo
+# Données météo & température de l'air via Open-Meteo
 LAT_SM, LON_SM = 48.6493, -2.0089
 try:
-    r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&current=wind_speed_10m,wind_direction_10m", timeout=5).json()
+    r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&current=temperature_2m,wind_speed_10m,wind_direction_10m", timeout=5).json()
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
+    temp_air = round(r["current"]["temperature_2m"], 1)
 except: 
     auto_v, auto_a = 15, 270.0
+    temp_air = 18.0
+
+# Données température de la mer via Open-Meteo Marine
+try:
+    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=sea_surface_temperature", timeout=5).json()
+    temp_mer = round(rm["current"]["sea_surface_temperature"], 1)
+except:
+    temp_mer = 16.0
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 
@@ -150,7 +159,7 @@ if onglet == "🏖️ Bronzette":
         angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
 
     ori = dirs[int(round((angle % 360) / 45))]
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:400px; margin:15px auto 25px auto; color:#333;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:480px; margin:15px auto 25px auto; color:#333;'>Vent : {vitesse} km/h - {ori} ({int(angle)} deg)<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b></div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -196,7 +205,7 @@ elif onglet == "🍹 Apéro au Soleil":
         angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
 
     ori = dirs[int(round((angle % 360) / 45))]
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:420px; margin:15px auto 25px auto; color:#333;'>Météo : Vent {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:480px; margin:15px auto 25px auto; color:#333;'>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b></div>", unsafe_allow_html=True)
 
     # Chargement des spots
     try:
