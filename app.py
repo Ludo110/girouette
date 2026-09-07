@@ -72,4 +72,47 @@ plages = [
 ]
 
 try:
-    r = requests.get("
+    r = requests.get("https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m", timeout=5).json()
+    auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
+except: auto_v, auto_a = 15, 270.0
+
+st.markdown("<div class='title-box-full'><h1>Girouette Malouine</h1></div>", unsafe_allow_html=True)
+
+with st.expander("Options"):
+    if st.button("🔄 Rafraîchir les données météo", use_container_width=True):
+        st.rerun()
+    use_manual = st.checkbox("Activer le mode manuel")
+    vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
+    angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
+
+dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+ori = dirs[int(round((angle % 360) / 45))]
+
+st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:400px; margin:15px auto 25px auto; color:#333;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
+
+abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
+exposees = [p for p in plages if p not in abritees]
+
+st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>A l'abri</h3></div>", unsafe_allow_html=True)
+html_a = "<div class='centrage-fixe'>"
+for p in abritees:
+    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+    img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
+    palmier_url = "https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
+    html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
+html_a += "</div>"
+st.markdown(html_a, unsafe_allow_html=True)
+
+st.markdown("<div class='title-box-section' style='margin-top: 30px; margin-bottom: 20px;'><h3>Exposées</h3></div>", unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+milieu = len(exposees) // 2
+
+def afficher_colonne(liste_plages, colonne):
+    with colonne:
+        for p in liste_plages:
+            q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+            st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><a href='https://google.com/search?q={q}' style='color:white;'>{p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+
+afficher_colonne(exposees[:milieu], col1)
+afficher_colonne(exposees[milieu:], col2)
