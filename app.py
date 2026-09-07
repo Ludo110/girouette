@@ -3,7 +3,7 @@ import requests
 import urllib.parse
 import json
 import re
-from datetime import datetime, timezone, time
+from datetime import datetime, timezone, time, timedelta
 import zoneinfo
 from pysolar.solar import get_azimuth, get_altitude
 
@@ -22,25 +22,17 @@ def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
 
 def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
-    # 0. PLUIE : Priorité absolue si précipitation
     if pluie > 0.2:
         return "🌧️ PLUIE / PAS TOP", "#cc0000"
 
     vent_ressenti = 0 if est_abrite else vitesse_vent
 
-    # 1. TOP CONDITION : Chaud + Grand soleil + Vent nul/faible
     if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
         return "☀️ TOP CONDITION", "#2d5a27"
-
-    # 2. AGREABLE : Chaud même nuageux, ou très doux avec du soleil
     elif (temp_air >= 20 and vent_ressenti < 15) or (temp_air >= 17 and vent_ressenti < 20 and rad > 50):
         return "😎 AGREABLE", "#38761d"
-
-    # 3. UN PEU JUSTE : Températures plus fraîches ou vent sensible
     elif temp_air >= 14 and vent_ressenti < 25:
         return "⛅ UN PEU JUSTE", "#e69138"
-
-    # 4. TROP FRAIS
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
@@ -253,7 +245,6 @@ adjacents = {
     "NNW": ["NNW", "NW", "N"]
 }
 
-# 1. En-tête principal
 st.markdown("""
 <div class='title-wrapper'>
     <div class='title-box-full'>
@@ -263,7 +254,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Boutons de navigation
 _, nav_col1, nav_col2, _ = st.columns([1, 2, 2, 1])
 
 with nav_col1:
@@ -289,29 +279,35 @@ if st.session_state["heure_selectionnee_str"] not in liste_heures:
     st.session_state["heure_selectionnee_str"] = f"{h_curr:02d}:{m_round:02d}"
 
 with st.expander("⚙️ Options & Horaire de simulation"):
-    col_time, col_reset = st.columns([1, 1])
+    col_date, col_time = st.columns([1, 1])
+    with col_date:
+        choix_jour = st.radio("Jour de simulation", ["Aujourd'hui", "Demain"], horizontal=True)
     with col_time:
-        heure_str = st.selectbox(
-            "Choisir une heure pour la simulation", 
-            options=liste_heures,
-            key="heure_selectionnee_str"
-        )
-    with col_reset:
-        st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
-    
+        heure_str = st.selectbox("Choisir une heure", options=liste_heures, key="heure_selectionnee_str")
+        
+    st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
     use_manual = st.checkbox("Activer le mode météo manuelle")
 
 heure_h, heure_m = map(int, heure_str.split(":"))
 heure_selectionnee = time(heure_h, heure_m)
 
-dt_local = datetime.combine(now_france.date(), heure_selectionnee).replace(tzinfo=tz_france)
+date_cible = now_france.date()
+if choix_jour == "Demain":
+    date_cible += timedelta(days=1)
+
+dt_local = datetime.combine(date_cible, heure_selectionnee).replace(tzinfo=tz_france)
 dt_utc = dt_local.astimezone(timezone.utc)
+
+label_jour = "Aujourd'hui" if choix_jour == "Aujourd'hui" else "Demain"
 
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation,precipitation", timeout=5).json()
     
-    heures = [datetime.fromisoformat(t).hour for t in r["hourly"]["time"]]
-    idx = heures.index(heure_selectionnee.hour) if heure_selectionnee.hour in heures else 0
+    iso_cible = dt_local.strftime("%Y-%m-%dT%H:00")
+    if iso_cible in r["hourly"]["time"]:
+        idx = r["hourly"]["time"].index(iso_cible)
+    else:
+        idx = 0
     
     auto_v = int(r["hourly"]["wind_speed_10m"][idx])
     auto_a = float(r["hourly"]["wind_direction_10m"][idx])
@@ -374,7 +370,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {label_jour} à {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -412,7 +408,7 @@ elif st.session_state["onglet"] == "apero":
     sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
     sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {label_jour} à {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
