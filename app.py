@@ -18,7 +18,7 @@ st.markdown("""
     div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
     
-    /* Encadrés secondaires avec fond semi-transparent (85% opacité) */
+    /* Encadrés secondaires avec fond semi-transparent */
     .rect-style { 
         background-color: rgba(240, 237, 230, 0.85) !important; 
         border-radius: 15px; 
@@ -40,7 +40,7 @@ st.markdown("""
         width: 100%;
     }
 
-    /* Encadré principal (Titre restent opaque pour une lisibilité parfaite) */
+    /* Encadré principal */
     .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
@@ -69,7 +69,7 @@ st.markdown("""
         text-align: center !important;
     }
 
-    /* Encadrés des titres de section (A l'abri / Exposées / Top Spots) */
+    /* Encadrés des sections */
     .title-box-section {
         background-color: #f0ede6;
         border-radius: 12px;
@@ -91,7 +91,7 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Style du sélecteur d'onglets centré */
+    /* Correctif iPhone/Safari pour le texte du sélecteur d'onglets */
     div[data-testid="stRadio"] {
         display: flex !important;
         justify-content: center !important;
@@ -99,11 +99,17 @@ st.markdown("""
     }
     div[data-testid="stRadio"] > div {
         justify-content: center;
-        background-color: #f0ede6;
+        background-color: #f0ede6 !important;
         padding: 8px 16px;
         border-radius: 12px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin: 0 auto 15px auto;
+    }
+    /* Forcer la couleur du texte des options radio sur iOS */
+    div[data-testid="stRadio"] label p {
+        color: #436e64 !important;
+        font-weight: bold !important;
+        -webkit-text-fill-color: #436e64 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -115,7 +121,6 @@ try:
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
     temp_air = round(r["current"]["temperature_2m"], 1)
     
-    # Qualification de l'ensoleillement d'après le rayonnement direct (W/m²)
     rad = r["current"].get("direct_radiation", 0)
     if rad > 400:
         soleil_txt = "☀️ Plein soleil"
@@ -213,7 +218,6 @@ if onglet == "🏖️ Bronzette":
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif onglet == "🍹 Apéro au Soleil":
-    # Calcul de la position du soleil avec timezone UTC explicite
     now = datetime.now(timezone.utc)
     sol_alt = get_altitude(LAT_SM, LON_SM, now)
     sol_azi = get_azimuth(LAT_SM, LON_SM, now)
@@ -242,9 +246,7 @@ elif onglet == "🍹 Apéro au Soleil":
         st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil est couché ! Rendez-vous demain pour l'apéro.</b></div>", unsafe_allow_html=True)
     else:
         for s in spots:
-            # Check soleil
             au_soleil = (s["soleil_azimut_min"] <= sol_azi <= s["soleil_azimut_max"])
-            # Check vent
             abrite_vent = True if vitesse < 10 else (ori in s["vents_abrites"])
             
             if au_soleil and abrite_vent:
