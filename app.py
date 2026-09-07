@@ -21,17 +21,15 @@ st.markdown("""
     .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
 
-    /* Encadré principal avec centrage Flexbox strict */
+    /* Encadré principal pleine largeur avec centrage texte direct (anti-bug iPhone) */
     .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
-        padding: 12px 10px;
+        padding: 14px 10px;
+        text-align: center !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         width: 100%;
         margin-bottom: 15px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
     }
     .title-box-full h1 {
         margin: 0 !important;
@@ -40,19 +38,18 @@ st.markdown("""
         font-size: 1.35em !important;
         white-space: nowrap !important;
         text-align: center !important;
+        width: 100% !important;
     }
 
-    /* Encadrés des sections (A l'abri / Exposées) avec centrage Flexbox strict */
+    /* Encadrés des sections (A l'abri / Exposées) */
     .title-box-section {
         background-color: #f0ede6;
         border-radius: 12px;
         padding: 10px 20px;
+        text-align: center !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         max-width: 350px;
         margin: 0 auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
     }
     .title-box-section h3 {
         margin: 0 !important;
@@ -60,6 +57,7 @@ st.markdown("""
         color: #436e64 !important;
         font-size: 1.2em !important;
         text-align: center !important;
+        width: 100% !important;
     }
 </style>
 """, unsafe_allow_html=True)
