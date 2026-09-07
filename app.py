@@ -162,7 +162,7 @@ st.markdown(f"""
         font-weight: bold !important;
     }}
 
-    /* Style spécifique pour le bouton de réinitialisation dans l'expander */
+    /* Style du bouton de réinitialisation dans l'expander */
     div[data-testid="stExpander"] button[kind="secondary"] {{
         background-color: #f0ede6 !important;
         border: 1px solid #436e64 !important;
@@ -172,6 +172,21 @@ st.markdown(f"""
         color: #436e64 !important;
         font-weight: bold !important;
         -webkit-text-fill-color: #436e64 !important;
+    }}
+
+    /* Personnalisation du champ st.time_input (alignement avec le bouton) */
+    div[data-testid="stTimeInput"] input {{
+        background-color: #f0ede6 !important;
+        border: 1px solid #436e64 !important;
+        color: #436e64 !important;
+        text-align: center !important;
+        font-weight: bold !important;
+        -webkit-text-fill-color: #436e64 !important;
+        border-radius: 8px !important;
+    }}
+    div[data-testid="stTimeInput"] > div {{
+        background-color: transparent !important;
+        border: none !important;
     }}
 </style>
 """, unsafe_allow_html=True)
