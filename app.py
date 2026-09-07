@@ -52,7 +52,16 @@ st.markdown(f"""
     
     .plage-card {{ padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }}
     .card-img {{ width: 100%; height: 140px; object-fit: cover; }}
-    .card-title {{ width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }}
+    
+    /* Taille ajustée du nom des plages et des bars */
+    .card-title {{ 
+        width: 100%; 
+        margin: 8px 0 4px 0 !important; 
+        font-size: 1.0em !important; 
+        font-weight: bold !important;
+        text-decoration: underline; 
+    }}
+    
     .card-text {{ width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; }}
     a::after {{ content: none !important; }}
 
@@ -81,7 +90,7 @@ st.markdown(f"""
         margin: 0 !important;
         padding: 0 !important;
         color: #436e64 !important;
-        font-size: 1.35em !important;
+        font-size: 1.4em !important;
         text-align: center !important;
     }}
     .title-box-full p {{
