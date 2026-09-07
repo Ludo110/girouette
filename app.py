@@ -18,8 +18,12 @@ now_france = datetime.now(tz_france)
 if "heure_selectionnee_str" not in st.session_state:
     st.session_state["heure_selectionnee_str"] = now_france.strftime("%H:%M")
 
+if "choix_jour" not in st.session_state:
+    st.session_state["choix_jour"] = "Aujourd'hui"
+
 def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
+    st.session_state["choix_jour"] = "Aujourd'hui"
 
 def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
     if pluie > 0.2:
@@ -56,7 +60,6 @@ def récupérer_marées_réelles(dt_cible):
             else:
                 pms, bms = ["16:54"], ["23:48"]
         else:
-            # Extraction des marées du lendemain sur la table latérale maree.info
             jour_num = dt_cible.strftime("%d")
             match_demain = re.search(fr'id="MareeJours_Tr_{jour_num}".*?>(.*?)</tr>', html, re.DOTALL)
             if match_demain:
@@ -294,7 +297,7 @@ if st.session_state["heure_selectionnee_str"] not in liste_heures:
 with st.expander("⚙️ Options & Horaire de simulation"):
     col_date, col_time = st.columns([1, 1])
     with col_date:
-        choix_jour = st.radio("Jour de simulation", ["Aujourd'hui", "Demain"], horizontal=True)
+        choix_jour = st.radio("Jour de simulation", ["Aujourd'hui", "Demain"], key="choix_jour", horizontal=True)
     with col_time:
         heure_str = st.selectbox("Choisir une heure", options=liste_heures, key="heure_selectionnee_str")
         
@@ -311,7 +314,7 @@ if choix_jour == "Demain":
 dt_local = datetime.combine(date_cible, heure_selectionnee).replace(tzinfo=tz_france)
 dt_utc = dt_local.astimezone(timezone.utc)
 
-label_jour = "Aujourd'hui" if choix_jour == "Aujourd'hui" else "Demain"
+label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Aujourd'hui" else f"pour Demain à {heure_selectionnee.strftime('%H:%M')}"
 
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation,precipitation", timeout=5).json()
@@ -383,7 +386,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {label_jour} à {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -421,7 +424,7 @@ elif st.session_state["onglet"] == "apero":
     sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
     sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {label_jour} à {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
