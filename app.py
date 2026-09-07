@@ -57,7 +57,7 @@ st.markdown(f"""
     .card-title {{ 
         width: 100%; 
         margin: 8px 0 4px 0 !important; 
-        font-size: 1.0em !important; 
+        font-size: 1.15em !important; 
         font-weight: bold !important;
         text-decoration: underline; 
     }}
