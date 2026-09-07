@@ -166,6 +166,7 @@ st.markdown(f"""
     div[data-testid="stExpander"] button[kind="secondary"] {{
         background-color: #f0ede6 !important;
         border: 1px solid #436e64 !important;
+        margin-top: 28px !important;
     }}
     div[data-testid="stExpander"] button[kind="secondary"] p {{
         color: #436e64 !important;
@@ -205,12 +206,16 @@ st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
 
 # Expander de configuration horaire & météo
 with st.expander("⚙️ Options & Horaire de simulation"):
-    st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
+    col_time, col_reset = st.columns([1, 1])
+    with col_time:
+        heure_selectionnee = st.time_input(
+            "Choisir une heure pour la simulation", 
+            key="heure_simulee"
+        )
+    with col_reset:
+        st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
+    
     use_manual = st.checkbox("Activer le mode météo manuelle")
-    heure_selectionnee = st.time_input(
-        "Choisir une heure pour la simulation", 
-        key="heure_simulee"
-    )
 
 # Date/heure locale complète pour la simulation
 now_france = datetime.now(tz_france)
