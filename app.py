@@ -174,19 +174,15 @@ st.markdown(f"""
         -webkit-text-fill-color: #436e64 !important;
     }}
 
-    /* Personnalisation du champ st.time_input (alignement avec le bouton) */
-    div[data-testid="stTimeInput"] input {{
+    /* Force le style sur l'encadré et l'input de st.time_input */
+    div[data-baseweb="input"], div[data-baseweb="input"] > div, div[data-baseweb="input"] input {{
         background-color: #f0ede6 !important;
-        border: 1px solid #436e64 !important;
+        border-color: #436e64 !important;
         color: #436e64 !important;
         text-align: center !important;
         font-weight: bold !important;
         -webkit-text-fill-color: #436e64 !important;
         border-radius: 8px !important;
-    }}
-    div[data-testid="stTimeInput"] > div {{
-        background-color: transparent !important;
-        border: none !important;
     }}
 </style>
 """, unsafe_allow_html=True)
