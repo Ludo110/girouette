@@ -21,17 +21,19 @@ st.markdown("""
     .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
     
-    /* Rendre le bouton rafraîchir compact et discret */
+    /* Bouton rafraîchir ultra-discret et miniature */
     div.stButton > button {
         background-color: transparent !important;
         color: white !important;
-        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 50% !important;
-        width: 38px !important;
-        height: 38px !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-height: unset !important;
         padding: 0px !important;
-        font-size: 1.1em !important;
+        font-size: 0.8em !important;
         box-shadow: none !important;
+        margin-top: 8px !important;
     }
     div.stButton > button:hover {
         background-color: rgba(255, 255, 255, 0.15) !important;
@@ -61,10 +63,10 @@ try:
     auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
 except: auto_v, auto_a = 15, 270.0
 
-# En-tête compact avec titre à gauche et bouton rond discret à droite
-c1, c2 = st.columns([4, 1])
+# En-tête avec colonnes serrées pour coller le bouton au titre
+c1, c2 = st.columns([6, 1])
 with c1:
-    st.markdown("<h1 style='color: white; margin: 0; font-size: 1.6em; padding-top: 5px;'>Girouette Malouine</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: white; margin: 0; font-size: 1.6em; padding-top: 4px;'>Girouette Malouine</h1>", unsafe_allow_html=True)
 with c2:
     if st.button("🔄", help="Rafraîchir"):
         st.rerun()
