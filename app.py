@@ -286,6 +286,7 @@ try:
 except:
     auto_v, auto_a = 15, 270.0
     temp_air = 18.0
+    rad = 300.0
     soleil_txt = "☀️ Ensoleillé"
 
 try:
@@ -385,12 +386,18 @@ elif st.session_state["onglet"] == "apero":
 
         st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>Top Spots Apéro</h3></div>", unsafe_allow_html=True)
         
+        # Adaptation dynamique du libellé selon l'ensoleillement effectif
+        if rad > 150:
+            badge_txt = "☀️ AU SOLEIL & À L'ABRI 🍹"
+        else:
+            badge_txt = "🍹 À L'ABRI DU VENT ☁️"
+
         if spots_valides:
             html_apero = "<div class='centrage-fixe'>"
             for s in spots_valides:
                 q = urllib.parse.quote(s['nom'] + " Saint-Malo")
                 target_url = f"https://google.com/search?q={q}"
-                html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{s['nom']}</div><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>☀️ AU SOLEIL & À L'ABRI 🍹</b></div>"
+                html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{s['nom']}</div><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>{badge_txt}</b></div>"
             html_apero += "</div>"
             st.markdown(html_apero, unsafe_allow_html=True)
         else:
