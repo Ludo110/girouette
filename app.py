@@ -50,27 +50,41 @@ st.markdown(f"""
         backdrop-filter: blur(5px);
     }}
     
-    .plage-card {{ padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }}
-    .card-img {{ width: 100%; height: 140px; object-fit: cover; }}
-    
-    /* Centrage strict du lien et suppression des marges par défaut du titre h3 */
-    .plage-card a {{
-        display: block !important;
-        width: 100% !important;
-        text-align: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
+    /* Conteneur Flexbox strict pour la carte */
+    .plage-card {{ 
+        padding: 0px 0px 15px 0px; 
+        text-align: center; 
+        width: 260px; 
+        display: flex !important; 
+        flex-direction: column !important; 
+        align-items: center !important; 
+        justify-content: flex-start !important; 
     }}
     
-    .card-title {{ 
-        width: 100% !important; 
-        margin: 8px auto 4px auto !important; 
+    .card-img {{ width: 100%; height: 140px; object-fit: cover; display: block; }}
+    
+    /* Alignment strict du bloc lien */
+    .plage-card a {{
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 8px 0 4px 0 !important;
         padding: 0 !important;
+        text-decoration: none !important;
+    }}
+    
+    /* Reinitialisation totale du style H3 pour un centrage parfait */
+    .card-title {{ 
+        all: unset !important;
+        display: block !important;
+        width: 100% !important; 
+        text-align: center !important; 
         font-size: 1.15em !important; 
         font-weight: bold !important;
-        text-decoration: underline; 
-        text-align: center !important;
-        display: block !important;
+        text-decoration: underline !important; 
+        color: #436e64 !important;
+        cursor: pointer !important;
     }}
     
     .card-text {{ width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; text-align: center !important; }}
@@ -287,7 +301,7 @@ if st.session_state["onglet"] == "bronzette":
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
         img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
         palmier_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
-        html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
+        html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
     html_a += "</div>"
     st.markdown(html_a, unsafe_allow_html=True)
 
@@ -338,7 +352,7 @@ elif st.session_state["onglet"] == "apero":
             html_apero = "<div class='centrage-fixe'>"
             for s in spots_valides:
                 q = urllib.parse.quote(s['nom'] + " Saint-Malo")
-                html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{s['nom']}</h3></a><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>☀️ AU SOLEIL & À L'ABRI 🍹</b></div>"
+                html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title'>{s['nom']}</h3></a><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>☀️ AU SOLEIL & À L'ABRI 🍹</b></div>"
             html_apero += "</div>"
             st.markdown(html_apero, unsafe_allow_html=True)
         else:
