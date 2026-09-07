@@ -21,7 +21,11 @@ if "heure_selectionnee_str" not in st.session_state:
 def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
 
-def evaluer_confort(temp_air, vitesse_vent, rad, est_abrite):
+def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
+    # 0. PLUIE : Priorité absolue si précipitation
+    if pluie > 0.2:
+        return "🌧️ PLUIE / PAS TOP", "#cc0000"
+
     vent_ressenti = 0 if est_abrite else vitesse_vent
 
     # 1. TOP CONDITION : Chaud + Grand soleil + Vent nul/faible
@@ -36,7 +40,7 @@ def evaluer_confort(temp_air, vitesse_vent, rad, est_abrite):
     elif temp_air >= 14 and vent_ressenti < 25:
         return "⛅ UN PEU JUSTE", "#e69138"
 
-    # 4. TROP FRAIS : Froid ou vent fort
+    # 4. TROP FRAIS
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
@@ -304,7 +308,7 @@ dt_local = datetime.combine(now_france.date(), heure_selectionnee).replace(tzinf
 dt_utc = dt_local.astimezone(timezone.utc)
 
 try:
-    r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation", timeout=5).json()
+    r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation,precipitation", timeout=5).json()
     
     heures = [datetime.fromisoformat(t).hour for t in r["hourly"]["time"]]
     idx = heures.index(heure_selectionnee.hour) if heure_selectionnee.hour in heures else 0
@@ -313,8 +317,11 @@ try:
     auto_a = float(r["hourly"]["wind_direction_10m"][idx])
     temp_air = round(r["hourly"]["temperature_2m"][idx], 1)
     rad = r["hourly"]["direct_radiation"][idx]
+    pluie = r["hourly"]["precipitation"][idx]
     
-    if rad > 400:
+    if pluie > 0.2:
+        soleil_txt = "🌧️ Pluie"
+    elif rad > 400:
         soleil_txt = "☀️ Plein soleil"
     elif rad > 150:
         soleil_txt = "⛅ Éclaircies"
@@ -326,6 +333,7 @@ except:
     auto_v, auto_a = 15, 270.0
     temp_air = 18.0
     rad = 300.0
+    pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
 
 try:
@@ -374,7 +382,7 @@ if st.session_state["onglet"] == "bronzette":
     st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>A l'abri</h3></div>", unsafe_allow_html=True)
     html_a = "<div class='centrage-fixe'>"
     for p in abritees:
-        badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, est_abrite=True)
+        badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, pluie, est_abrite=True)
         q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
         target_url = f"https://google.com/search?q={q}"
         img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
@@ -431,7 +439,7 @@ elif st.session_state["onglet"] == "apero":
         if spots_valides:
             html_apero = "<div class='centrage-fixe'>"
             for s in spots_valides:
-                badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, est_abrite=True)
+                badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, pluie, est_abrite=True)
                 q = urllib.parse.quote(s['nom'] + " Saint-Malo")
                 target_url = f"https://google.com/search?q={q}"
                 html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{s['nom']}</div><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:{badge_color};'>{badge_txt} 🍹</b></div>"
