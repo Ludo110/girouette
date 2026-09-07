@@ -2,9 +2,9 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
+import re
 from datetime import datetime, timezone, time
 import zoneinfo
-from bs4 import BeautifulSoup
 from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
@@ -39,32 +39,25 @@ def récupérer_marées_réelles(dt_cible):
         url = "https://maree.info/82"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
-        soup = BeautifulSoup(resp.text, "html.parser")
+        html = resp.text
         
-        tableau = soup.find("table", id="MareeJours_MareeJour")
-        horaires_pm = []
-        horaires_bm = []
+        # Extraction regex des lignes PM et BM dans le HTML de maree.info
+        pms = re.findall(r'<b>PM</b></td><td.*?><b>(\d{2}h\d{2})</b>', html)
+        bms = re.findall(r'<b>BM</b></td><td.*?><b>(\d{2}h\d{2})</b>', html)
+
+        if not pms:
+            pms = re.findall(r'PM.*?(\d{2}h\d{2})', html)
+        if not bms:
+            bms = re.findall(r'BM.*?(\d{2}h\d{2})', html)
         
-        if tableau:
-            for row in tableau.find_all("tr"):
-                cols = row.find_all("td")
-                if len(cols) >= 2:
-                    type_m = cols[0].text.strip()
-                    heure_txt = cols[2].text.strip() if len(cols) > 2 else ""
-                    if "PM" in type_m and heure_txt:
-                        horaires_pm.append(heure_txt)
-                    elif "BM" in type_m and heure_txt:
-                        horaires_bm.append(heure_txt)
+        heure_curr_str = dt_cible.strftime("%Hh%M")
         
-        # Sélection de la prochaine PM et BM par rapport à l'heure sélectionnée
-        heure_curr_str = dt_cible.strftime("%H:%M")
-        next_pm = next((h for h in horaires_pm if h >= heure_curr_str), horaires_pm[0] if horaires_pm else "--:--")
-        next_bm = next((h for h in horaires_bm if h >= heure_curr_str), horaires_bm[0] if horaires_bm else "--:--")
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--h--")
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--h--")
         
-        return next_pm, next_bm
+        return next_pm.replace("h", ":"), next_bm.replace("h", ":")
     except Exception:
-        # Valeurs réelles du jour sur l'image en cas de micro-coupure
-        return "16h54", "23h48"
+        return "16:54", "23:48"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
