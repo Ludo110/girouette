@@ -2,3 +2,4 @@ streamlit
 pandas
 requests
 pysolar
+beautifulsoup4
