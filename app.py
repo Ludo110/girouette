@@ -39,7 +39,9 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        url = "https://maree.info/82"
+        # maree.info/82?d=YYYYMMDD permet d'accéder directement au jour sélectionné
+        date_str = dt_cible.strftime("%Y%m%d")
+        url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
         html = resp.text
@@ -54,12 +56,12 @@ def récupérer_marées_réelles(dt_cible):
 
         heure_curr_str = dt_cible.strftime("%Hh%M")
         
-        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "16h54")
-        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "23h48")
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--h--")
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--h--")
         
         return next_pm.replace("h", ":"), next_bm.replace("h", ":")
     except Exception:
-        return "16:54", "23:48"
+        return "--:--", "--:--"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
