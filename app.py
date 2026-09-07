@@ -91,25 +91,36 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Correctif iPhone/Safari pour le texte du sélecteur d'onglets */
+    /* Repositionnement et alignement strict du sélecteur d'onglets */
     div[data-testid="stRadio"] {
         display: flex !important;
         justify-content: center !important;
         width: 100% !important;
     }
     div[data-testid="stRadio"] > div {
-        justify-content: center;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 15px !important;
         background-color: #f0ede6 !important;
-        padding: 8px 16px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        margin: 0 auto 15px auto;
+        padding: 8px 20px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
+        margin: 0 auto 15px auto !important;
     }
-    /* Forcer la couleur du texte des options radio sur iOS */
+    div[data-testid="stRadio"] label {
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
     div[data-testid="stRadio"] label p {
         color: #436e64 !important;
         font-weight: bold !important;
         -webkit-text-fill-color: #436e64 !important;
+        margin: 0 !important;
+        padding-left: 4px !important;
     }
 </style>
 """, unsafe_allow_html=True)
