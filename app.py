@@ -6,18 +6,37 @@ st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
 st.markdown("""
 <style>
-    .stApp { background-color: #5d7689 !important; }
-    div[data-testid="stExpander"] button div p { color: #e2dfd7 !important; font-weight: bold !important; }
+    /* Fond vert-d'eau / sauge */
+    .stApp { background-color: #64978b !important; }
+    
+    div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
     .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
-    .rect-style { background-color: #e2dfd7; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); }
-    .plage-card { padding: 20px 10px; text-align: center; width: 200px; height: 250px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
-    .card-title { width: 100%; margin: 0 0 10px 0; font-size: 1.2em; text-decoration: underline; }
-    .card-text { width: 100%; color: #555; margin: 0 0 10px 0; font-size: 0.9em; }
+    
+    /* Style des cartes */
+    .rect-style { background-color: #f0ede6; border-radius: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); overflow: hidden; }
+    .plage-card { padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+    .card-img { width: 100%; height: 140px; object-fit: cover; }
+    .card-title { width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }
+    .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
 </style>
 """, unsafe_allow_html=True)
 
-plages = [{"Nom": "La Passagere", "Ville": "Saint-Malo", "Min": 315, "Max": 135}, {"Nom": "Fours a Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135}, {"Nom": "Saint-Pere", "Ville": "Saint-Malo", "Min": 315, "Max": 135}, {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225}, {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180}, {"Nom": "L'Eventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180}, {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225}, {"Nom": "Le Val", "Ville": "Rotheneuf", "Min": 45, "Max": 225}, {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202}, {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270}, {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225}, {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225}, {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360}]
+plages = [
+    {"Nom": "La Passagere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "passagere.jpg"},
+    {"Nom": "Fours a Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "fours.jpg"},
+    {"Nom": "Saint-Pere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "saintpere.jpg"},
+    {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "sablons.jpg"},
+    {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "bonsecours.jpg"},
+    {"Nom": "L'Eventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "eventail.jpg"},
+    {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "sillon.jpg"},
+    {"Nom": "Le Val", "Ville": "Rotheneuf", "Min": 45, "Max": 225, "Image": "val.jpg"},
+    {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202, "Image": "chevrets.jpg"},
+    {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270, "Image": "Touesse.jpg"},
+    {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "guesclin.jpg"},
+    {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "verger.jpg"},
+    {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "portmer.jpg"}
+]
 
 try:
     r = requests.get("https://api.open-meteo.com/v1/forecast?latitude=48.6493&longitude=-2.0089&current=wind_speed_10m,wind_direction_10m", timeout=5).json()
@@ -34,7 +53,7 @@ with st.expander("Options"):
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 ori = dirs[int(round((angle % 360) / 45))]
 
-st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='rect-style' style='padding:15px; text-align:center; max-width:400px; margin:0 auto 30px auto; color:#333;'>Vent: {vitesse} km/h - {ori} ({int(angle)} deg)</div>", unsafe_allow_html=True)
 
 abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
 exposees = [p for p in plages if p not in abritees]
@@ -43,13 +62,20 @@ st.markdown("<h3 style='color:white; text-align:center;'>A l'abri</h3>", unsafe_
 html_a = "<div class='centrage-fixe'>"
 for p in abritees:
     q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-    html_a += f"<div class='plage-card rect-style'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #5d7689;'>{p['Nom']}</h3></a><p class='card-text'>{p['Ville']}</p><b style='color:#2d5a27;'>IDEALE</b></div>"
+    img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
+    html_a += f"""
+    <div class='plage-card rect-style'>
+        <img src='{img_url}' class='card-img' onerror="this.src='https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png'">
+        <a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{p['Nom']}</h3></a>
+        <p class='card-text'>{p['Ville']}</p>
+        <b style='color:#2d5a27;'>IDEALE</b>
+    </div>
+    """
 html_a += "</div>"
 st.markdown(html_a, unsafe_allow_html=True)
 
-st.markdown("<h3 style='color:#e2dfd7; text-align:center; margin-top:40px;'>Exposees</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#f0ede6; text-align:center; margin-top:40px;'>Exposees</h3>", unsafe_allow_html=True)
 
-# Découpage en deux colonnes pour les exposées
 col1, col2 = st.columns(2)
 milieu = len(exposees) // 2
 
