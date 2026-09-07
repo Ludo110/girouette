@@ -247,6 +247,10 @@ elif onglet == "🍹 Apéro au Soleil":
             html_apero = "<div class='centrage-fixe'>"
             for s in spots_valides:
                 q = urllib.parse.quote(s['nom'] + " Saint-Malo")
+                img_name = s.get("image", "Palmier.png")
+                img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{img_name}"
+                palmier_url = "https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
+                
                 html_apero += f"<div class='plage-card rect-style' style='padding:15px;'><a href='https://google.com/search?q={q}' style='text-decoration:none;'><h3 class='card-title' style='color: #436e64;'>{s['nom']}</h3></a><p class='card-text'><b>{s['type']}</b><br>{s['description']}</p><b style='color:#2d5a27;'>☀️ AU SOLEIL & À L'ABRI 🍹</b></div>"
             html_apero += "</div>"
             st.markdown(html_apero, unsafe_allow_html=True)
