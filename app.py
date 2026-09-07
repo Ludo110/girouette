@@ -91,36 +91,18 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Repositionnement et alignement strict du sélecteur d'onglets */
-    div[data-testid="stRadio"] {
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
-    }
-    div[data-testid="stRadio"] > div {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 15px !important;
+    /* Styling personnalisé des boutons de navigation (Onglets) */
+    div[data-testid="stColumn"] button {
         background-color: #f0ede6 !important;
-        padding: 8px 20px !important;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1) !important;
-        margin: 0 auto 15px auto !important;
+        color: #436e64 !important;
+        border: 2px solid #436e64 !important;
+        font-weight: bold !important;
+        border-radius: 10px !important;
+        padding: 6px 12px !important;
     }
-    div[data-testid="stRadio"] label {
-        margin: 0 !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-    div[data-testid="stRadio"] label p {
+    div[data-testid="stColumn"] button p {
         color: #436e64 !important;
         font-weight: bold !important;
-        -webkit-text-fill-color: #436e64 !important;
-        margin: 0 !important;
-        padding-left: 4px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -165,13 +147,29 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Navigation centrée sous le titre
-onglet = st.radio("", ["🏖️ Bronzette", "🍹 Apéro au Soleil"], horizontal=True)
+# Initialisation de l'onglet actif dans le state
+if "onglet" not in st.session_state:
+    st.session_state["onglet"] = "bronzette"
+
+# 2. Boutons de navigation parfaitement centrés et alignés
+_, nav_col1, nav_col2, _ = st.columns([1, 2, 2, 1])
+
+with nav_col1:
+    if st.button("🏖️ Bronzette", use_container_width=True):
+        st.session_state["onglet"] = "bronzette"
+        st.rerun()
+
+with nav_col2:
+    if st.button("🍹 Apéro au Soleil", use_container_width=True):
+        st.session_state["onglet"] = "apero"
+        st.rerun()
+
+st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # ONGLET 1 : BRONZETTE
 # -----------------------------------------------------------------------------
-if onglet == "🏖️ Bronzette":
+if st.session_state["onglet"] == "bronzette":
     plages = [
         {"Nom": "La Passagere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Passagere.jpg"},
         {"Nom": "Fours a Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Foursachaux.jpg"},
@@ -228,7 +226,7 @@ if onglet == "🏖️ Bronzette":
 # -----------------------------------------------------------------------------
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
-elif onglet == "🍹 Apéro au Soleil":
+elif st.session_state["onglet"] == "apero":
     now = datetime.now(timezone.utc)
     sol_alt = get_altitude(LAT_SM, LON_SM, now)
     sol_azi = get_azimuth(LAT_SM, LON_SM, now)
