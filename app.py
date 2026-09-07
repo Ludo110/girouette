@@ -7,41 +7,49 @@ from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
-st.markdown("""
+# Initialisation de l'onglet actif dans le state
+if "onglet" not in st.session_state:
+    st.session_state["onglet"] = "bronzette"
+
+# Détermination des styles dynamiques pour l'onglet actif vs inactif
+style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+
+st.markdown(f"""
 <style>
     /* Masquer le header, le footer et le menu Streamlit */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    header {{visibility: hidden;}}
     
-    .stApp { background-color: #64978b !important; }
-    div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
-    .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
+    .stApp {{ background-color: #64978b !important; }}
+    div[data-testid="stExpander"] button div p {{ color: #f0ede6 !important; font-weight: bold !important; }}
+    .centrage-fixe {{ display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }}
     
     /* Encadrés secondaires avec fond semi-transparent */
-    .rect-style { 
+    .rect-style {{ 
         background-color: rgba(240, 237, 230, 0.85) !important; 
         border-radius: 15px; 
         box-shadow: 0 8px 16px rgba(0,0,0,0.15); 
         overflow: hidden; 
         backdrop-filter: blur(5px);
-    }
+    }}
     
-    .plage-card { padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
-    .card-img { width: 100%; height: 140px; object-fit: cover; }
-    .card-title { width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }
-    .card-text { width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; }
-    a::after { content: none !important; }
+    .plage-card {{ padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }}
+    .card-img {{ width: 100%; height: 140px; object-fit: cover; }}
+    .card-title {{ width: 100%; margin: 10px 0 5px 0; font-size: 1.1em; text-decoration: underline; }}
+    .card-text {{ width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; }}
+    a::after {{ content: none !important; }}
 
     /* Conteneur global centré */
-    .title-wrapper {
+    .title-wrapper {{
         display: flex;
         justify-content: center;
         width: 100%;
-    }
+    }}
 
     /* Encadré principal */
-    .title-box-full {
+    .title-box-full {{
         background-color: #f0ede6;
         border-radius: 12px;
         padding: 14px 20px;
@@ -53,24 +61,24 @@ st.markdown("""
         flex-direction: column;
         align-items: center;
         justify-content: center;
-    }
-    .title-box-full h1 {
+    }}
+    .title-box-full h1 {{
         margin: 0 !important;
         padding: 0 !important;
         color: #436e64 !important;
         font-size: 1.35em !important;
         text-align: center !important;
-    }
-    .title-box-full p {
+    }}
+    .title-box-full p {{
         margin: 6px 0 0 0 !important;
         padding: 0 !important;
         color: #557a70 !important;
         font-size: 0.9em !important;
         text-align: center !important;
-    }
+    }}
 
     /* Encadrés des sections */
-    .title-box-section {
+    .title-box-section {{
         background-color: #f0ede6;
         border-radius: 12px;
         padding: 10px 20px;
@@ -81,29 +89,40 @@ st.markdown("""
         display: flex;
         justify-content: center;
         align-items: center;
-    }
-    .title-box-section h3 {
+    }}
+    .title-box-section h3 {{
         margin: 0 !important;
         padding: 0 !important;
         color: #436e64 !important;
         font-size: 1.2em !important;
         text-align: center !important;
         width: 100% !important;
-    }
+    }}
     
     /* Styling personnalisé des boutons de navigation (Onglets) */
-    div[data-testid="stColumn"] button {
-        background-color: #f0ede6 !important;
-        color: #436e64 !important;
+    div[data-testid="stColumn"]:nth-child(2) button {{
+        {style_bronzette}
         border: 2px solid #436e64 !important;
         font-weight: bold !important;
         border-radius: 10px !important;
         padding: 6px 12px !important;
-    }
-    div[data-testid="stColumn"] button p {
-        color: #436e64 !important;
+    }}
+    div[data-testid="stColumn"]:nth-child(2) button p {{
+        color: inherit !important;
         font-weight: bold !important;
-    }
+    }}
+
+    div[data-testid="stColumn"]:nth-child(3) button {{
+        {style_apero}
+        border: 2px solid #436e64 !important;
+        font-weight: bold !important;
+        border-radius: 10px !important;
+        padding: 6px 12px !important;
+    }}
+    div[data-testid="stColumn"]:nth-child(3) button p {{
+        color: inherit !important;
+        font-weight: bold !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -146,10 +165,6 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-# Initialisation de l'onglet actif dans le state
-if "onglet" not in st.session_state:
-    st.session_state["onglet"] = "bronzette"
 
 # 2. Boutons de navigation parfaitement centrés et alignés
 _, nav_col1, nav_col2, _ = st.columns([1, 2, 2, 1])
