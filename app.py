@@ -23,7 +23,11 @@ st.markdown(f"""
     header {{visibility: hidden;}}
     
     .stApp {{ background-color: #64978b !important; }}
+    
+    /* Titre expander et textes internes */
     div[data-testid="stExpander"] button div p {{ color: #f0ede6 !important; font-weight: bold !important; }}
+    div[data-testid="stExpander"] label p {{ color: #f0ede6 !important; font-weight: bold !important; }}
+    
     .centrage-fixe {{ display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }}
     
     /* Encadrés secondaires avec fond semi-transparent */
@@ -99,7 +103,7 @@ st.markdown(f"""
         width: 100% !important;
     }}
     
-    /* Styling personnalisé des boutons de navigation (Onglets) */
+    /* Styling ciblé uniquement pour les boutons d'onglets haut de page */
     div[data-testid="stColumn"]:nth-child(2) button {{
         {style_bronzette}
         border: 2px solid #436e64 !important;
@@ -122,6 +126,17 @@ st.markdown(f"""
     div[data-testid="stColumn"]:nth-child(3) button p {{
         color: inherit !important;
         font-weight: bold !important;
+    }}
+
+    /* Style spécifique pour le bouton de réinitialisation dans l'expander */
+    div[data-testid="stExpander"] button[kind="secondary"] {{
+        background-color: #f0ede6 !important;
+        border: 1px solid #436e64 !important;
+    }}
+    div[data-testid="stExpander"] button[kind="secondary"] p {{
+        color: #436e64 !important;
+        font-weight: bold !important;
+        -webkit-text-fill-color: #436e64 !important;
     }}
 </style>
 """, unsafe_allow_html=True)
