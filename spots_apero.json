@@ -1,35 +1,90 @@
 [
   {
-    "id": "place_du_quebec",
-    "nom": "Place du Québec",
+    "id": "le_cancalais",
+    "nom": "Le Cancalais",
     "type": "Bar / Terrasse",
-    "description": "Vue sur la fosse aux lions et l'entrée du port",
-    "lat": 48.6492,
-    "lon": -2.0268,
-    "soleil_azimut_min": 140,
-    "soleil_azimut_max": 280,
-    "vents_abrites": ["S", "SE", "E", "SW"]
-  },
-  {
-    "id": "cale_de_dinan",
-    "nom": "Cale de Dinan",
-    "type": "Spot sauvage",
-    "description": "Parfait sur les marches face au bassin",
-    "lat": 48.6465,
-    "lon": -2.0255,
-    "soleil_azimut_min": 110,
+    "description": "Place Bouvet à Saint-Servan, terrasse animée",
+    "lat": 48.6381,
+    "lon": -2.0135,
+    "soleil_azimut_min": 120,
     "soleil_azimut_max": 250,
-    "vents_abrites": ["N", "NW", "NE", "E"]
+    "vents_abrites": ["N", "NW", "E", "NE"]
   },
   {
-    "id": "bon_secours_banc",
-    "nom": "Bancs de Bon-Secours",
-    "type": "Spot sauvage",
-    "description": "Face au Grand Bé et au soleil couchant",
-    "lat": 48.6515,
-    "lon": -2.0285,
+    "id": "les_voiles_de_solidor",
+    "nom": "Les Voiles de Solidor",
+    "type": "Bar / Terrasse",
+    "description": "Port de Solidor, vue sur la tour et la Rance",
+    "lat": 48.6343,
+    "lon": -2.0255,
+    "soleil_azimut_min": 130,
+    "soleil_azimut_max": 280,
+    "vents_abrites": ["N", "NE", "E"]
+  },
+  {
+    "id": "la_trinquette",
+    "nom": "La Trinquette",
+    "type": "Bar / Terrasse",
+    "description": "Port des Sablons, ambiance maritime face aux bateaux",
+    "lat": 48.6387,
+    "lon": -2.0198,
+    "soleil_azimut_min": 120,
+    "soleil_azimut_max": 270,
+    "vents_abrites": ["N", "NE", "E", "NW"]
+  },
+  {
+    "id": "le_bain_des_dames",
+    "nom": "Le Bain des Dames",
+    "type": "Bar / Terrasse",
+    "description": "Sur la plage de Bon-Secours, vue sur le Grand Bé",
+    "lat": 48.6516,
+    "lon": -2.0282,
     "soleil_azimut_min": 180,
-    "soleil_azimut_max": 300,
+    "soleil_azimut_max": 305,
     "vents_abrites": ["E", "SE", "S"]
+  },
+  {
+    "id": "la_caravelle",
+    "nom": "La Caravelle",
+    "type": "Bar / Terrasse",
+    "description": "Rothéneuf, cadre paisible proche du havre",
+    "lat": 48.6812,
+    "lon": -1.9685,
+    "soleil_azimut_min": 130,
+    "soleil_azimut_max": 275,
+    "vents_abrites": ["N", "NW", "W"]
+  },
+  {
+    "id": "colette",
+    "nom": "Colette",
+    "type": "Bar / Guinguette",
+    "description": "Saint-Coulomb, ambiance guinguette près des plages",
+    "lat": 48.6745,
+    "lon": -1.9120,
+    "soleil_azimut_min": 140,
+    "soleil_azimut_max": 290,
+    "vents_abrites": ["S", "SE", "SW"]
+  },
+  {
+    "id": "le_galion",
+    "nom": "Le Galion",
+    "type": "Bar / Terrasse",
+    "description": "Sur le port de la Houle à Cancale, vue sur la baie",
+    "lat": 48.6722,
+    "lon": -1.8525,
+    "soleil_azimut_min": 100,
+    "soleil_azimut_max": 240,
+    "vents_abrites": ["W", "NW", "N", "SW"]
+  },
+  {
+    "id": "ty_suliau",
+    "nom": "Ty Suliau",
+    "type": "Bar / Terrasse",
+    "description": "Saint-Suliac, au cœur du village sur les bords de Rance",
+    "lat": 48.5698,
+    "lon": -1.9742,
+    "soleil_azimut_min": 120,
+    "soleil_azimut_max": 265,
+    "vents_abrites": ["E", "NE", "N"]
   }
 ]
