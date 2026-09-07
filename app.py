@@ -316,6 +316,9 @@ dt_utc = dt_local.astimezone(timezone.utc)
 
 label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Aujourd'hui" else f"pour Demain à {heure_selectionnee.strftime('%H:%M')}"
 
+sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
+sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
+
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation,precipitation", timeout=5).json()
     
@@ -370,60 +373,60 @@ ori_code = dirs_code_16[idx_dir]
 # ONGLET 1 : BRONZETTE
 # -----------------------------------------------------------------------------
 if st.session_state["onglet"] == "bronzette":
-    plages = [
-        {"Nom": "La Passagere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Passagere.jpg"},
-        {"Nom": "Fours a Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Foursachaux.jpg"},
-        {"Nom": "Saint-Pere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Saint-Pere.jpg"},
-        {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "Sablons.jpg"},
-        {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Bonsecours.jpg"},
-        {"Nom": "L'Eventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Eventail.jpg"},
-        {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "Sillon.jpg"},
-        {"Nom": "Le Val", "Ville": "Rotheneuf", "Min": 45, "Max": 225, "Image": "Val.jpg"},
-        {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202, "Image": "Chevrets.jpg"},
-        {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270, "Image": "Touesse.jpg"},
-        {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "Guesclin.jpg"},
-        {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "Verger.jpg"},
-        {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
-    ]
-
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
-    abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
-    exposees = [p for p in plages if p not in abritees]
+    if sol_alt <= 2:
+        st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil est couché à cette heure-là ! Pas de bronzette possible.</b></div>", unsafe_allow_html=True)
+    else:
+        plages = [
+            {"Nom": "La Passagere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Passagere.jpg"},
+            {"Nom": "Fours a Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Foursachaux.jpg"},
+            {"Nom": "Saint-Pere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Saint-Pere.jpg"},
+            {"Nom": "Les Sablons", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "Sablons.jpg"},
+            {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Bonsecours.jpg"},
+            {"Nom": "L'Eventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Eventail.jpg"},
+            {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "Sillon.jpg"},
+            {"Nom": "Le Val", "Ville": "Rotheneuf", "Min": 45, "Max": 225, "Image": "Val.jpg"},
+            {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202, "Image": "Chevrets.jpg"},
+            {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270, "Image": "Touesse.jpg"},
+            {"Nom": "Le Guesclin", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "Guesclin.jpg"},
+            {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "Verger.jpg"},
+            {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
+        ]
 
-    st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>A l'abri</h3></div>", unsafe_allow_html=True)
-    html_a = "<div class='centrage-fixe'>"
-    for p in abritees:
-        badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, pluie, est_abrite=True)
-        q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-        target_url = f"https://google.com/search?q={q}"
-        img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
-        palmier_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
-        html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{p['Nom']}</div><p class='card-text'>{p['Ville']}</p><b style='color:{badge_color};'>{badge_txt}</b></div>"
-    html_a += "</div>"
-    st.markdown(html_a, unsafe_allow_html=True)
+        abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
+        exposees = [p for p in plages if p not in abritees]
 
-    st.markdown("<div class='title-box-section' style='margin-top: 30px; margin-bottom: 20px;'><h3>Exposées</h3></div>", unsafe_allow_html=True)
+        st.markdown("<div class='title-box-section' style='margin-bottom: 20px;'><h3>A l'abri</h3></div>", unsafe_allow_html=True)
+        html_a = "<div class='centrage-fixe'>"
+        for p in abritees:
+            badge_txt, badge_color = evaluer_confort(temp_air, vitesse, rad, pluie, est_abrite=True)
+            q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+            target_url = f"https://google.com/search?q={q}"
+            img_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/{p['Image']}"
+            palmier_url = f"https://raw.githubusercontent.com/Ludo110/girouette/main/Palmier.png"
+            html_a += f"<div class='plage-card rect-style'><img src='{img_url}' class='card-img' onerror=\"this.src='{palmier_url}';\"><div class='card-title-clickable' onclick=\"window.open('{target_url}', '_blank');\">{p['Nom']}</div><p class='card-text'>{p['Ville']}</p><b style='color:{badge_color};'>{badge_txt}</b></div>"
+        html_a += "</div>"
+        st.markdown(html_a, unsafe_allow_html=True)
 
-    col1, col2 = st.columns(2)
-    milieu = len(exposees) // 2
+        st.markdown("<div class='title-box-section' style='margin-top: 30px; margin-bottom: 20px;'><h3>Exposées</h3></div>", unsafe_allow_html=True)
 
-    def afficher_colonne(liste_plages, colonne):
-        with colonne:
-            for p in liste_plages:
-                q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
-                st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><a href='https://google.com/search?q={q}' style='color:white;' target='_blank'>{p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        milieu = len(exposees) // 2
 
-    afficher_colonne(exposees[:milieu], col1)
-    afficher_colonne(exposees[milieu:], col2)
+        def afficher_colonne(liste_plages, colonne):
+            with colonne:
+                for p in liste_plages:
+                    q = urllib.parse.quote(p['Nom'] + " " + p['Ville'])
+                    st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><a href='https://google.com/search?q={q}' style='color:white;' target='_blank'>{p['Nom']} ({p['Ville']})</a></div>", unsafe_allow_html=True)
+
+        afficher_colonne(exposees[:milieu], col1)
+        afficher_colonne(exposees[milieu:], col2)
 
 # -----------------------------------------------------------------------------
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "apero":
-    sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
-    sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
-
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     try:
