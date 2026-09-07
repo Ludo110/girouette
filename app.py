@@ -53,22 +53,24 @@ st.markdown(f"""
     .plage-card {{ padding: 0px 0px 15px 0px; text-align: center; width: 260px; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }}
     .card-img {{ width: 100%; height: 140px; object-fit: cover; }}
     
-    /* Correctif du centrage du lien et du titre des cartes */
+    /* Centrage strict du lien et suppression des marges par défaut du titre h3 */
     .plage-card a {{
         display: block !important;
         width: 100% !important;
         text-align: center !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         padding: 0 !important;
     }}
     
     .card-title {{ 
         width: 100% !important; 
-        margin: 8px 0 4px 0 !important; 
+        margin: 8px auto 4px auto !important; 
+        padding: 0 !important;
         font-size: 1.15em !important; 
         font-weight: bold !important;
         text-decoration: underline; 
         text-align: center !important;
+        display: block !important;
     }}
     
     .card-text {{ width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; text-align: center !important; }}
