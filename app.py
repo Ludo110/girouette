@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, time
 from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
@@ -126,34 +126,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Données météo, température & ensoleillement via Open-Meteo
 LAT_SM, LON_SM = 48.6493, -2.0089
-try:
-    r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code,direct_radiation", timeout=5).json()
-    auto_v, auto_a = int(r["current"]["wind_speed_10m"]), float(r["current"]["wind_direction_10m"])
-    temp_air = round(r["current"]["temperature_2m"], 1)
-    
-    rad = r["current"].get("direct_radiation", 0)
-    if rad > 400:
-        soleil_txt = "☀️ Plein soleil"
-    elif rad > 150:
-        soleil_txt = "⛅ Éclaircies"
-    elif rad > 20:
-        soleil_txt = "☁️ Nuageux"
-    else:
-        soleil_txt = "☁️ Couvert"
-except: 
-    auto_v, auto_a = 15, 270.0
-    temp_air = 18.0
-    soleil_txt = "☀️ Ensoleillé"
-
-# Données température de la mer via Open-Meteo Marine
-try:
-    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=sea_surface_temperature", timeout=5).json()
-    temp_mer = round(rm["current"]["sea_surface_temperature"], 1)
-except:
-    temp_mer = 16.0
-
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
 
 # 1. En-tête principal
@@ -166,7 +139,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Boutons de navigation parfaitement centrés et alignés
+# 2. Boutons de navigation
 _, nav_col1, nav_col2, _ = st.columns([1, 2, 2, 1])
 
 with nav_col1:
@@ -179,7 +152,61 @@ with nav_col2:
         st.session_state["onglet"] = "apero"
         st.rerun()
 
-st.markdown("<div style='margin-bottom: 15px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
+
+# Récupération de l'heure cible (par défaut heure actuelle)
+now_local = datetime.now()
+with st.expander("⚙️ Options & Horaire de simulation"):
+    if st.button("🔄 Réinitialiser à l'heure actuelle", use_container_width=True):
+        st.rerun()
+    
+    heure_cible = st.time_input("Choisir une heure pour la simulation", value=now_local.time())
+    use_manual = st.checkbox("Activer le mode météo manuelle")
+
+# Date/heure complète à simuler
+dt_cible = datetime.combine(now_local.date(), heure_cible).replace(tzinfo=timezone.utc)
+
+# Requête météo horaire Open-Meteo
+try:
+    r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation", timeout=5).json()
+    
+    # Trouver l'index correspondant à l'heure sélectionnée
+    heures = [datetime.fromisoformat(t).hour for t in r["hourly"]["time"]]
+    idx = heures.index(heure_cible.hour) if heure_cible.hour in heures else 0
+    
+    auto_v = int(r["hourly"]["wind_speed_10m"][idx])
+    auto_a = float(r["hourly"]["wind_direction_10m"][idx])
+    temp_air = round(r["hourly"]["temperature_2m"][idx], 1)
+    rad = r["hourly"]["direct_radiation"][idx]
+    
+    if rad > 400:
+        soleil_txt = "☀️ Plein soleil"
+    elif rad > 150:
+        soleil_txt = "⛅ Éclaircies"
+    elif rad > 20:
+        soleil_txt = "☁️ Nuageux"
+    else:
+        soleil_txt = "☁️ Couvert"
+except:
+    auto_v, auto_a = 15, 270.0
+    temp_air = 18.0
+    soleil_txt = "☀️ Ensoleillé"
+
+# Données mer
+try:
+    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=sea_surface_temperature", timeout=5).json()
+    temp_mer = round(rm["current"]["sea_surface_temperature"], 1)
+except:
+    temp_mer = 16.0
+
+if use_manual:
+    with st.expander("⚙️ Options & Horaire de simulation", expanded=True):
+        vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v)
+        angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a)))
+else:
+    vitesse, angle = auto_v, auto_a
+
+ori = dirs[int(round((angle % 360) / 45))]
 
 # -----------------------------------------------------------------------------
 # ONGLET 1 : BRONZETTE
@@ -201,15 +228,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    with st.expander("Options"):
-        if st.button("🔄 Rafraîchir les données météo", use_container_width=True):
-            st.rerun()
-        use_manual = st.checkbox("Activer le mode manuel")
-        vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
-        angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
-
-    ori = dirs[int(round((angle % 360) / 45))]
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:520px; margin:15px auto 25px auto; color:#222;'>Vent : {vitesse} km/h - {ori} ({int(angle)} deg)<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 10 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -242,21 +261,11 @@ if st.session_state["onglet"] == "bronzette":
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "apero":
-    now = datetime.now(timezone.utc)
-    sol_alt = get_altitude(LAT_SM, LON_SM, now)
-    sol_azi = get_azimuth(LAT_SM, LON_SM, now)
+    sol_alt = get_altitude(LAT_SM, LON_SM, dt_cible)
+    sol_azi = get_azimuth(LAT_SM, LON_SM, dt_cible)
 
-    with st.expander("Options"):
-        if st.button("🔄 Rafraîchir les données", use_container_width=True):
-            st.rerun()
-        use_manual = st.checkbox("Activer le mode manuel (Apéro)")
-        vitesse = st.slider("Vitesse vent (km/h)", 0, 80, auto_v) if use_manual else auto_v
-        angle = float(st.slider("Direction vent ( deg )", 0, 360, int(auto_a))) if use_manual else auto_a
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Prévisions Apéro pour {heure_cible.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
-    ori = dirs[int(round((angle % 360) / 45))]
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:520px; margin:15px auto 25px auto; color:#222;'>Vent : {vitesse} km/h ({ori}) — Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>🌡️ Air : <b>{temp_air}°C</b> | 🌊 Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
-
-    # Chargement des spots
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
             spots = json.load(f)
@@ -264,10 +273,9 @@ elif st.session_state["onglet"] == "apero":
         st.error("Impossible de charger spots_apero.json")
         spots = []
 
-    # Filtrage
     spots_valides = []
     if sol_alt <= 2:
-        st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil est couché ! Rendez-vous demain pour l'apéro.</b></div>", unsafe_allow_html=True)
+        st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil sera couché à cette heure-là !</b></div>", unsafe_allow_html=True)
     else:
         for s in spots:
             au_soleil = (s["soleil_azimut_min"] <= sol_azi <= s["soleil_azimut_max"])
@@ -286,4 +294,4 @@ elif st.session_state["onglet"] == "apero":
             html_apero += "</div>"
             st.markdown(html_apero, unsafe_allow_html=True)
         else:
-            st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'>Aucun spot idéal trouvé actuellement pour cette orientation de vent/soleil.</div>", unsafe_allow_html=True)
+            st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'>Aucun spot idéal trouvé à cette heure-là pour cette orientation de vent/soleil.</div>", unsafe_allow_html=True)
