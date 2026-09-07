@@ -183,12 +183,11 @@ st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
 # Expander de configuration horaire & météo
 with st.expander("⚙️ Options & Horaire de simulation"):
     st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
-    
+    use_manual = st.checkbox("Activer le mode météo manuelle")
     heure_selectionnee = st.time_input(
         "Choisir une heure pour la simulation", 
         key="heure_simulee"
     )
-    use_manual = st.checkbox("Activer le mode météo manuelle")
 
 # Date/heure locale complète pour la simulation
 now_france = datetime.now(tz_france)
