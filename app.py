@@ -21,14 +21,22 @@ st.markdown("""
     .card-text { width: 100%; color: #666; margin: 0 0 10px 0; font-size: 0.85em; }
     a::after { content: none !important; }
 
-    /* Encadré principal pleine largeur avec centrage texte direct */
+    /* Conteneur global centré */
+    .title-wrapper {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* Encadré principal parfaitement centré en bloc */
     .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
-        padding: 14px 10px;
+        padding: 14px 20px;
         text-align: center !important;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         width: 100%;
+        max-width: 600px;
         margin-bottom: 15px;
     }
     .title-box-full h1 {
@@ -36,12 +44,11 @@ st.markdown("""
         padding: 0 !important;
         color: #436e64 !important;
         font-size: 1.35em !important;
-        white-space: nowrap !important;
         text-align: center !important;
         width: 100% !important;
     }
     .title-box-full p {
-        margin: 5px 0 0 0 !important;
+        margin: 6px 0 0 0 !important;
         padding: 0 !important;
         color: #557a70 !important;
         font-size: 0.9em !important;
@@ -92,9 +99,11 @@ try:
 except: auto_v, auto_a = 15, 270.0
 
 st.markdown("""
-<div class='title-box-full'>
-    <h1>Girouette Malouine</h1>
-    <p>Quelle plage à l'abri du vent ?</p>
+<div class='title-wrapper'>
+    <div class='title-box-full'>
+        <h1>Girouette Malouine</h1>
+        <p>Quelle plage à l'abri du vent ?</p>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
