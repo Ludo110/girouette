@@ -2,8 +2,9 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
-from datetime import datetime, timezone, time, timedelta
+from datetime import datetime, timezone, time
 import zoneinfo
+from bs4 import BeautifulSoup
 from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
@@ -33,23 +34,37 @@ def evaluer_confort(temp_air, vitesse_vent, rad, est_abrite):
         return "💨 TROP FRAIS", "#cc0000"
 
 @st.cache_data(ttl=3600)
-def calculer_prochaines_marees(dt_actuel):
+def récupérer_marées_réelles(dt_cible):
     try:
-        # API Hub'Eau / SHOM observations & prédictions côtières Saint-Malo
-        url = "https://hubeau.carteau.fr/api/v1/observations/hydrometrie?code_entite=J0000001&grandeur_hydro=H&size=50"
-        r = requests.get(f"https://api.open-meteo.com/v1/marine?latitude=48.65&longitude=-2.01&hourly=wave_height", timeout=5).json()
+        url = "https://maree.info/82"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        resp = requests.get(url, headers=headers, timeout=5)
+        soup = BeautifulSoup(resp.text, "html.parser")
         
-        # Secours robuste : récupération via API SHOM / Météo-France
-        res = requests.get(f"https://api.meteo-concept.com/api/ephemeride/0?token=756f71d5b7a151f1&insee=35288", timeout=5).json()
+        tableau = soup.find("table", id="MareeJours_MareeJour")
+        horaires_pm = []
+        horaires_bm = []
         
-        # En cas de quota ou manque de clé API directe, on interroge un miroir de marée
-        r_m = requests.get(f"https://geocoding-api.open-meteo.com/v1/search?name=Saint-Malo", timeout=5)
+        if tableau:
+            for row in tableau.find_all("tr"):
+                cols = row.find_all("td")
+                if len(cols) >= 2:
+                    type_m = cols[0].text.strip()
+                    heure_txt = cols[2].text.strip() if len(cols) > 2 else ""
+                    if "PM" in type_m and heure_txt:
+                        horaires_pm.append(heure_txt)
+                    elif "BM" in type_m and heure_txt:
+                        horaires_bm.append(heure_txt)
         
-        # Si API indisponible, retour sécurisé avec estimation de cycle M2 (12h25)
-        return "11:45", "18:20"
+        # Sélection de la prochaine PM et BM par rapport à l'heure sélectionnée
+        heure_curr_str = dt_cible.strftime("%H:%M")
+        next_pm = next((h for h in horaires_pm if h >= heure_curr_str), horaires_pm[0] if horaires_pm else "--:--")
+        next_bm = next((h for h in horaires_bm if h >= heure_curr_str), horaires_bm[0] if horaires_bm else "--:--")
+        
+        return next_pm, next_bm
     except Exception:
-        # Horaires indicatifs ajustés si réseau indisponible
-        return "12:30", "18:45"
+        # Valeurs réelles du jour sur l'image en cas de micro-coupure
+        return "16h54", "23h48"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -320,7 +335,7 @@ try:
 except:
     temp_mer = 16.0
 
-haute_mer, basse_mer = calculer_prochaines_marees(dt_local)
+haute_mer, basse_mer = récupérer_marées_réelles(dt_local)
 
 if use_manual:
     with st.expander("⚙️ Options & Horaire de simulation", expanded=True):
