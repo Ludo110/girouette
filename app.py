@@ -182,18 +182,40 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 LAT_SM, LON_SM = 48.6493, -2.0089
-dirs_fr = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
-dirs_code = ["N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"]
 
+# Rose des vents étendue à 16 directions
+dirs_fr_16 = [
+    "Nord", "Nord-Nord-Est", "Nord-Est", "Est-Nord-Est",
+    "Est", "Est-Sud-Est", "Sud-Est", "Sud-Sud-Est",
+    "Sud", "Sud-Sud-Ouest", "Sud-Ouest", "Ouest-Sud-Ouest",
+    "Ouest", "Ouest-Nord-Ouest", "Nord-Ouest", "Nord-Nord-Ouest", "Nord"
+]
+
+dirs_code_16 = [
+    "N", "NNE", "NE", "ENE",
+    "E", "ESE", "SE", "SSE",
+    "S", "SSW", "SW", "WSW",
+    "W", "WNW", "NW", "NNW", "N"
+]
+
+# Correspondances et tolérances pour les 16 directions cardinales
 adjacents = {
-    "N": ["N", "NE", "NW"],
-    "NE": ["NE", "N", "E"],
-    "E": ["E", "NE", "SE"],
-    "SE": ["SE", "E", "S"],
-    "S": ["S", "SE", "SW"],
-    "SW": ["SW", "S", "W"],
-    "W": ["W", "SW", "NW"],
-    "NW": ["NW", "W", "N"]
+    "N": ["N", "NNE", "NNW"],
+    "NNE": ["NNE", "N", "NE"],
+    "NE": ["NE", "NNE", "ENE", "N", "E"],
+    "ENE": ["ENE", "NE", "E"],
+    "E": ["E", "ENE", "ESE"],
+    "ESE": ["ESE", "E", "SE"],
+    "SE": ["SE", "ESE", "SSE", "E", "S"],
+    "SSE": ["SSE", "SE", "S"],
+    "S": ["S", "SSE", "SSW"],
+    "SSW": ["SSW", "S", "SW"],
+    "SW": ["SW", "SSW", "WSW", "S", "W"],
+    "WSW": ["WSW", "SW", "W"],
+    "W": ["W", "WSW", "WNW"],
+    "WNW": ["WNW", "W", "NW"],
+    "NW": ["NW", "WNW", "NNW", "W", "N"],
+    "NNW": ["NNW", "NW", "N"]
 }
 
 # 1. En-tête principal
@@ -287,9 +309,9 @@ if use_manual:
 else:
     vitesse, angle = auto_v, auto_a
 
-idx_dir = int(round((angle % 360) / 45))
-ori = dirs_fr[idx_dir]
-ori_code = dirs_code[idx_dir]
+idx_dir = int(round((angle % 360) / 22.5))
+ori = dirs_fr_16[idx_dir]
+ori_code = dirs_code_16[idx_dir]
 
 # -----------------------------------------------------------------------------
 # ONGLET 1 : BRONZETTE
