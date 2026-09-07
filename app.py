@@ -82,7 +82,7 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Style du sélecteur d'onglets */
+    /* Style du sélecteur d'onglets sous le titre */
     div[data-testid="stRadio"] > div {
         justify-content: center;
         background-color: #f0ede6;
@@ -94,10 +94,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Navigation
-onglet = st.radio("", ["🏖️ Plages", "🍹 Apéro au Soleil"], horizontal=True)
-
-# Données météoOpen-Meteo
+# Données météo Open-Meteo
 LAT_SM, LON_SM = 48.6493, -2.0089
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&current=wind_speed_10m,wind_direction_10m", timeout=5).json()
@@ -106,6 +103,19 @@ except:
     auto_v, auto_a = 15, 270.0
 
 dirs = ["Nord", "Nord-Est", "Est", "Sud-Est", "Sud", "Sud-Ouest", "Ouest", "Nord-Ouest", "Nord"]
+
+# 1. En-tête principal
+st.markdown("""
+<div class='title-wrapper'>
+    <div class='title-box-full'>
+        <h1>Girouette Malouine</h1>
+        <p>Météo, plages & apéros à l'abri du vent</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# 2. Navigation sous le titre
+onglet = st.radio("", ["🏖️ Plages", "🍹 Apéro au Soleil"], horizontal=True)
 
 # -----------------------------------------------------------------------------
 # ONGLET 1 : PLAGES
@@ -126,15 +136,6 @@ if onglet == "🏖️ Plages":
         {"Nom": "Le Verger", "Ville": "Saint-Coulomb", "Min": 45, "Max": 225, "Image": "Verger.jpg"},
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
-
-    st.markdown("""
-    <div class='title-wrapper'>
-        <div class='title-box-full'>
-            <h1>Girouette Malouine</h1>
-            <p>Quelle plage à l'abri du vent ?</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
     with st.expander("Options"):
         if st.button("🔄 Rafraîchir les données météo", use_container_width=True):
@@ -177,15 +178,6 @@ if onglet == "🏖️ Plages":
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif onglet == "🍹 Apéro au Soleil":
-    st.markdown("""
-    <div class='title-wrapper'>
-        <div class='title-box-full'>
-            <h1>Apéro Malouin</h1>
-            <p>Où boire un coup au soleil et à l'abri du vent ?</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     # Calcul de la position du soleil
     now = datetime.utcnow()
     sol_alt = get_altitude(LAT_SM, LON_SM, now)
