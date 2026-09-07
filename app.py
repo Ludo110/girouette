@@ -114,18 +114,18 @@ st.markdown("""
 <div class='title-wrapper'>
     <div class='title-box-full'>
         <h1>Girouette Malouine</h1>
-        <p>Météo, plages & apéros à l'abri du vent</p>
+        <p>Météo, bronzette & apéros à l'abri du vent</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # 2. Navigation centrée sous le titre
-onglet = st.radio("", ["🏖️ Plages", "🍹 Apéro au Soleil"], horizontal=True)
+onglet = st.radio("", ["🏖️ Bronzette", "🍹 Apéro au Soleil"], horizontal=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 1 : PLAGES
+# ONGLET 1 : BRONZETTE
 # -----------------------------------------------------------------------------
-if onglet == "🏖️ Plages":
+if onglet == "🏖️ Bronzette":
     plages = [
         {"Nom": "La Passagere", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Passagere.jpg"},
         {"Nom": "Fours a Chaux", "Ville": "Saint-Malo", "Min": 315, "Max": 135, "Image": "Foursachaux.jpg"},
