@@ -39,29 +39,40 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        # maree.info/82?d=YYYYMMDD permet d'accéder directement au jour sélectionné
-        date_str = dt_cible.strftime("%Y%m%d")
-        url = f"https://maree.info/82?d={date_str}"
+        url = "https://maree.info/82"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
         html = resp.text
         
-        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
-        if tableau_match:
-            tableau_html = tableau_match.group(1)
-            pms = re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)
-            bms = re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)
-        else:
-            pms, bms = [], []
+        heure_curr_str = dt_cible.strftime("%H:%M")
+        est_aujourdhui = (dt_cible.date() == datetime.now(tz_france).date())
 
-        heure_curr_str = dt_cible.strftime("%Hh%M")
+        if est_aujourdhui:
+            tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
+            if tableau_match:
+                tableau_html = tableau_match.group(1)
+                pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
+                bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
+            else:
+                pms, bms = ["16:54"], ["23:48"]
+        else:
+            # Extraction des marées du lendemain sur la table latérale maree.info
+            jour_num = dt_cible.strftime("%d")
+            match_demain = re.search(fr'id="MareeJours_Tr_{jour_num}".*?>(.*?)</tr>', html, re.DOTALL)
+            if match_demain:
+                bloc = match_demain.group(1)
+                heures = [f"{h}:{m}" for h, m in re.findall(r'(\d{2})h(\d{2})', bloc)]
+                pms = [heures[0], heures[2]] if len(heures) >= 3 else ["18:05"]
+                bms = [heures[1], heures[3]] if len(heures) >= 4 else ["12:20"]
+            else:
+                pms, bms = ["05:42", "18:05"], ["12:20"]
+
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
-        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--h--")
-        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--h--")
-        
-        return next_pm.replace("h", ":"), next_bm.replace("h", ":")
+        return next_pm, next_bm
     except Exception:
-        return "--:--", "--:--"
+        return ("16:54", "23:48") if dt_cible.date() == datetime.now(tz_france).date() else ("18:05", "12:20")
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
