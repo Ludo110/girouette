@@ -15,12 +15,13 @@ tz_france = zoneinfo.ZoneInfo("Europe/Paris")
 if "onglet" not in st.session_state:
     st.session_state["onglet"] = "bronzette"
 
-if "heure_simulee" not in st.session_state:
-    st.session_state["heure_simulee"] = datetime.now(tz_france).time()
+now_france = datetime.now(tz_france)
+if "heure_selectionnee_str" not in st.session_state:
+    st.session_state["heure_selectionnee_str"] = now_france.strftime("%H:%M")
 
-# Callback pour réinitialiser l'heure à l'heure locale actuelle
+# Callback pour réinitialiser à l'heure actuelle
 def reinitialiser_heure():
-    st.session_state["heure_simulee"] = datetime.now(tz_france).time()
+    st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
 
 # Styles dynamiques pour les boutons d'onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -63,7 +64,7 @@ st.markdown(f"""
     
     .card-img {{ width: 100%; height: 140px; object-fit: cover; display: block; }}
     
-    /* Titre cliquable purement centré sans balises A encombrantes */
+    /* Titre cliquable purement centré */
     .card-title-clickable {{ 
         width: 100% !important; 
         margin: 10px 0 4px 0 !important; 
@@ -174,15 +175,19 @@ st.markdown(f"""
         -webkit-text-fill-color: #436e64 !important;
     }}
 
-    /* Force le style sur l'encadré et l'input de st.time_input */
-    div[data-baseweb="input"], div[data-baseweb="input"] > div, div[data-baseweb="input"] input {{
+    /* Customisation de la boîte de sélection de l'heure (fond crème, texte vert centré et gras) */
+    div[data-testid="stSelectbox"] > div > div {{
         background-color: #f0ede6 !important;
-        border-color: #436e64 !important;
+        border: 1px solid #436e64 !important;
         color: #436e64 !important;
-        text-align: center !important;
-        font-weight: bold !important;
-        -webkit-text-fill-color: #436e64 !important;
         border-radius: 8px !important;
+    }}
+    div[data-testid="stSelectbox"] div[role="combobox"] {{
+        color: #436e64 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        justify-content: center !important;
+        -webkit-text-fill-color: #436e64 !important;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -215,13 +220,27 @@ with nav_col2:
 
 st.markdown("<div style='margin-bottom: 10px;'></div>", unsafe_allow_html=True)
 
+# Génération des plages horaires de 00:00 à 23:45 par pas de 15 minutes
+liste_heures = [f"{h:02d}:{m:02d}" for h in range(24) for m in (0, 15, 30, 45)]
+
+# Sécurité si l'heure actuelle n'est pas exacte dans la liste
+if st.session_state["heure_selectionnee_str"] not in liste_heures:
+    # Arrondi à la tranche de 15 min la plus proche
+    h_curr, m_curr = map(int, st.session_state["heure_selectionnee_str"].split(":"))
+    m_round = 15 * round(m_curr / 15)
+    if m_round == 60:
+        h_curr = (h_curr + 1) % 24
+        m_round = 0
+    st.session_state["heure_selectionnee_str"] = f"{h_curr:02d}:{m_round:02d}"
+
 # Expander de configuration horaire & météo
 with st.expander("⚙️ Options & Horaire de simulation"):
     col_time, col_reset = st.columns([1, 1])
     with col_time:
-        heure_selectionnee = st.time_input(
+        heure_str = st.selectbox(
             "Choisir une heure pour la simulation", 
-            key="heure_simulee"
+            options=liste_heures,
+            key="heure_selectionnee_str"
         )
     with col_reset:
         st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
@@ -229,7 +248,9 @@ with st.expander("⚙️ Options & Horaire de simulation"):
     use_manual = st.checkbox("Activer le mode météo manuelle")
 
 # Date/heure locale complète pour la simulation
-now_france = datetime.now(tz_france)
+heure_h, heure_m = map(int, heure_str.split(":"))
+heure_selectionnee = time(heure_h, heure_m)
+
 dt_local = datetime.combine(now_france.date(), heure_selectionnee).replace(tzinfo=tz_france)
 dt_utc = dt_local.astimezone(timezone.utc)
 
