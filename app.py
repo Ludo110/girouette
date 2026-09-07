@@ -33,7 +33,8 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 
     if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
         return "☀️ TOP CONDITION", "#2d5a27"
-    elif (temp_air >= 20 and vent_ressenti < 15) or (temp_air >= 17 and vent_ressenti < 20 and rad > 50):
+    # Agréable dès 18°C
+    elif (temp_air >= 18 and vent_ressenti < 18) or (temp_air >= 17 and vent_ressenti < 20 and rad > 50):
         return "😎 AGREABLE", "#38761d"
     elif temp_air >= 14 and vent_ressenti < 25:
         return "⛅ UN PEU JUSTE", "#e69138"
