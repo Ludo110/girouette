@@ -82,13 +82,18 @@ st.markdown("""
         width: 100% !important;
     }
     
-    /* Style du sélecteur d'onglets sous le titre */
+    /* Style du sélecteur d'onglets centré */
+    div[data-testid="stRadio"] {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
     div[data-testid="stRadio"] > div {
         justify-content: center;
         background-color: #f0ede6;
-        padding: 8px;
+        padding: 8px 16px;
         border-radius: 12px;
-        max-width: 400px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin: 0 auto 15px auto;
     }
 </style>
@@ -114,7 +119,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 2. Navigation sous le titre
+# 2. Navigation centrée sous le titre
 onglet = st.radio("", ["🏖️ Plages", "🍹 Apéro au Soleil"], horizontal=True)
 
 # -----------------------------------------------------------------------------
