@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pysolar.solar import get_azimuth, get_altitude
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
@@ -204,8 +204,8 @@ if onglet == "🏖️ Bronzette":
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif onglet == "🍹 Apéro au Soleil":
-    # Calcul de la position du soleil
-    now = datetime.utcnow()
+    # Calcul de la position du soleil avec timezone UTC explicite
+    now = datetime.now(timezone.utc)
     sol_alt = get_altitude(LAT_SM, LON_SM, now)
     sol_azi = get_azimuth(LAT_SM, LON_SM, now)
 
