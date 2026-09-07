@@ -183,14 +183,7 @@ st.markdown(f"""
 
 LAT_SM, LON_SM = 48.6493, -2.0089
 
-# Rose des vents étendue à 16 directions
-dirs_fr_16 = [
-    "Nord", "Nord-Nord-Est", "Nord-Est", "Est-Nord-Est",
-    "Est", "Est-Sud-Est", "Sud-Est", "Sud-Sud-Est",
-    "Sud", "Sud-Sud-Ouest", "Sud-Ouest", "Ouest-Sud-Ouest",
-    "Ouest", "Ouest-Nord-Ouest", "Nord-Ouest", "Nord-Nord-Ouest", "Nord"
-]
-
+# Rose des vents à 16 directions (abréviations courtes)
 dirs_code_16 = [
     "N", "NNE", "NE", "ENE",
     "E", "ESE", "SE", "SSE",
@@ -205,7 +198,6 @@ adjacents = {
     "NE": ["NE", "NNE", "ENE", "N", "E"],
     "ENE": ["ENE", "NE", "E"],
     "E": ["E", "ENE", "ESE"],
-    "ESE": ["ESE", "E", "SE"],
     "SE": ["SE", "ESE", "SSE", "E", "S"],
     "SSE": ["SSE", "SE", "S"],
     "S": ["S", "SSE", "SSW"],
@@ -310,7 +302,6 @@ else:
     vitesse, angle = auto_v, auto_a
 
 idx_dir = int(round((angle % 360) / 22.5))
-ori = dirs_fr_16[idx_dir]
 ori_code = dirs_code_16[idx_dir]
 
 # -----------------------------------------------------------------------------
@@ -333,7 +324,7 @@ if st.session_state["onglet"] == "bronzette":
         {"Nom": "Port Mer", "Ville": "Cancale", "Min": 180, "Max": 360, "Image": "Portmer.jpg"}
     ]
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h - {ori} ({int(angle)}°)<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Bronzette pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     abritees = [p for p in plages if (True if vitesse < 12 else (p["Min"] <= angle <= p["Max"] if p["Min"] <= p["Max"] else (angle >= p["Min"] or angle <= p["Max"])))]
     exposees = [p for p in plages if p not in abritees]
@@ -370,7 +361,7 @@ elif st.session_state["onglet"] == "apero":
     sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
     sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori}) — Soleil : Alt {int(sol_alt)}° / Azi {int(sol_azi)}°<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:540px; margin:15px auto 25px auto; color:#222;'><b>Apéro pour {heure_selectionnee.strftime('%H:%M')}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b></div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
