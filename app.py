@@ -31,12 +31,19 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 
     vent_ressenti = 0 if est_abrite else vitesse_vent
 
+    # Top Condition : chaud + grand soleil + vent faible
     if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
         return "☀️ TOP CONDITION", "#2d5a27"
-    elif (temp_air >= 18 and vent_ressenti < 18) or (temp_air >= 17 and vent_ressenti < 20 and rad > 50):
+    
+    # Agréable : exige un minimum d'éclaircies/soleil (rad > 50) pour éviter le piège du temps gris/couvert
+    elif rad > 50 and ((temp_air >= 18 and vent_ressenti < 18) or (temp_air >= 17 and vent_ressenti < 20)):
         return "😎 AGREABLE", "#38761d"
+    
+    # Un peu juste : temps couvert ou températures moyennes
     elif temp_air >= 14 and vent_ressenti < 25:
         return "⛅ UN PEU JUSTE", "#e69138"
+    
+    # Trop frais
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
