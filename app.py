@@ -33,7 +33,6 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 
     if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
         return "☀️ TOP CONDITION", "#2d5a27"
-    # Agréable dès 18°C
     elif (temp_air >= 18 and vent_ressenti < 18) or (temp_air >= 17 and vent_ressenti < 20 and rad > 50):
         return "😎 AGREABLE", "#38761d"
     elif temp_air >= 14 and vent_ressenti < 25:
@@ -387,6 +386,7 @@ if st.session_state["onglet"] == "bronzette":
             {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Bonsecours.jpg"},
             {"Nom": "L'Eventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Eventail.jpg"},
             {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "Sillon.jpg"},
+            {"Nom": "Le Môle", "Ville": "Saint-Malo", "Min": 270, "Max": 90, "Image": "Mole.jpg"},
             {"Nom": "Le Val", "Ville": "Rotheneuf", "Min": 45, "Max": 225, "Image": "Val.jpg"},
             {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202, "Image": "Chevrets.jpg"},
             {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270, "Image": "Touesse.jpg"},
