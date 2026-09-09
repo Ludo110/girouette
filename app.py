@@ -18,12 +18,12 @@ now_france = datetime.now(tz_france)
 if "heure_selectionnee_str" not in st.session_state:
     st.session_state["heure_selectionnee_str"] = now_france.strftime("%H:%M")
 
-if "choix_jour" not in st.session_state:
-    st.session_state["choix_jour"] = "Aujourd'hui"
+if "date_selectionnee" not in st.session_state:
+    st.session_state["date_selectionnee"] = now_france.date()
 
 def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
-    st.session_state["choix_jour"] = "Aujourd'hui"
+    st.session_state["date_selectionnee"] = datetime.now(tz_france).date()
 
 def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
     if pluie > 0.2:
@@ -46,8 +46,8 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        # Correction du format de date attendu par maree.info (?d=JJMMAAAA)
-        date_str = dt_cible.strftime("%d%m%Y")
+        # Format correct attendu par maree.info : YYYYMMDD
+        date_str = dt_cible.strftime("%Y%m%d")
         url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
@@ -292,24 +292,24 @@ if st.session_state["heure_selectionnee_str"] not in liste_heures:
 with st.expander("⚙️ Options & Horaire de simulation"):
     col_date, col_time = st.columns([1, 1])
     with col_date:
-        choix_jour = st.radio("Jour de simulation", ["Aujourd'hui", "Demain"], key="choix_jour", horizontal=True)
+        # Sélecteur de date permettant de choisir n'importe quel jour de la semaine
+        date_cible = st.date_input("Choisir un jour", value=st.session_state["date_selectionnee"], key="date_selectionnee")
     with col_time:
         heure_str = st.selectbox("Choisir une heure", options=liste_heures, key="heure_selectionnee_str")
         
-    st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
+    st.button("🔄 Réinitialiser à l'heure et date actuelles", on_click=reinitialiser_heure, use_container_width=True)
     use_manual = st.checkbox("Activer le mode météo manuelle")
 
 heure_h, heure_m = map(int, heure_str.split(":"))
 heure_selectionnee = time(heure_h, heure_m)
 
-date_cible = now_france.date()
-if choix_jour == "Demain":
-    date_cible += timedelta(days=1)
-
 dt_local = datetime.combine(date_cible, heure_selectionnee).replace(tzinfo=tz_france)
 dt_utc = dt_local.astimezone(timezone.utc)
 
-label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Aujourd'hui" else f"pour Demain à {heure_selectionnee.strftime('%H:%M')}"
+if date_cible == now_france.date():
+    label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}"
+else:
+    label_jour = f"pour le {date_cible.strftime('%d/%m/%Y')} à {heure_selectionnee.strftime('%H:%M')}"
 
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
