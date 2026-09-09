@@ -44,10 +44,9 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
         return "💨 TROP FRAIS", "#cc0000"
 
 @st.cache_data(ttl=3600)
-def _fetch_marees_html(date_yyyymmdd):
-    # Fonction mise en cache uniquement sur la chaîne de date (ex: "20260909")
+def _fetch_marees_html(date_ddmmyyyy):
     try:
-        url = f"https://maree.info/82?d={date_yyyymmdd}"
+        url = f"https://maree.info/82?d={date_ddmmyyyy}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
         return resp.text
@@ -56,37 +55,43 @@ def _fetch_marees_html(date_yyyymmdd):
 
 def récupérer_marées_réelles(dt_cible):
     try:
-        date_yyyymmdd = dt_cible.strftime("%Y%m%d")
-        html = _fetch_marees_html(date_yyyymmdd)
-        
+        date_str = dt_cible.strftime("%d%m%Y")
+        html = _fetch_marees_html(date_str)
         heure_curr_str = dt_cible.strftime("%H:%M")
 
-        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
-        pms, bms = [], []
-        
+        pms = []
+        bms = []
+
+        # Extraction ultra-stricte ciblée sur les lignes PM et BM du tableau des marées
+        tableau_match = re.search(r'<table[^>]*id="MareeJours_MareeJour"[^>]*>(.*?)</table>', html, re.DOTALL)
         if tableau_match:
-            tableau_html = tableau_match.group(1)
-            lignes = re.findall(r'<tr.*?>(.*?)</tr>', tableau_html, re.DOTALL)
+            table_content = tableau_match.group(1)
+            lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', table_content, re.DOTALL)
             for ligne in lignes:
-                time_match = re.search(r'(\d{2}h\d{2})', ligne)
-                if time_match:
-                    t_str = time_match.group(1).replace("h", ":")
+                h_match = re.search(r'(\d{2}h\d{2})', ligne)
+                if h_match:
+                    t_str = h_match.group(1).replace("h", ":")
                     if 'PM' in ligne.upper():
-                        pms.append(t_str)
+                        if t_str not in pms: pms.append(t_str)
                     elif 'BM' in ligne.upper():
-                        bms.append(t_str)
+                        if t_str not in bms: bms.append(t_str)
 
+        # Fallback de secours si le tableau principal change d'ID
         if not pms or not bms:
-            toutes_les_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
-            seen = set()
-            unique_times = [x for x in toutes_les_heures if not (x in seen or seen.add(x))]
-            if len(unique_times) >= 4:
-                bms = [unique_times[0], unique_times[2]]
-                pms = [unique_times[1], unique_times[3]]
-            else:
-                pms, bms = ["06:41", "18:58"], ["00:59", "13:24"]
+            for match in re.finditer(r'(PM|BM)[^<]{0,50}?(\d{2}h\d{2})', html, re.IGNORECASE):
+                type_maree = match.group(1).upper()
+                t_str = match.group(2).replace("h", ":")
+                if type_maree == 'PM' and t_str not in pms:
+                    pms.append(t_str)
+                elif type_maree == 'BM' and t_str not in bms:
+                    bms.append(t_str)
 
-        # Si on regarde une heure future/passée du même jour, on cherche la prochaine marée par rapport à l'heure sélectionnée
+        if not pms: pms = ["06:41", "18:58"]
+        if not bms: bms = ["00:59", "13:24"]
+
+        pms.sort()
+        bms.sort()
+
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
