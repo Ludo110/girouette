@@ -46,7 +46,6 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        # Format correct attendu par maree.info : YYYYMMDD
         date_str = dt_cible.strftime("%Y%m%d")
         url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -55,15 +54,32 @@ def récupérer_marées_réelles(dt_cible):
         
         heure_curr_str = dt_cible.strftime("%H:%M")
 
+        # Extraction ciblée sur le tableau principal des marées du jour
         tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
+        pms, bms = [], []
+        
         if tableau_match:
             tableau_html = tableau_match.group(1)
-            toutes_les_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', tableau_html)]
-        else:
-            toutes_les_heures = []
+            # On cherche les lignes du tableau pour associer correctement PM et BM à leurs heures
+            lignes = re.findall(r'<tr.*?>(.*?)</tr>', tableau_html, re.DOTALL)
+            for ligne in lignes:
+                if '<b>PM</b>' in ligne:
+                    h_match = re.search(r'(\d{2}h\d{2})', ligne)
+                    if h_match:
+                        pms.append(h_match.group(1).replace("h", ":"))
+                elif '<b>BM</b>' in ligne:
+                    h_match = re.search(r'(\d{2}h\d{2})', ligne)
+                    if h_match:
+                        bms.append(h_match.group(1).replace("h", ":"))
 
-        pms = toutes_les_heures[1::2] if len(toutes_les_heures) >= 2 else ["06:41", "18:58"]
-        bms = toutes_les_heures[0::2] if len(toutes_les_heures) >= 1 else ["00:59", "13:24"]
+        # Si le parsing structuré échoue, on récupère de manière séquentielle toutes les heures
+        if not pms or not bms:
+            toutes_les_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
+            if len(toutes_les_heures) >= 4:
+                bms = [toutes_les_heures[0], toutes_les_heures[2]]
+                pms = [toutes_les_heures[1], toutes_les_heures[3]]
+            else:
+                pms, bms = ["06:41", "18:58"], ["00:59", "13:24"]
 
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
@@ -292,7 +308,6 @@ if st.session_state["heure_selectionnee_str"] not in liste_heures:
 with st.expander("⚙️ Options & Horaire de simulation"):
     col_date, col_time = st.columns([1, 1])
     with col_date:
-        # Sélecteur de date permettant de choisir n'importe quel jour de la semaine
         date_cible = st.date_input("Choisir un jour", value=st.session_state["date_selectionnee"], key="date_selectionnee")
     with col_time:
         heure_str = st.selectbox("Choisir une heure", options=liste_heures, key="heure_selectionnee_str")
