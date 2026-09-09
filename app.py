@@ -59,8 +59,11 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
         
+        # Extraction de toutes les heures au format HHhMM du site
         toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
         
+        # Le site affiche d'abord le jour J en haut (2 BM, 2 PM), puis les jours suivants dans le tableau
+        # Chaque jour comporte exactement 4 horaires (2 Basses mers, 2 Pleines mers)
         jours_marées = []
         for i in range(0, len(toutes_heures) - 3, 4):
             bloc = toutes_heures[i:i+4]
@@ -70,6 +73,7 @@ def récupérer_marées_réelles(dt_cible):
         if 0 <= delta_jours < len(jours_marées):
             heures_jour = jours_marées[delta_jours]
         else:
+            # Fallback par défaut si index hors limites
             heures_jour = ["01:03", "06:37", "13:26", "18:56"]
 
         bms = [heures_jour[0], heures_jour[2]]
@@ -468,4 +472,3 @@ elif st.session_state["onglet"] == "apero":
             st.markdown(html_apero, unsafe_allow_html=True)
         else:
             st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'>Aucun spot idéal trouvé à cette heure-là pour cette orientation de vent/soleil.</div>", unsafe_allow_html=True)
-            
