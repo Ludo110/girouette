@@ -46,25 +46,25 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        # Utilisation de l'API Open-Meteo Marine pour les marées (fiable et sans blocage)
-        url = f"https://marine-api.open-meteo.com/v1/marine?latitude=48.6493&longitude=-2.0089&hourly=sea_level&start_date={dt_cible.strftime('%Y-%m-%d')}&end_date={dt_cible.strftime('%Y-%m-%d')}"
-        resp = requests.get(url, timeout=5).json()
+        # Forçage de la date dans l'URL pour charger dynamiquement le tableau correct du jour
+        date_str = dt_cible.strftime("%Y%m%d")
+        url = f"https://maree.info/82?d={date_str}"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        resp = requests.get(url, headers=headers, timeout=5)
+        html = resp.text
         
-        times = resp["hourly"]["time"]
-        levels = resp["hourly"]["sea_level"]
-        
-        # Détection des pics (Pleines mers) et creux (Basses mers) locaux
-        pms = []
-        bms = []
-        for i in range(1, len(levels) - 1):
-            if levels[i] is not None and levels[i-1] is not None and levels[i+1] is not None:
-                if levels[i] > levels[i-1] and levels[i] > levels[i+1]:
-                    pms.append(times[i][11:16])
-                elif levels[i] < levels[i-1] and levels[i] < levels[i+1]:
-                    bms.append(times[i][11:16])
-
         heure_curr_str = dt_cible.strftime("%H:%M")
-        
+
+        # Ciblage du tableau principal spécifique à la date
+        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
+        if tableau_match:
+            tableau_html = tableau_match.group(1)
+            # Extraction propre et sans doublons basée sur la structure HTML de maree.info
+            pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
+            bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
+        else:
+            pms, bms = [], []
+
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
