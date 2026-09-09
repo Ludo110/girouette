@@ -57,23 +57,36 @@ def récupérer_marées_réelles(dt_cible):
     try:
         html = _fetch_marees_semaine()
         heure_curr_str = dt_cible.strftime("%H:%M")
+        day_num = dt_cible.day
         
         lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
-        jours_marées = []
+        heures_jour = []
         
+        # Recherche prioritaire par correspondance exacte du numéro du jour dans le tableau latéral
         for ligne in lignes:
-            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-            if len(h_trouvees) >= 4:
-                heures_4 = h_trouvees[:4]
-                if heures_4 not in jours_marées:
-                    jours_marées.append(heures_4)
+            texte_brut = re.sub(r'<[^>]+>', ' ', ligne)
+            mots = texte_brut.split()
+            if str(day_num) in mots or f"{day_num:02d}" in mots:
+                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+                if len(h_trouvees) >= 4:
+                    heures_jour = h_trouvees[:4]
+                    break
         
-        delta_jours = (dt_cible - now_france.date()).days
-        
-        if 0 <= delta_jours < len(jours_marées):
-            heures_jour = jours_marées[delta_jours]
-        else:
-            heures_jour = jours_marées[0] if jours_marées else ["00:59", "06:41", "13:24", "18:58"]
+        # Fallback par delta de jours si la recherche par numéro échoue
+        if len(heures_jour) < 4:
+            jours_marées = []
+            for ligne in lignes:
+                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+                if len(h_trouvees) >= 4:
+                    h4 = h_trouvees[:4]
+                    if h4 not in jours_marées:
+                        jours_marées.append(h4)
+            
+            delta_jours = (dt_cible - now_france.date()).days
+            if 0 <= delta_jours < len(jours_marées):
+                heures_jour = jours_marées[delta_jours]
+            else:
+                heures_jour = jours_marées[0] if jours_marées else ["00:59", "06:41", "13:24", "18:58"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
