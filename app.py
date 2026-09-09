@@ -44,14 +44,20 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
         return "💨 TROP FRAIS", "#cc0000"
 
 @st.cache_data(ttl=3600)
-def récupérer_marées_réelles(dt_cible):
+def _fetch_marees_html(date_yyyymmdd):
+    # Fonction mise en cache uniquement sur la chaîne de date (ex: "20260909")
     try:
-        # On passe explicitement dt_cible en chaîne dans le cache pour forcer le recalcul si la date change
-        date_str = dt_cible.strftime("%d%m%Y")
-        url = f"https://maree.info/82?d={date_str}"
+        url = f"https://maree.info/82?d={date_yyyymmdd}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
-        html = resp.text
+        return resp.text
+    except Exception:
+        return ""
+
+def récupérer_marées_réelles(dt_cible):
+    try:
+        date_yyyymmdd = dt_cible.strftime("%Y%m%d")
+        html = _fetch_marees_html(date_yyyymmdd)
         
         heure_curr_str = dt_cible.strftime("%H:%M")
 
@@ -80,6 +86,7 @@ def récupérer_marées_réelles(dt_cible):
             else:
                 pms, bms = ["06:41", "18:58"], ["00:59", "13:24"]
 
+        # Si on regarde une heure future/passée du même jour, on cherche la prochaine marée par rapport à l'heure sélectionnée
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
