@@ -59,22 +59,28 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
         
-        toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
+        # Isolation de la section spécifique du tableau des marées pour éviter les doublons du header
+        match_table = re.search(r'Marées des 10 prochains jours.*?(?:</table>|<div class="clear">)', html, re.DOTALL)
+        zone_analyse = match_table.group(0) if match_table else html
         
-        if not toutes_heures:
-            return "18:56", "13:26"
-            
-        if delta_jours == 0:
-            # Aujourd'hui : premier bloc du haut (4 premiers horaires)
-            heures_jour = toutes_heures[:4]
+        lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', zone_analyse, re.DOTALL)
+        jours_marées = []
+        
+        for ligne in lignes:
+            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+            if len(h_trouvees) >= 4:
+                bloc = h_trouvees[:4]
+                if bloc not in jours_marées:
+                    jours_marées.append(bloc)
+                    
+        # Si on a aujourd'hui, on prend le premier bloc disponible du tableau
+        if delta_jours == 0 and jours_marées:
+            heures_jour = jours_marées[0]
+        elif 0 < delta_jours < len(jours_marées):
+            # Pour demain (delta_jours = 1), on prend l'index 1, etc.
+            heures_jour = jours_marées[delta_jours]
         else:
-            # Demain et suivants : tableau des 10 prochains jours (commence après le bloc du haut)
-            table_heures = toutes_heures[4:]
-            block_idx = delta_jours - 1
-            if block_idx * 4 + 4 <= len(table_heures):
-                heures_jour = table_heures[block_idx * 4 : block_idx * 4 + 4]
-            else:
-                heures_jour = table_heures[:4] if table_heures else ["01:52", "07:22", "14:10", "19:39"]
+            heures_jour = ["01:03", "06:37", "13:26", "18:56"] if delta_jours == 0 else ["01:52", "07:22", "14:10", "19:39"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
