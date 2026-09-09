@@ -59,33 +59,44 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
         
+        # On extrait toutes les lignes <tr> du site
+        lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
+        
+        blocs_par_jour = []
+        for ligne in lignes:
+            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+            if len(h_trouvees) >= 4:
+                bloc = h_trouvees[:4]
+                if (ligne, bloc) not in blocs_par_jour:
+                    blocs_par_jour.append((ligne, bloc))
+                    
+        if not blocs_par_jour:
+            return "18:56", "13:26"
+            
+        heures_jour = None
+        
         if delta_jours == 0:
-            # 1. Aujourd'hui : on extrait uniquement le premier bloc du haut (avant "Marées des 10 prochains jours")
-            pos_coupure = html.find("Marées des 10 prochains jours")
-            zone_haut = html[:pos_coupure] if pos_coupure != -1 else html
-            heures_jour = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', zone_haut)]
-            heures_jour = heures_jour[:4] if len(heures_jour) >= 4 else ["01:03", "06:37", "13:26", "18:56"]
+            # Aujourd'hui : on prend le tout premier bloc trouvé (le bloc du haut)
+            heures_jour = blocs_par_jour[0][1]
+        elif delta_jours == 1:
+            # Demain : on cherche spécifiquement la ligne contenant le mot "Demain" dans le tableau
+            for ligne, bloc in blocs_par_jour:
+                if "Demain" in ligne:
+                    heures_jour = bloc
+                    break
+            # Fallback si le mot n'est pas trouvé : on prend le 2ème bloc (index 1)
+            if not heures_jour and len(blocs_par_jour) > 1:
+                heures_jour = blocs_par_jour[1][1]
         else:
-            # 2. Demain et jours suivants : on extrait uniquement le tableau du bas
-            pos_coupure = html.find("Marées des 10 prochains jours")
-            zone_tableau = html[pos_coupure:] if pos_coupure != -1 else html
-            
-            # On découpe ligne par ligne dans le tableau du bas pour attribuer 4 horaires par jour
-            lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', zone_tableau, re.DOTALL)
-            jours_marées = []
-            for ligne in lignes:
-                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-                if len(h_trouvees) >= 4:
-                    bloc = h_trouvees[:4]
-                    if bloc not in jours_marées:
-                        jours_marées.append(bloc)
-            
-            # delta_jours = 1 correspond à la première ligne du tableau du bas (Demain)
-            idx_tableau = delta_jours - 1
-            if 0 <= idx_tableau < len(jours_marées):
-                heures_jour = jours_marées[idx_tableau]
+            # Pour les jours suivants (> 1), on prend l'index correspondant si disponible
+            idx = delta_jours
+            if idx < len(blocs_par_jour):
+                heures_jour = blocs_par_jour[idx][1]
             else:
-                heures_jour = ["01:52", "07:22", "14:10", "19:39"]
+                heures_jour = blocs_par_jour[-1][1]
+                
+        if not heures_jour:
+            heures_jour = ["01:03", "06:37", "13:26", "18:56"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
