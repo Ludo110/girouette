@@ -31,23 +31,15 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 
     vent_ressenti = 0 if est_abrite else vitesse_vent
 
-    # Si le vent dépasse 22 km/h, c'est trop fort pour bronzer tranquillement
     if vent_ressenti > 22 or vitesse_vent > 25:
         return "💨 TROP FRAIS", "#cc0000"
 
-    # Top Condition : chaud + grand soleil + vent très faible
     if temp_air >= 20 and rad > 200 and vent_ressenti < 12:
         return "☀️ TOP CONDITION", "#2d5a27"
-    
-    # Agréable : soleil (rad > 50), douceur et vent faible
     elif rad > 50 and vent_ressenti < 15 and temp_air >= 20:
         return "😎 AGREABLE", "#38761d"
-    
-    # Un peu juste : entre 18°C et 20°C (ou nuageux/vent un peu plus présent)
     elif temp_air >= 18 and temp_air < 20:
         return "⛅ UN PEU JUSTE", "#e69138"
-    
-    # Trop frais en deçà de 18°C
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
@@ -62,24 +54,29 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         est_aujourdhui = (dt_cible.date() == datetime.now(tz_france).date())
 
+        pms, bms = [], []
         if est_aujourdhui:
             tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
             if tableau_match:
                 tableau_html = tableau_match.group(1)
                 pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
                 bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
-            else:
-                pms, bms = ["16:54"], ["23:48"]
         else:
             jour_num = dt_cible.strftime("%d")
-            match_demain = re.search(fr'id="MareeJours_Tr_{jour_num}".*?>(.*?)</tr>', html, re.DOTALL)
-            if match_demain:
-                bloc = match_demain.group(1)
-                heures = [f"{h}:{m}" for h, m in re.findall(r'(\d{2})h(\d{2})', bloc)]
-                pms = [heures[0], heures[2]] if len(heures) >= 3 else ["18:05"]
-                bms = [heures[1], heures[3]] if len(heures) >= 4 else ["12:20"]
-            else:
-                pms, bms = ["05:42", "18:05"], ["12:20"]
+            # Recherche ciblée dans le bloc du jour du mois sur maree.info
+            match_jour = re.search(fr'id="MareeJours_Tr_{jour_num}".*?>(.*?)</tr>', html, re.DOTALL)
+            if match_jour:
+                bloc = match_jour.group(1)
+                heures_trouvees = [f"{h}:{m}" for h, m in re.findall(r'(\d{2})h(\d{2})', bloc)]
+                # Sur maree.info, l'alternance PM/BM dépend de la structure, on extrait proprement
+                pms =heures_trouvees[0::2] if heures_trouvees else []
+                bms = heures_trouvees[1::2] if heures_trouvees else []
+
+        # Fallbacks de sécurité si le scraping bloque
+        if not pms:
+            pms = ["05:42", "18:05"] if not est_aujourdhui else ["16:54"]
+        if not bms:
+            bms = ["12:20"] if not est_aujourdhui else ["23:48"]
 
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
