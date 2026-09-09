@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
-import re
 from datetime import datetime, timezone, time, timedelta
 import zoneinfo
 from pysolar.solar import get_azimuth, get_altitude
@@ -43,61 +42,53 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
-@st.cache_data(ttl=3600)
-def _fetch_marees_html(date_ddmmyyyy):
-    try:
-        url = f"https://maree.info/82?d={date_ddmmyyyy}"
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        resp = requests.get(url, headers=headers, timeout=5)
-        return resp.text
-    except Exception:
-        return ""
+LAT_SM, LON_SM = 48.6493, -2.0089
 
+@st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        date_str = dt_cible.strftime("%d%m%Y")
-        html = _fetch_marees_html(date_str)
+        # Utilisation de l'API Open-Meteo Marine pour récupérer les hauteurs de marée de manière fiable
+        url = f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&hourly=tide_height"
+        resp = requests.get(url, timeout=5).json()
+        
+        times = resp["hourly"]["time"]
+        heights = resp["hourly"]["tide_height"]
+        
+        date_cible_str = dt_cible.strftime("%Y-%m-%d")
         heure_curr_str = dt_cible.strftime("%H:%M")
-
+        
+        jour_indices = [i for i, t in enumerate(times) if t.startswith(date_cible_str)]
+        
+        if not jour_indices:
+            return "--:--", "--:--"
+            
         pms = []
         bms = []
-
-        # Extraction ultra-stricte ciblée sur les lignes PM et BM du tableau des marées
-        tableau_match = re.search(r'<table[^>]*id="MareeJours_MareeJour"[^>]*>(.*?)</table>', html, re.DOTALL)
-        if tableau_match:
-            table_content = tableau_match.group(1)
-            lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', table_content, re.DOTALL)
-            for ligne in lignes:
-                h_match = re.search(r'(\d{2}h\d{2})', ligne)
-                if h_match:
-                    t_str = h_match.group(1).replace("h", ":")
-                    if 'PM' in ligne.upper():
-                        if t_str not in pms: pms.append(t_str)
-                    elif 'BM' in ligne.upper():
-                        if t_str not in bms: bms.append(t_str)
-
-        # Fallback de secours si le tableau principal change d'ID
-        if not pms or not bms:
-            for match in re.finditer(r'(PM|BM)[^<]{0,50}?(\d{2}h\d{2})', html, re.IGNORECASE):
-                type_maree = match.group(1).upper()
-                t_str = match.group(2).replace("h", ":")
-                if type_maree == 'PM' and t_str not in pms:
-                    pms.append(t_str)
-                elif type_maree == 'BM' and t_str not in bms:
-                    bms.append(t_str)
-
-        if not pms: pms = ["06:41", "18:58"]
-        if not bms: bms = ["00:59", "13:24"]
-
-        pms.sort()
-        bms.sort()
-
-        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
-        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
+        
+        # Calcul mathématique des pleines mers (maxima) et basses mers (minima)
+        for i in range(1, len(jour_indices) - 1):
+            idx = jour_indices[i]
+            h_prev = heights[idx - 1]
+            h_curr = heights[idx]
+            h_next = heights[idx + 1]
+            
+            if h_prev is not None and h_curr is not None and h_next is not None:
+                if h_curr > h_prev and h_curr >= h_next:
+                    time_part = times[idx].split("T")[1][:5]
+                    pms.append(time_part)
+                elif h_curr < h_prev and h_curr <= h_next:
+                    time_part = times[idx].split("T")[1][:5]
+                    bms.append(time_part)
+                    
+        if not pms: pms = ["--:--"]
+        if not bms: bms = ["--:--"]
+        
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0])
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0])
         
         return next_pm, next_bm
     except Exception:
-        return "18:58", "13:24"
+        return "--:--", "--:--"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -255,8 +246,6 @@ st.markdown(f"""
     }}
 </style>
 """, unsafe_allow_html=True)
-
-LAT_SM, LON_SM = 48.6493, -2.0089
 
 dirs_code_16 = [
     "N", "NNE", "NE", "ENE",
