@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
-import re
 from datetime import datetime, timezone, time, timedelta
 import zoneinfo
 from pysolar.solar import get_azimuth, get_altitude
@@ -43,62 +42,59 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
+LAT_SM, LON_SM = 48.6493, -2.0089
+
 @st.cache_data(ttl=3600)
-def _fetch_marees_semaine():
+def _fetch_marine_data():
     try:
-        url = "https://maree.info/82"
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        resp = requests.get(url, headers=headers, timeout=5)
-        return resp.text
+        url = f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&hourly=tide_height&current=sea_surface_temperature"
+        resp = requests.get(url, timeout=5).json()
+        return resp
     except Exception:
-        return ""
+        return {}
 
 def récupérer_marées_réelles(dt_cible):
     try:
-        html = _fetch_marees_semaine()
+        data = _fetch_marine_data()
+        if not data or "hourly" not in data:
+            return "--:--", "--:--"
+            
+        times = data["hourly"]["time"]
+        heights = data["hourly"]["tide_height"]
+        
+        date_cible_str = dt_cible.strftime("%Y-%m-%d")
         heure_curr_str = dt_cible.strftime("%H:%M")
-        day_num = dt_cible.day
         
-        lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
-        heures_jour = []
-        jours_semaine_fr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+        jour_indices = [i for i, t in enumerate(times) if t.startswith(date_cible_str)]
+        if not jour_indices:
+            return "--:--", "--:--"
+            
+        pms = []
+        bms = []
         
-        # Étape 1 : Recherche dans le tableau latéral (lignes contenant un jour de la semaine et 4 horaires)
-        sidebar_lignes = []
-        for ligne in lignes:
-            has_jour = any(j in ligne for j in jours_semaine_fr)
-            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-            if has_jour and len(h_trouvees) >= 4:
-                h4 = h_trouvees[:4]
-                if h4 not in sidebar_lignes:
-                    sidebar_lignes.append(h4)
-                
-                # Vérification de correspondance exacte du numéro du jour
-                texte_brut = re.sub(r'<[^>]+>', ' ', ligne)
-                mots = [m.strip() for m in texte_brut.split()]
-                if str(day_num) in mots or f"{day_num:02d}" in mots:
-                    heures_jour = h4
+        for i in range(1, len(jour_indices) - 1):
+            idx = jour_indices[i]
+            h_prev = heights[idx - 1]
+            h_curr = heights[idx]
+            h_next = heights[idx + 1]
+            
+            if h_prev is not None and h_curr is not None and h_next is not None:
+                if h_curr > h_prev and h_curr >= h_next:
+                    t_str = times[idx].split("T")[1][:5]
+                    if t_str not in pms: pms.append(t_str)
+                elif h_curr < h_prev and h_curr <= h_next:
+                    t_str = times[idx].split("T")[1][:5]
+                    if t_str not in bms: bms.append(t_str)
+                    
+        if not pms: pms = ["--:--"]
+        if not bms: bms = ["--:--"]
         
-        # Étape 2 : Si non trouvé par numéro exact, utilisation du delta de jours par rapport à aujourd'hui
-        if not heures_jour and sidebar_lignes:
-            delta_jours = (dt_cible - now_france.date()).days
-            if 0 <= delta_jours < len(sidebar_lignes):
-                heures_jour = sidebar_lignes[delta_jours]
-            else:
-                heures_jour = sidebar_lignes[0]
-                
-        if not heures_jour:
-            heures_jour = ["00:59", "06:41", "13:24", "18:58"]
-
-        bms = [heures_jour[0], heures_jour[2]]
-        pms = [heures_jour[1], heures_jour[3]]
-
-        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
-        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0])
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0])
         
         return next_pm, next_bm
     except Exception:
-        return "18:58", "13:24"
+        return "--:--", "--:--"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -257,8 +253,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-LAT_SM, LON_SM = 48.6493, -2.0089
-
 dirs_code_16 = [
     "N", "NNE", "NE", "ENE",
     "E", "ESE", "SE", "SSE",
@@ -374,9 +368,9 @@ except:
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
 
+marine_data = _fetch_marine_data()
 try:
-    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=sea_surface_temperature", timeout=5).json()
-    temp_mer = round(rm["current"]["sea_surface_temperature"], 1)
+    temp_mer = round(marine_data["current"]["sea_surface_temperature"], 1)
 except:
     temp_mer = 16.0
 
