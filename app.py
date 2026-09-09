@@ -18,12 +18,12 @@ now_france = datetime.now(tz_france)
 if "heure_selectionnee_str" not in st.session_state:
     st.session_state["heure_selectionnee_str"] = now_france.strftime("%H:%M")
 
-if "date_selectionnee" not in st.session_state:
-    st.session_state["date_selectionnee"] = now_france.date()
+if "choix_jour" not in st.session_state:
+    st.session_state["choix_jour"] = "Aujourd'hui"
 
 def reinitialiser_heure():
     st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
-    st.session_state["date_selectionnee"] = datetime.now(tz_france).date()
+    st.session_state["choix_jour"] = "Aujourd'hui"
 
 def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
     if pluie > 0.2:
@@ -46,7 +46,8 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        date_str = dt_cible.strftime("%Y%m%d")
+        # Format exact attendu par maree.info : ?d=DDMMYYYY
+        date_str = dt_cible.strftime("%d%m%Y")
         url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
@@ -54,30 +55,28 @@ def récupérer_marées_réelles(dt_cible):
         
         heure_curr_str = dt_cible.strftime("%H:%M")
 
-        # Extraction ciblée sur le tableau principal des marées du jour
         tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
         pms, bms = [], []
         
         if tableau_match:
             tableau_html = tableau_match.group(1)
-            # On cherche les lignes du tableau pour associer correctement PM et BM à leurs heures
             lignes = re.findall(r'<tr.*?>(.*?)</tr>', tableau_html, re.DOTALL)
             for ligne in lignes:
-                if '<b>PM</b>' in ligne:
-                    h_match = re.search(r'(\d{2}h\d{2})', ligne)
-                    if h_match:
-                        pms.append(h_match.group(1).replace("h", ":"))
-                elif '<b>BM</b>' in ligne:
-                    h_match = re.search(r'(\d{2}h\d{2})', ligne)
-                    if h_match:
-                        bms.append(h_match.group(1).replace("h", ":"))
+                time_match = re.search(r'(\d{2}h\d{2})', ligne)
+                if time_match:
+                    t_str = time_match.group(1).replace("h", ":")
+                    if 'PM' in ligne.upper():
+                        pms.append(t_str)
+                    elif 'BM' in ligne.upper():
+                        bms.append(t_str)
 
-        # Si le parsing structuré échoue, on récupère de manière séquentielle toutes les heures
         if not pms or not bms:
             toutes_les_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
-            if len(toutes_les_heures) >= 4:
-                bms = [toutes_les_heures[0], toutes_les_heures[2]]
-                pms = [toutes_les_heures[1], toutes_les_heures[3]]
+            seen = set()
+            unique_times = [x for x in toutes_les_heures if not (x in seen or seen.add(x))]
+            if len(unique_times) >= 4:
+                bms = [unique_times[0], unique_times[2]]
+                pms = [unique_times[1], unique_times[3]]
             else:
                 pms, bms = ["06:41", "18:58"], ["00:59", "13:24"]
 
@@ -308,23 +307,24 @@ if st.session_state["heure_selectionnee_str"] not in liste_heures:
 with st.expander("⚙️ Options & Horaire de simulation"):
     col_date, col_time = st.columns([1, 1])
     with col_date:
-        date_cible = st.date_input("Choisir un jour", value=st.session_state["date_selectionnee"], key="date_selectionnee")
+        choix_jour = st.radio("Jour de simulation", ["Aujourd'hui", "Demain"], key="choix_jour", horizontal=True)
     with col_time:
         heure_str = st.selectbox("Choisir une heure", options=liste_heures, key="heure_selectionnee_str")
         
-    st.button("🔄 Réinitialiser à l'heure et date actuelles", on_click=reinitialiser_heure, use_container_width=True)
+    st.button("🔄 Réinitialiser à l'heure actuelle", on_click=reinitialiser_heure, use_container_width=True)
     use_manual = st.checkbox("Activer le mode météo manuelle")
 
 heure_h, heure_m = map(int, heure_str.split(":"))
 heure_selectionnee = time(heure_h, heure_m)
 
+date_cible = now_france.date()
+if choix_jour == "Demain":
+    date_cible += timedelta(days=1)
+
 dt_local = datetime.combine(date_cible, heure_selectionnee).replace(tzinfo=tz_france)
 dt_utc = dt_local.astimezone(timezone.utc)
 
-if date_cible == now_france.date():
-    label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}"
-else:
-    label_jour = f"pour le {date_cible.strftime('%d/%m/%Y')} à {heure_selectionnee.strftime('%H:%M')}"
+label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Aujourd'hui" else f"pour Demain à {heure_selectionnee.strftime('%H:%M')}"
 
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
