@@ -64,8 +64,9 @@ def récupérer_marées_réelles(dt_cible):
         for ligne in lignes:
             h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
             if len(h_trouvees) >= 4:
-                if h_trouvees not in jours_marées:
-                    jours_marées.append(h_trouvees)
+                4_heures = h_trouvees[:4]
+                if 4_heures not in jours_marées:
+                    jours_marées.append(4_heures)
         
         delta_jours = (dt_cible - now_france.date()).days
         
