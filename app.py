@@ -56,22 +56,23 @@ def _fetch_marees_semaine():
 def récupérer_marées_réelles(dt_cible):
     try:
         html = _fetch_marees_semaine()
-        jour_num = dt_cible.day
         heure_curr_str = dt_cible.strftime("%H:%M")
         
         lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
-        heures_jour = []
+        jours_marées = []
         
         for ligne in lignes:
-            texte_ligne = re.sub(r'<[^>]+>', ' ', ligne)
-            if re.search(r'\b' + str(jour_num) + r'\b', texte_ligne):
-                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', texte_ligne)]
-                if len(h_trouvees) >= 4:
-                    heures_jour = h_trouvees
-                    break
-                    
-        if len(heures_jour) < 4:
-            heures_jour = ["01:57", "07:28", "14:18", "19:43"]
+            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+            if len(h_trouvees) >= 4:
+                if h_trouvees not in jours_marées:
+                    jours_marées.append(h_trouvees)
+        
+        delta_jours = (dt_cible - now_france.date()).days
+        
+        if 0 <= delta_jours < len(jours_marées):
+            heures_jour = jours_marées[delta_jours]
+        else:
+            heures_jour = jours_marées[0] if jours_marées else ["00:59", "06:41", "13:24", "18:58"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
