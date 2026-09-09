@@ -44,8 +44,9 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
         return "💨 TROP FRAIS", "#cc0000"
 
 @st.cache_data(ttl=3600)
-def _fetch_page(url):
+def _fetch_horaire_maree_site():
     try:
+        url = "https://horaire-maree.fr/maree/SAINT-MALO/"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
         return resp.text
@@ -54,20 +55,23 @@ def _fetch_page(url):
 
 def récupérer_marées_réelles(dt_cible):
     try:
-        delta_jours = (dt_cible - now_france.date()).days
+        html = _fetch_horaire_maree_site()
         heure_curr_str = dt_cible.strftime("%H:%M")
+        delta_jours = (dt_cible - now_france.date()).days
         
-        html = _fetch_page("https://horaire-maree.fr/maree/SAINT-MALO/")
-        lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
+        toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
         
+        # Filtrage pour éliminer les doublons successifs et n'isoler que les blocs de journées complets (4 horaires par jour)
         jours_marées = []
-        for ligne in lignes:
-            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-            if len(h_trouvees) >= 4:
-                bloc = h_trouvees[:4]
-                if bloc not in jours_marées:
-                    jours_marées.append(bloc)
-                    
+        i = 0
+        while i < len(toutes_heures) - 3:
+            bloc = toutes_heures[i:i+4]
+            if not jours_marées or bloc != jours_marées[-1]:
+                jours_marées.append(bloc)
+                i += 4
+            else:
+                i += 1
+                
         if 0 <= delta_jours < len(jours_marées):
             heures_jour = jours_marées[delta_jours]
         else:
