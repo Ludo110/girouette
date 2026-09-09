@@ -61,21 +61,20 @@ def récupérer_marées_réelles(dt_cible):
         
         toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
         
-        # Filtrage pour éliminer les doublons successifs et n'isoler que les blocs de journées complets (4 horaires par jour)
-        jours_marées = []
-        i = 0
-        while i < len(toutes_heures) - 3:
-            bloc = toutes_heures[i:i+4]
-            if not jours_marées or bloc != jours_marées[-1]:
-                jours_marées.append(bloc)
-                i += 4
-            else:
-                i += 1
-                
-        if 0 <= delta_jours < len(jours_marées):
-            heures_jour = jours_marées[delta_jours]
+        if not toutes_heures:
+            return "18:56", "13:26"
+            
+        if delta_jours == 0:
+            # Aujourd'hui : premier bloc du haut (4 premiers horaires)
+            heures_jour = toutes_heures[:4]
         else:
-            heures_jour = ["01:03", "06:37", "13:26", "18:56"] if delta_jours == 0 else ["01:52", "07:22", "14:10", "19:39"]
+            # Demain et suivants : tableau des 10 prochains jours (commence après le bloc du haut)
+            table_heures = toutes_heures[4:]
+            block_idx = delta_jours - 1
+            if block_idx * 4 + 4 <= len(table_heures):
+                heures_jour = table_heures[block_idx * 4 : block_idx * 4 + 4]
+            else:
+                heures_jour = table_heures[:4] if table_heures else ["01:52", "07:22", "14:10", "19:39"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
