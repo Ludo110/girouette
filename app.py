@@ -46,7 +46,6 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        # On passe la date exacte dans l'URL pour forcer maree.info à charger le bon jour
         date_str = dt_cible.strftime("%Y%m%d")
         url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -55,18 +54,18 @@ def récupérer_marées_réelles(dt_cible):
         
         heure_curr_str = dt_cible.strftime("%H:%M")
 
-        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
-        if tableau_match:
-            tableau_html = tableau_match.group(1)
-            pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
-            bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
-        else:
-            pms, bms = [], []
+        # Recherche large et robuste des horaires PM et BM sur la page ciblée
+        pms = [h.replace("h", ":") for h in re.findall(r'PM.*?(\d{2}h\d{2})', html, re.DOTALL)]
+        bms = [h.replace("h", ":") for h in re.findall(r'BM.*?(\d{2}h\d{2})', html, re.DOTALL)]
+
+        # Nettoyage et déduplication
+        pms = list(dict.fromkeys(pms))
+        bms = list(dict.fromkeys(bms))
 
         if not pms:
             pms = ["05:42", "18:05"]
         if not bms:
-            bms = ["12:20"]
+            bms = ["12:20", "23:48"]
 
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
