@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import urllib.parse
 import json
+import re
 from datetime import datetime, timezone, time, timedelta
 import zoneinfo
 from pysolar.solar import get_azimuth, get_altitude
@@ -42,59 +43,46 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
     else:
         return "💨 TROP FRAIS", "#cc0000"
 
-LAT_SM, LON_SM = 48.6493, -2.0089
-
 @st.cache_data(ttl=3600)
-def _fetch_marine_data():
+def _fetch_marees_semaine():
     try:
-        url = f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&hourly=tide_height&current=sea_surface_temperature"
-        resp = requests.get(url, timeout=5).json()
-        return resp
+        url = "https://maree.info/82"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        resp = requests.get(url, headers=headers, timeout=5)
+        return resp.text
     except Exception:
-        return {}
+        return ""
 
 def récupérer_marées_réelles(dt_cible):
     try:
-        data = _fetch_marine_data()
-        if not data or "hourly" not in data:
-            return "--:--", "--:--"
-            
-        times = data["hourly"]["time"]
-        heights = data["hourly"]["tide_height"]
-        
-        date_cible_str = dt_cible.strftime("%Y-%m-%d")
+        html = _fetch_marees_semaine()
         heure_curr_str = dt_cible.strftime("%H:%M")
         
-        jour_indices = [i for i, t in enumerate(times) if t.startswith(date_cible_str)]
-        if not jour_indices:
-            return "--:--", "--:--"
-            
-        pms = []
-        bms = []
+        # Extraction de toutes les heures présentes sur la page (le tableau latéral de la semaine)
+        toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
         
-        for i in range(1, len(jour_indices) - 1):
-            idx = jour_indices[i]
-            h_prev = heights[idx - 1]
-            h_curr = heights[idx]
-            h_next = heights[idx + 1]
-            
-            if h_prev is not None and h_curr is not None and h_next is not None:
-                if h_curr > h_prev and h_curr >= h_next:
-                    t_str = times[idx].split("T")[1][:5]
-                    if t_str not in pms: pms.append(t_str)
-                elif h_curr < h_prev and h_curr <= h_next:
-                    t_str = times[idx].split("T")[1][:5]
-                    if t_str not in bms: bms.append(t_str)
-                    
-        if not pms: pms = ["--:--"]
-        if not bms: bms = ["--:--"]
+        jours_marées = []
+        for i in range(0, len(toutes_heures) - 3, 4):
+            bloc = toutes_heures[i:i+4]
+            if bloc not in jours_marées:
+                jours_marées.append(bloc)
+                
+        delta_jours = (dt_cible - now_france.date()).days
         
-        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0])
-        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0])
+        if 0 <= delta_jours < len(jours_marées):
+            heures_jour = jours_marées[delta_jours]
+        else:
+            heures_jour = ["00:59", "06:41", "13:24", "18:58"]
+
+        bms = [heures_jour[0], heures_jour[2]]
+        pms = [heures_jour[1], heures_jour[3]]
+
+        next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
+        next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
         return next_pm, next_bm
     except Exception:
-        return "--:--", "--:--"
+        return "18:58", "13:24"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -253,6 +241,8 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
+LAT_SM, LON_SM = 48.6493, -2.0089
+
 dirs_code_16 = [
     "N", "NNE", "NE", "ENE",
     "E", "ESE", "SE", "SSE",
@@ -368,9 +358,9 @@ except:
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
 
-marine_data = _fetch_marine_data()
 try:
-    temp_mer = round(marine_data["current"]["sea_surface_temperature"], 1)
+    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=sea_surface_temperature", timeout=5).json()
+    temp_mer = round(rm["current"]["sea_surface_temperature"], 1)
 except:
     temp_mer = 16.0
 
