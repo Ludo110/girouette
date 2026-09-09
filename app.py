@@ -59,32 +59,18 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
         
-        if delta_jours == 0:
-            # Aujourd'hui : on extrait uniquement le bloc du haut (avant la section des 10 jours)
-            pos_fin = html.find("Marées des 10 prochains jours")
-            zone_auj = html[:pos_fin] if pos_fin != -1 else html
-            heures_jour = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', zone_auj)]
-            heures_jour = heures_jour[:4] if len(heures_jour) >= 4 else ["01:03", "06:37", "13:26", "18:56"]
+        toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
+        
+        # Chaque jour possède exactement 4 horaires (2 Basses mers, 2 Pleines mers)
+        # Indice 0 = Aujourd'hui (bloc du haut)
+        # Indice 4 = Demain (première ligne du tableau des 10 jours)
+        # Indice 8 = Après-demain (deuxième ligne), etc.
+        start_idx = delta_jours * 4
+        
+        if start_idx + 4 <= len(toutes_heures):
+            heures_jour = toutes_heures[start_idx:start_idx+4]
         else:
-            # Demain et suivants : on extrait uniquement le tableau des 10 jours (qui commence à Demain)
-            pos_debut = html.find("Marées des 10 prochains jours")
-            zone_table = html[pos_debut:] if pos_debut != -1 else html
-            
-            lignes_tr = re.findall(r'<tr[^>]*>(.*?)</tr>', zone_table, re.DOTALL)
-            jours_marées = []
-            for tr in lignes_tr:
-                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', tr)]
-                if len(h_trouvees) >= 4:
-                    bloc = h_trouvees[:4]
-                    if bloc not in jours_marées:
-                        jours_marées.append(bloc)
-                        
-            # delta_jours = 1 (Demain) correspond à l'index 0 du tableau des 10 jours
-            idx_tab = delta_jours - 1
-            if 0 <= idx_tab < len(jours_marées):
-                heures_jour = jours_marées[idx_tab]
-            else:
-                heures_jour = ["01:52", "07:22", "14:10", "19:39"]
+            heures_jour = ["01:03", "06:37", "13:26", "18:56"] if delta_jours == 0 else ["01:52", "07:22", "14:10", "19:39"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
