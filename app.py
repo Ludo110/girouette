@@ -44,9 +44,8 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
         return "💨 TROP FRAIS", "#cc0000"
 
 @st.cache_data(ttl=3600)
-def _fetch_horaire_maree_site():
+def _fetch_page(url):
     try:
-        url = "https://horaire-maree.fr/maree/SAINT-MALO/"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
         return resp.text
@@ -55,25 +54,25 @@ def _fetch_horaire_maree_site():
 
 def récupérer_marées_réelles(dt_cible):
     try:
-        html = _fetch_horaire_maree_site()
-        heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
+        heure_curr_str = dt_cible.strftime("%H:%M")
         
-        # Analyse ligne par ligne du tableau HTML pour isoler chaque jour proprement
-        lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
-        jours_marées = []
-        
-        for ligne in lignes:
-            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-            if len(h_trouvees) >= 4:
-                bloc = h_trouvees[:4]
-                if bloc not in jours_marées:
-                    jours_marées.append(bloc)
-                
-        if 0 <= delta_jours < len(jours_marées):
-            heures_jour = jours_marées[delta_jours]
+        if delta_jours == 0:
+            # Page principale pour aujourd'hui
+            html = _fetch_page("https://horaire-maree.fr/maree/SAINT-MALO/")
+            toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
+            heures_jour = toutes_heures[:4] if len(toutes_heures) >= 4 else ["01:03", "06:37", "13:26", "18:56"]
         else:
-            heures_jour = ["01:03", "06:37", "13:26", "18:56"]
+            # Pour demain et les jours suivants, on récupère la page principale et on cible la ligne correspondante du tableau des 10 jours
+            html = _fetch_page("https://horaire-maree.fr/maree/SAINT-MALO/")
+            toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
+            
+            # Les 4 premiers horaires sont aujourd'hui, les 4 suivants c'est demain, etc.
+            start_idx = delta_jours * 4
+            if start_idx + 4 <= len(toutes_heures):
+                heures_jour = toutes_heures[start_idx:start_idx+4]
+            else:
+                heures_jour = ["01:52", "07:22", "14:10", "19:39"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
@@ -83,7 +82,7 @@ def récupérer_marées_réelles(dt_cible):
         
         return next_pm, next_bm
     except Exception:
-        return "18:56", "13:26"
+        return "19:39", "14:10"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
