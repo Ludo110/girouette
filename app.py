@@ -61,32 +61,34 @@ def récupérer_marées_réelles(dt_cible):
         
         lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
         heures_jour = []
+        jours_semaine_fr = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
         
-        # Recherche prioritaire par correspondance exacte du numéro du jour dans le tableau latéral
+        # Étape 1 : Recherche dans le tableau latéral (lignes contenant un jour de la semaine et 4 horaires)
+        sidebar_lignes = []
         for ligne in lignes:
-            texte_brut = re.sub(r'<[^>]+>', ' ', ligne)
-            mots = texte_brut.split()
-            if str(day_num) in mots or f"{day_num:02d}" in mots:
-                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-                if len(h_trouvees) >= 4:
-                    heures_jour = h_trouvees[:4]
-                    break
+            has_jour = any(j in ligne for j in jours_semaine_fr)
+            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+            if has_jour and len(h_trouvees) >= 4:
+                h4 = h_trouvees[:4]
+                if h4 not in sidebar_lignes:
+                    sidebar_lignes.append(h4)
+                
+                # Vérification de correspondance exacte du numéro du jour
+                texte_brut = re.sub(r'<[^>]+>', ' ', ligne)
+                mots = [m.strip() for m in texte_brut.split()]
+                if str(day_num) in mots or f"{day_num:02d}" in mots:
+                    heures_jour = h4
         
-        # Fallback par delta de jours si la recherche par numéro échoue
-        if len(heures_jour) < 4:
-            jours_marées = []
-            for ligne in lignes:
-                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-                if len(h_trouvees) >= 4:
-                    h4 = h_trouvees[:4]
-                    if h4 not in jours_marées:
-                        jours_marées.append(h4)
-            
+        # Étape 2 : Si non trouvé par numéro exact, utilisation du delta de jours par rapport à aujourd'hui
+        if not heures_jour and sidebar_lignes:
             delta_jours = (dt_cible - now_france.date()).days
-            if 0 <= delta_jours < len(jours_marées):
-                heures_jour = jours_marées[delta_jours]
+            if 0 <= delta_jours < len(sidebar_lignes):
+                heures_jour = sidebar_lignes[delta_jours]
             else:
-                heures_jour = jours_marées[0] if jours_marées else ["00:59", "06:41", "13:24", "18:58"]
+                heures_jour = sidebar_lignes[0]
+                
+        if not heures_jour:
+            heures_jour = ["00:59", "06:41", "13:24", "18:58"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
