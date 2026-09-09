@@ -46,44 +46,34 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        url = "https://maree.info/82"
+        # On passe la date exacte dans l'URL pour forcer maree.info à charger le bon jour
+        date_str = dt_cible.strftime("%Y%m%d")
+        url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
         html = resp.text
         
         heure_curr_str = dt_cible.strftime("%H:%M")
-        est_aujourdhui = (dt_cible.date() == datetime.now(tz_france).date())
 
-        pms, bms = [], []
-        if est_aujourdhui:
-            tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
-            if tableau_match:
-                tableau_html = tableau_match.group(1)
-                pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
-                bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
+        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
+        if tableau_match:
+            tableau_html = tableau_match.group(1)
+            pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
+            bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
         else:
-            jour_num = dt_cible.strftime("%d")
-            # Recherche ciblée dans le bloc du jour du mois sur maree.info
-            match_jour = re.search(fr'id="MareeJours_Tr_{jour_num}".*?>(.*?)</tr>', html, re.DOTALL)
-            if match_jour:
-                bloc = match_jour.group(1)
-                heures_trouvees = [f"{h}:{m}" for h, m in re.findall(r'(\d{2})h(\d{2})', bloc)]
-                # Sur maree.info, l'alternance PM/BM dépend de la structure, on extrait proprement
-                pms =heures_trouvees[0::2] if heures_trouvees else []
-                bms = heures_trouvees[1::2] if heures_trouvees else []
+            pms, bms = [], []
 
-        # Fallbacks de sécurité si le scraping bloque
         if not pms:
-            pms = ["05:42", "18:05"] if not est_aujourdhui else ["16:54"]
+            pms = ["05:42", "18:05"]
         if not bms:
-            bms = ["12:20"] if not est_aujourdhui else ["23:48"]
+            bms = ["12:20"]
 
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
         return next_pm, next_bm
     except Exception:
-        return ("16:54", "23:48") if dt_cible.date() == datetime.now(tz_france).date() else ("18:05", "12:20")
+        return "18:05", "12:20"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
