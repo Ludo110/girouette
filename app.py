@@ -54,13 +54,19 @@ def récupérer_marées_réelles(dt_cible):
         
         heure_curr_str = dt_cible.strftime("%H:%M")
 
-        # Recherche large et robuste des horaires PM et BM sur la page ciblée
-        pms = [h.replace("h", ":") for h in re.findall(r'PM.*?(\d{2}h\d{2})', html, re.DOTALL)]
-        bms = [h.replace("h", ":") for h in re.findall(r'BM.*?(\d{2}h\d{2})', html, re.DOTALL)]
-
-        # Nettoyage et déduplication
-        pms = list(dict.fromkeys(pms))
-        bms = list(dict.fromkeys(bms))
+        # Extraction stricte et séquentielle des PM et BM pour éviter les confusions d'horaires
+        matches = re.findall(r'<b>(PM|BM)</b>.*?<b>(\d{2}h\d{2})</b>', html, re.DOTALL)
+        
+        pms = []
+        bms = []
+        for tide_type, time_str in matches:
+            t_formatted = time_str.replace("h", ":")
+            if tide_type == "PM":
+                if t_formatted not in pms:
+                    pms.append(t_formatted)
+            elif tide_type == "BM":
+                if t_formatted not in bms:
+                    bms.append(t_formatted)
 
         if not pms:
             pms = ["05:42", "18:05"]
