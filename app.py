@@ -59,44 +59,32 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
         
-        # On extrait toutes les lignes <tr> du site
-        lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
-        
-        blocs_par_jour = []
-        for ligne in lignes:
-            h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
-            if len(h_trouvees) >= 4:
-                bloc = h_trouvees[:4]
-                if (ligne, bloc) not in blocs_par_jour:
-                    blocs_par_jour.append((ligne, bloc))
-                    
-        if not blocs_par_jour:
-            return "18:56", "13:26"
-            
-        heures_jour = None
+        # On sépare le bloc du haut (aujourd'hui) et le tableau du bas (10 prochains jours)
+        pos_tableau = html.find("Marées des 10 prochains jours")
+        zone_aujourdhui = html[:pos_tableau] if pos_tableau != -1 else html
+        zone_suivants = html[pos_tableau:] if pos_tableau != -1 else ""
         
         if delta_jours == 0:
-            # Aujourd'hui : on prend le tout premier bloc trouvé (le bloc du haut)
-            heures_jour = blocs_par_jour[0][1]
-        elif delta_jours == 1:
-            # Demain : on cherche spécifiquement la ligne contenant le mot "Demain" dans le tableau
-            for ligne, bloc in blocs_par_jour:
-                if "Demain" in ligne:
-                    heures_jour = bloc
-                    break
-            # Fallback si le mot n'est pas trouvé : on prend le 2ème bloc (index 1)
-            if not heures_jour and len(blocs_par_jour) > 1:
-                heures_jour = blocs_par_jour[1][1]
+            # Aujourd'hui : 4 premières heures du bloc supérieur
+            h_brutes = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', zone_aujourdhui)]
+            heures_jour = h_brutes[:4] if len(h_brutes) >= 4 else ["01:03", "06:37", "13:26", "18:56"]
         else:
-            # Pour les jours suivants (> 1), on prend l'index correspondant si disponible
-            idx = delta_jours
-            if idx < len(blocs_par_jour):
-                heures_jour = blocs_par_jour[idx][1]
+            # Demain et jours suivants : on extrait les lignes du tableau des 10 jours
+            lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', zone_suivants, re.DOTALL)
+            jours_marées = []
+            for ligne in lignes:
+                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+                if len(h_trouvees) >= 4:
+                    bloc = h_trouvees[:4]
+                    if bloc not in jours_marées:
+                        jours_marées.append(bloc)
+            
+            # delta_jours = 1 (Demain) correspond au premier élément du tableau des suivants (index 0)
+            idx = delta_jours - 1
+            if 0 <= idx < len(jours_marées):
+                heures_jour = jours_marées[idx]
             else:
-                heures_jour = blocs_par_jour[-1][1]
-                
-        if not heures_jour:
-            heures_jour = ["01:03", "06:37", "13:26", "18:56"]
+                heures_jour = ["01:52", "07:22", "14:10", "19:39"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
