@@ -46,39 +46,31 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        date_str = dt_cible.strftime("%Y%m%d")
-        url = f"https://maree.info/82?d={date_str}"
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-        resp = requests.get(url, headers=headers, timeout=5)
-        html = resp.text
+        # Utilisation de l'API Open-Meteo Marine pour les marées (fiable et sans blocage)
+        url = f"https://marine-api.open-meteo.com/v1/marine?latitude=48.6493&longitude=-2.0089&hourly=sea_level&start_date={dt_cible.strftime('%Y-%m-%d')}&end_date={dt_cible.strftime('%Y-%m-%d')}"
+        resp = requests.get(url, timeout=5).json()
         
-        heure_curr_str = dt_cible.strftime("%H:%M")
-
-        # Extraction stricte et séquentielle des PM et BM pour éviter les confusions d'horaires
-        matches = re.findall(r'<b>(PM|BM)</b>.*?<b>(\d{2}h\d{2})</b>', html, re.DOTALL)
+        times = resp["hourly"]["time"]
+        levels = resp["hourly"]["sea_level"]
         
+        # Détection des pics (Pleines mers) et creux (Basses mers) locaux
         pms = []
         bms = []
-        for tide_type, time_str in matches:
-            t_formatted = time_str.replace("h", ":")
-            if tide_type == "PM":
-                if t_formatted not in pms:
-                    pms.append(t_formatted)
-            elif tide_type == "BM":
-                if t_formatted not in bms:
-                    bms.append(t_formatted)
+        for i in range(1, len(levels) - 1):
+            if levels[i] is not None and levels[i-1] is not None and levels[i+1] is not None:
+                if levels[i] > levels[i-1] and levels[i] > levels[i+1]:
+                    pms.append(times[i][11:16])
+                elif levels[i] < levels[i-1] and levels[i] < levels[i+1]:
+                    bms.append(times[i][11:16])
 
-        if not pms:
-            pms = ["05:42", "18:05"]
-        if not bms:
-            bms = ["12:20", "23:48"]
-
+        heure_curr_str = dt_cible.strftime("%H:%M")
+        
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
         
         return next_pm, next_bm
     except Exception:
-        return "18:05", "12:20"
+        return "--:--", "--:--"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
