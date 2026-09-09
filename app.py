@@ -46,7 +46,6 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        # On force toujours la date exacte dans l'URL pour viser le bon jour dynamiquement
         date_str = dt_cible.strftime("%Y%m%d")
         url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -55,13 +54,12 @@ def récupérer_marées_réelles(dt_cible):
         
         heure_curr_str = dt_cible.strftime("%H:%M")
 
-        tableau_match = re.search(r'<table id="MareeJours_MareeJour".*?>(.*?)</table>', html, re.DOTALL)
-        if tableau_match:
-            tableau_html = tableau_match.group(1)
-            pms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>PM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
-            bms = [h.replace("h", ":") for h in re.findall(r'<td.*?><b>BM</b></td>.*?<td.*?><b>(\d{2}h\d{2})</b>', tableau_html, re.DOTALL)]
-        else:
-            pms, bms = [], []
+        # Recherche large et robuste indépendante des balises HTML exactes
+        pms = [h.replace("h", ":") for h in re.findall(r'PM[^0-9]*?(\d{2}h\d{2})', html, re.IGNORECASE | re.DOTALL)]
+        bms = [h.replace("h", ":") for h in re.findall(r'BM[^0-9]*?(\d{2}h\d{2})', html, re.IGNORECASE | re.DOTALL)]
+
+        pms = list(dict.fromkeys(pms))
+        bms = list(dict.fromkeys(bms))
 
         next_pm = next((h for h in pms if h >= heure_curr_str), pms[0] if pms else "--:--")
         next_bm = next((h for h in bms if h >= heure_curr_str), bms[0] if bms else "--:--")
