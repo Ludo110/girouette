@@ -59,18 +59,33 @@ def récupérer_marées_réelles(dt_cible):
         heure_curr_str = dt_cible.strftime("%H:%M")
         delta_jours = (dt_cible - now_france.date()).days
         
-        toutes_heures = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', html)]
-        
-        # Chaque jour possède exactement 4 horaires (2 Basses mers, 2 Pleines mers)
-        # Indice 0 = Aujourd'hui (bloc du haut)
-        # Indice 4 = Demain (première ligne du tableau des 10 jours)
-        # Indice 8 = Après-demain (deuxième ligne), etc.
-        start_idx = delta_jours * 4
-        
-        if start_idx + 4 <= len(toutes_heures):
-            heures_jour = toutes_heures[start_idx:start_idx+4]
+        if delta_jours == 0:
+            # 1. Aujourd'hui : on extrait uniquement le premier bloc du haut (avant "Marées des 10 prochains jours")
+            pos_coupure = html.find("Marées des 10 prochains jours")
+            zone_haut = html[:pos_coupure] if pos_coupure != -1 else html
+            heures_jour = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', zone_haut)]
+            heures_jour = heures_jour[:4] if len(heures_jour) >= 4 else ["01:03", "06:37", "13:26", "18:56"]
         else:
-            heures_jour = ["01:03", "06:37", "13:26", "18:56"] if delta_jours == 0 else ["01:52", "07:22", "14:10", "19:39"]
+            # 2. Demain et jours suivants : on extrait uniquement le tableau du bas
+            pos_coupure = html.find("Marées des 10 prochains jours")
+            zone_tableau = html[pos_coupure:] if pos_coupure != -1 else html
+            
+            # On découpe ligne par ligne dans le tableau du bas pour attribuer 4 horaires par jour
+            lignes = re.findall(r'<tr[^>]*>(.*?)</tr>', zone_tableau, re.DOTALL)
+            jours_marées = []
+            for ligne in lignes:
+                h_trouvees = [h.replace("h", ":") for h in re.findall(r'(\d{2}h\d{2})', ligne)]
+                if len(h_trouvees) >= 4:
+                    bloc = h_trouvees[:4]
+                    if bloc not in jours_marées:
+                        jours_marées.append(bloc)
+            
+            # delta_jours = 1 correspond à la première ligne du tableau du bas (Demain)
+            idx_tableau = delta_jours - 1
+            if 0 <= idx_tableau < len(jours_marées):
+                heures_jour = jours_marées[idx_tableau]
+            else:
+                heures_jour = ["01:52", "07:22", "14:10", "19:39"]
 
         bms = [heures_jour[0], heures_jour[2]]
         pms = [heures_jour[1], heures_jour[3]]
