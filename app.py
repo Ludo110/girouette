@@ -46,7 +46,8 @@ def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
 @st.cache_data(ttl=3600)
 def récupérer_marées_réelles(dt_cible):
     try:
-        date_str = dt_cible.strftime("%Y%m%d")
+        # Correction du format de date attendu par maree.info (?d=JJMMAAAA)
+        date_str = dt_cible.strftime("%d%m%Y")
         url = f"https://maree.info/82?d={date_str}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
         resp = requests.get(url, headers=headers, timeout=5)
