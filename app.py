@@ -350,7 +350,6 @@ label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Au
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-# Tolérance assouplie : on considère qu'une heure est passée uniquement si elle a plus de 35 minutes de retard sur l'heure actuelle
 est_passe = (choix_jour == "Aujourd'hui" and dt_local < now_france - timedelta(minutes=35))
 est_instant_present = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 1800)
 
@@ -572,10 +571,10 @@ elif st.session_state["onglet"] == "webcam":
     <div class='rect-style' style='padding:20px; max-width:900px; margin:0 auto; text-align:center;'>
         <h3 style='color:#436e64; margin-top:0;'>📹 Thermes Marins de Saint-Malo en direct</h3>
         <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-            <iframe src="https://www.vision-environnement.com/live/player/stmalo40.php" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen></iframe>
+            <iframe src="https://www.vision-environnement.com/live/player/stmalo40.php" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen scrolling="no" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
         </div>
-        <p style="margin-top:15px; font-size:0.9em; color:#444;">
-            🌊 <i>Vue en direct avec la surimpression météo intégrée.</i>
+        <p style="margin-top:15px; font-size:0.95em; color:#444;">
+            📱 <i>Si la vidéo tourne en boucle sur iPhone (Safari), <a href="https://www.vision-environnement.com/live/stmalo" target="_blank" style="color:#2d5a27; font-weight:bold; text-decoration:underline;">cliquez ici pour l'ouvrir directement sur le site d'origine</a>.</i>
         </p>
     </div>
     """, unsafe_allow_html=True)
