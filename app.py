@@ -95,6 +95,18 @@ def récupérer_marées_réelles(dt_cible):
     except Exception:
         return "--:--", "--:--"
 
+@st.cache_data(ttl=600)
+def récupérer_temperature_live():
+    """Tente de récupérer la température réelle de la station locale en direct"""
+    try:
+        url = "https://www.vision-environnement.com/live/json/stmalo40.json"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        resp = requests.get(url, headers=headers, timeout=2)
+        data = resp.json()
+        return float(data.get("temperature", data.get("temp", None)))
+    except Exception:
+        return None
+
 # Styles dynamiques des 4 onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -340,6 +352,7 @@ label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Au
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
+# Récupération Open-Meteo pour les prévisions globales
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation,precipitation", timeout=5).json()
     
@@ -351,10 +364,7 @@ try:
     
     auto_v = int(r["hourly"]["wind_speed_10m"][idx])
     auto_a = float(r["hourly"]["wind_direction_10m"][idx])
-    
-    # Application d'un coefficient correcteur (-2.0°C par exemple pour coller à la réalité côtière du Sillon)
-    temp_air = round(r["hourly"]["temperature_2m"][idx] - 2.0, 1)
-    
+    temp_air_modele = round(r["hourly"]["temperature_2m"][idx], 1)
     rad = r["hourly"]["direct_radiation"][idx]
     pluie = r["hourly"]["precipitation"][idx]
     
@@ -370,10 +380,19 @@ try:
         soleil_txt = "☁️ Couvert"
 except:
     auto_v, auto_a = 15, 270.0
-    temp_air = 15.0
+    temp_air_modele = 18.0
     rad = 300.0
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
+
+# Logique séparée : Température réelle locale pour l'heure actuelle (Live), prévision globale pour le futur/simulation
+est_heure_actuelle = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 3600)
+
+if est_heure_actuelle:
+    temp_live = récupérer_temperature_live()
+    temp_air = temp_live if temp_live is not None else temp_air_modele
+else:
+    temp_air = temp_air_modele
 
 try:
     rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=wave_height,wave_period,sea_surface_temperature", timeout=5).json()
