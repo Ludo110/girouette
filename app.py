@@ -517,22 +517,16 @@ elif st.session_state["onglet"] == "plongee":
     """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : WEBCAM THERMES MARINS
+# ONGLET 4 : WEBCAM THERMES MARINS (Direct YouTube)
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Thermes Marins / Le Sillon</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     st.markdown("""
-    <div class='rect-style' style='padding:30px; max-width:600px; margin:0 auto; text-align:center;'>
-        <h3 style='color:#436e64; margin-top:0;'>📹 Webcam des Thermes Marins</h3>
-        <p style='color:#444; margin-bottom:25px;'>
-            Accédez directement à la vue en direct de la digue et de la plage du Sillon depuis les Thermes Marins de Saint-Malo.
-        </p>
-        <a href="https://saintmaloinfo.fr/webcams/" target="_blank" style="background-color:#436e64; color:#f0ede6; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display:inline-block;">
-            🚀 Ouvrir la Webcam des Thermes Marins
-        </a>
-        <p style="margin-top:25px; font-size:0.85em; color:#666;">
-            🌊 Idéal pour observer l'état réel de la mer, des vagues et de la météo sur la grande plage.
-        </p>
+    <div class='rect-style' style='padding:25px; max-width:800px; margin:0 auto; text-align:center;'>
+        <h3 style='color:#436e64; margin-top:0;'>📹 La digue de Saint-Malo en direct</h3>
     </div>
     """, unsafe_allow_html=True)
+
+    # Intégration native et fluide du flux YouTube en direct des Thermes Marins
+    st.video("https://www.youtube.com/watch?v=Fj-yZomW5mU")
