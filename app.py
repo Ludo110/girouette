@@ -350,9 +350,9 @@ label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Au
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-# Détection si l'heure sélectionnée est dans le passé (par rapport à maintenant)
-est_passe = (choix_jour == "Aujourd'hui" and dt_local < now_france - timedelta(minutes=5))
-est_instant_present = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 900)
+# Tolérance assouplie : on considère qu'une heure est passée uniquement si elle a plus de 35 minutes de retard sur l'heure actuelle
+est_passe = (choix_jour == "Aujourd'hui" and dt_local < now_france - timedelta(minutes=35))
+est_instant_present = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 1800)
 
 try:
     url_météo = (
@@ -363,15 +363,13 @@ try:
     r = requests.get(url_météo, timeout=5).json()
     
     if est_passe:
-        # Heure passée : on bloque l'affichage météo
         temp_air = None
         auto_v = 0
         auto_a = 0.0
         rad = 0.0
         pluie = 0.0
-        soleil_txt = "⏳ Heure passée (Non disponible)"
+        soleil_txt = "⏳ Heure passée"
     elif est_instant_present and "current" in r:
-        # Heure actuelle : Données réelles en direct
         temp_air = round(r["current"]["temperature_2m"], 1)
         auto_v = int(r["current"]["wind_speed_10m"])
         auto_a = float(r["current"]["wind_direction_10m"])
@@ -379,7 +377,6 @@ try:
         pluie = 0.0
         soleil_txt = "☀️ Ensoleillé / Direct"
     else:
-        # Heure future ou demain : Modèle prévisionnel
         iso_cible = dt_local.strftime("%Y-%m-%dT%H:00")
         if "hourly" in r and iso_cible in r["hourly"]["time"]:
             idx = r["hourly"]["time"].index(iso_cible)
