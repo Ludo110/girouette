@@ -96,14 +96,14 @@ def récupérer_marées_réelles(dt_cible):
         return "--:--", "--:--"
 
 @st.cache_data(ttl=600)
-def récupérer_temperature_live():
-    """Tente de récupérer la température réelle de la station locale en direct"""
+def récupérer_temperature_mole():
+    """Récupère la température en direct de la station StatIC du Môle des Noires (000YV) via l'API Infoclimat"""
     try:
-        url = "https://www.vision-environnement.com/live/json/stmalo40.json"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(url, headers=headers, timeout=2)
+        url = "https://www.infoclimat.fr/public-api/static/json/?id=000YV&auth=Tldx1OehbMsR6xzpQDzArHPJkGeBZX9Gb8dF0Qd3pqaUpart2w&format=json"
+        resp = requests.get(url, timeout=4)
         data = resp.json()
-        return float(data.get("temperature", data.get("temp", None)))
+        # Extraction de la température courante sur la station StatIC
+        return float(data.get("temperature", data.get("current", {}).get("temperature", None)))
     except Exception:
         return None
 
@@ -385,12 +385,12 @@ except:
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
 
-# Logique séparée : Température réelle locale pour l'heure actuelle (Live), prévision globale pour le futur/simulation
+# Logique hybride : Température réelle du Môle des Noires pour l'heure actuelle, modèle global pour le reste
 est_heure_actuelle = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 3600)
 
 if est_heure_actuelle:
-    temp_live = récupérer_temperature_live()
-    temp_air = temp_live if temp_live is not None else temp_air_modele
+    temp_mole = récupérer_temperature_mole()
+    temp_air = temp_mole if temp_mole is not None else temp_air_modele
 else:
     temp_air = temp_air_modele
 
