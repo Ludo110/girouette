@@ -102,7 +102,21 @@ def récupérer_temperature_mole():
         url = "https://www.infoclimat.fr/public-api/static/json/?id=000YV&auth=Tldx1OehbMsR6xzpQDzArHPJkGeBZX9Gb8dF0Qd3pqaUpart2w&format=json"
         resp = requests.get(url, timeout=4)
         data = resp.json()
-        return float(data.get("temperature", data.get("current", {}).get("temperature", None)))
+        
+        # Recherche flexible de la température dans le JSON Infoclimat
+        if "temperature" in data:
+            return float(data["temperature"])
+        if "current" in data and "temperature" in data["current"]:
+            return float(data["current"]["temperature"])
+        if "000YV" in data and isinstance(data["000YV"], dict):
+            station_data = data["000YV"]
+            if "temperature" in station_data:
+                return float(station_data["temperature"])
+            # Parfois stocké dans les observations horaires les plus récentes
+            derniere_heure = list(station_data.values())[-1]
+            if isinstance(derniere_heure, dict) and "temperature" in derniere_heure:
+                return float(derniere_heure["temperature"])
+        return None
     except Exception:
         return None
 
@@ -384,10 +398,12 @@ except:
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
 
-# Logique hybride : Température réelle du Môle des Noires pour aujourd'hui, modèle global pour le reste
-est_aujourdhui = (choix_jour == "Aujourd'hui")
+# Logique de ciblage : La température du Môle s'applique si on est aujourd'hui
+# ET que l'heure sélectionnée correspond au moment présent ou au quart d'heure suivant (fenêtre de 15 minutes)
+diff_secondes = (dt_local - now_france).total_seconds()
+est_tranche_actuelle = (choix_jour == "Aujourd'hui" and -300 <= diff_secondes <= 900)
 
-if est_aujourdhui:
+if est_tranche_actuelle:
     temp_mole = récupérer_temperature_mole()
     temp_air = temp_mole if temp_mole is not None else temp_air_modele
 else:
