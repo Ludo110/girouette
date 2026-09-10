@@ -95,20 +95,6 @@ def récupérer_marées_réelles(dt_cible):
     except Exception:
         return "--:--", "--:--"
 
-@st.cache_data(ttl=600)
-def récupérer_meteo_thermes_marins():
-    """Tente de récupérer la température réelle de la station météo des Thermes Marins"""
-    try:
-        url = "https://www.vision-environnement.com/live/json/stmalo40.json"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(url, headers=headers, timeout=3)
-        data = resp.json()
-        # Extraction de la température de la station si disponible dans le JSON
-        temp_reel = float(data.get("temperature", data.get("temp", None)))
-        return temp_reel
-    except Exception:
-        return None
-
 # Styles dynamiques des 4 onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -354,7 +340,6 @@ label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Au
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-# Récupération Open-Meteo pour le vent, les prévisions et le rayonnement
 try:
     r = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,direct_radiation,precipitation", timeout=5).json()
     
@@ -366,7 +351,10 @@ try:
     
     auto_v = int(r["hourly"]["wind_speed_10m"][idx])
     auto_a = float(r["hourly"]["wind_direction_10m"][idx])
-    temp_air_modele = round(r["hourly"]["temperature_2m"][idx], 1)
+    
+    # Application d'un coefficient correcteur (-2.0°C par exemple pour coller à la réalité côtière du Sillon)
+    temp_air = round(r["hourly"]["temperature_2m"][idx] - 2.0, 1)
+    
     rad = r["hourly"]["direct_radiation"][idx]
     pluie = r["hourly"]["precipitation"][idx]
     
@@ -382,17 +370,10 @@ try:
         soleil_txt = "☁️ Couvert"
 except:
     auto_v, auto_a = 15, 270.0
-    temp_air_modele = 18.0
+    temp_air = 15.0
     rad = 300.0
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
-
-# Priorité à la station réelle des Thermes Marins si on est sur le jour "Aujourd'hui"
-temp_reel_station = récupérer_meteo_thermes_marins()
-if choix_jour == "Aujourd'hui" and temp_reel_station is not None:
-    temp_air = temp_reel_station
-else:
-    temp_air = temp_air_modele
 
 try:
     rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=wave_height,wave_period,sea_surface_temperature", timeout=5).json()
@@ -421,7 +402,7 @@ ori_code = dirs_code_16[idx_dir]
 # ONGLET 1 : BRONZETTE
 # -----------------------------------------------------------------------------
 if st.session_state["onglet"] == "bronzette":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> <i>(Station Thermes)</i> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     if sol_alt <= 2:
         st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil est couché à cette heure-là ! Pas de bronzette possible.</b></div>", unsafe_allow_html=True)
