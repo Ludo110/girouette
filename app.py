@@ -299,7 +299,7 @@ with nav_col3:
         st.rerun()
 
 with nav_col4:
-    if st.button("📹 Webcam Le Sillon", use_container_width=True):
+    if st.button("📹 Webcam Intra-Muros", use_container_width=True):
         st.session_state["onglet"] = "webcam"
         st.rerun()
 
@@ -517,19 +517,19 @@ elif st.session_state["onglet"] == "plongee":
     """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : WEBCAM LE SILLON
+# ONGLET 4 : WEBCAM INTRA-MUROS (Skaping)
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Le Sillon en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Intra-Muros en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class='rect-style' style='padding:20px; max-width:800px; margin:0 auto; text-align:center;'>
-        <h3 style='color:#436e64; margin-top:0;'>📹 La digue du Sillon en direct</h3>
+        <h3 style='color:#436e64; margin-top:0;'>📹 Saint-Malo Intra-Muros & Panoramique</h3>
         <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-            <iframe src="https://pv.viewsurf.com/1314/Dinard?i=NTQ1Njp1bmRlZmluZWQ" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen></iframe>
+            <iframe src="https://www.skaping.com/saint-malo/intra-muros/panoramique/video" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen></iframe>
         </div>
         <p style="margin-top:15px; font-size:0.9em; color:#444;">
-            🌊 <i>Vue en direct sur la baie et la mer depuis les côtes malouines.</i>
+            🌊 <i>Vue panoramique en direct sur la ville, les remparts et la mer.</i>
         </p>
     </div>
     """, unsafe_allow_html=True)
