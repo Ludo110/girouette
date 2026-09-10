@@ -568,29 +568,17 @@ elif st.session_state["onglet"] == "plongee":
 elif st.session_state["onglet"] == "webcam":
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Thermes Marins en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
-    # Intégration propre via components.v1.html pour exécuter le HTML/JS sans affichage de code brut
+    # Intégration optimisée avec le lecteur natif iOS compatible pour éviter la boucle infinie
     components.html("""
     <div style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; max-width: 900px; margin: 0 auto; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
         <h3 style="color:#436e64; margin-top:0;">📹 Thermes Marins de Saint-Malo en direct</h3>
         
-        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-            <iframe src="https://www.vision-environnement.com/live/player/stmalo40.php" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen allow="autoplay; fullscreen; picture-in-picture"></iframe>
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #000;">
+            <iframe src="https://www.vision-environnement.com/live/player/stmalo40.php" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen; picture-in-picture; encrypted-media"></iframe>
         </div>
-
-        <div id="ios-fallback" style="display:none; margin-top:15px; padding:12px; background:rgba(67, 110, 100, 0.1); border-radius:8px;">
-            <p style="margin:0 0 10px 0; color:#333; font-size:0.95em;">📱 <i>Sur iPhone, les flux sécurisés s'ouvrent directement en plein écran :</i></p>
-            <a href="https://www.vision-environnement.com/live/stmalo" target="_blank" style="display:inline-block; background-color:#436e64; color:#f0ede6; padding:10px 20px; border-radius:8px; font-weight:bold; text-decoration:none;">🎥 Voir le direct des Thermes Marins</a>
-        </div>
-
-        <script>
-            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            if (isIOS) {
-                document.getElementById('ios-fallback').style.display = 'block';
-            }
-        </script>
 
         <p style="margin-top:15px; font-size:0.9em; color:#444;">
             🌊 <i>Vue panoramique en direct depuis les Thermes Marins de Saint-Malo.</i>
         </p>
     </div>
-    """, height=620, scrolling=False)
+    """, height=580, scrolling=False)
