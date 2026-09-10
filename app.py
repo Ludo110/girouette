@@ -299,7 +299,7 @@ with nav_col3:
         st.rerun()
 
 with nav_col4:
-    if st.button("📹 Webcam Thermes", use_container_width=True):
+    if st.button("📹 Webcam Sillon", use_container_width=True):
         st.session_state["onglet"] = "webcam"
         st.rerun()
 
@@ -511,28 +511,25 @@ elif st.session_state["onglet"] == "plongee":
             <div><b>Pluie récente</b><br>{pluie} mm</div>
         </div>
         <div style='margin-top:20px; font-size:0.9em; text-align:center; color:#555;'>
-            💡 <i>Rappel : For la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
+            💡 <i>Rappel : Pour la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : WEBCAM THERMES MARINS (Via lien direct sécurisé et pérenne)
+# ONGLET 4 : WEBCAM LE SILLON (Intégration directe par iframe Viewsurf)
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Thermes Marins / Le Sillon</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Le Sillon en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     st.markdown("""
-    <div class='rect-style' style='padding:30px; max-width:600px; margin:0 auto; text-align:center;'>
-        <h3 style='color:#436e64; margin-top:0;'>📹 La digue de Saint-Malo en direct</h3>
-        <p style='color:#444; margin-bottom:25px;'>
-            Accédez instantanément au flux vidéo officiel des Thermes Marins.
-        </p>
-        <a href="https://saintmaloinfo.fr/webcams/" target="_blank" style="background-color:#436e64; color:#f0ede6; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display:inline-block;">
-            🚀 Ouvrir la Webcam des Thermes Marins
-        </a>
-        <p style="margin-top:25px; font-size:0.85em; color:#666;">
-            🌊 Idéal pour observer l'état réel des vagues, du vent et de la marée sur la grande plage.
+    <div class='rect-style' style='padding:20px; max-width:800px; margin:0 auto; text-align:center;'>
+        <h3 style='color:#436e64; margin-top:0;'>📹 La digue du Sillon en direct</h3>
+        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <iframe src="https://pv.viewsurf.com/1314/Dinard?i=NTQ1Njp1bmRlZmluZWQ" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen></iframe>
+        </div>
+        <p style="margin-top:15px; font-size:0.9em; color:#444;">
+            🌊 <i>Vue en direct sur la baie et la mer depuis les côtes malouines.</i>
         </p>
     </div>
     """, unsafe_allow_html=True)
