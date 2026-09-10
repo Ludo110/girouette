@@ -68,7 +68,8 @@ def récupérer_marées_réelles(dt_cible):
     try:
         html = _fetch_horaire_maree_site()
         heure_curr_str = dt_cible.strftime("%H:%M")
-        delta_jours = (dt_cible - now_france.date()).days
+        # Correction ici : on convertit dt_cible en .date() pour soustraire proprement deux dates
+        delta_jours = (dt_cible.date() - now_france.date()).days
         
         raw_heures = re.findall(r'(\d{2}[h:]\d{2})', html)
         heures = [h.replace("h", ":") for h in raw_heures]
@@ -93,7 +94,7 @@ def récupérer_marées_réelles(dt_cible):
         
         return next_pm, next_bm
     except Exception:
-        return "19:39", "14:10"
+        return "--:--", "--:--"
 
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
