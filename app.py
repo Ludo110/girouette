@@ -563,45 +563,30 @@ elif st.session_state["onglet"] == "plongee":
         """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : WEBCAM THERMES MARINS (LECTEUR HTML5 NATIF UNIVERSEL)
+# ONGLET 4 : WEBCAM THERMES MARINS (FLUIDE SUR IPHONE & PC)
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Thermes Marins en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
-    # Lecteur intégré avec injection d'une balise vidéo HTML5 native reconnue par l'iPhone et Safari
     components.html("""
     <div style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; max-width: 900px; margin: 0 auto; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
         <h3 style="color:#436e64; margin-top:0;">📹 Thermes Marins de Saint-Malo en direct</h3>
         
         <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); background: #000;">
-            <video id="webcam-video" autoplay muted playsinline controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"></video>
+            <!-- Utilisation d'une image dynamique propre rafraîchie à intervalle régulier -->
+            <img id="webcam-img" src="https://www.vision-environnement.com/live/stmalo40.php" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
         </div>
 
-        <!-- Chargement de la librairie hls.js pour décoder le flux vidéo sur tous les navigateurs y compris iPhone -->
-        <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
         <script>
-            var video = document.getElementById('webcam-video');
-            // Flux HLS officiel de la webcam des Thermes Marins
-            var videoSrc = 'https://stream.vision-environnement.com/live/stmalo.m3u8';
-            
-            if (Hls.isSupported()) {
-                var hls = new Hls();
-                hls.loadSource(videoSrc);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED,function() {
-                    video.play();
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Lecture native directe sur iPhone / Safari mobile
-                video.src = videoSrc;
-                video.addEventListener('loadedmetadata', function() {
-                    video.play();
-                });
-            }
+            // Rafraîchissement automatique toutes les 15 secondes pour garantir un rendu dynamique et fluide sur iPhone
+            setInterval(function() {
+                var img = document.getElementById('webcam-img');
+                img.src = "https://www.vision-environnement.com/live/stmalo40.php?t=" + new Date().getTime();
+            }, 15000);
         </script>
 
         <p style="margin-top:15px; font-size:0.9em; color:#444;">
-            🌊 <i>Flux vidéo direct natif depuis les Thermes Marins de Saint-Malo.</i>
+            🌊 <i>Vue panoramique mise à jour en temps réel.</i>
         </p>
     </div>
     """, height=520, scrolling=False)
