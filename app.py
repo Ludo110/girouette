@@ -16,13 +16,23 @@ if "onglet" not in st.session_state:
 
 now_france = datetime.now(tz_france)
 if "heure_selectionnee_str" not in st.session_state:
-    st.session_state["heure_selectionnee_str"] = now_france.strftime("%H:%M")
+    m_init = 15 * round(now_france.minute / 15)
+    h_init = now_france.hour
+    if m_init == 60:
+        h_init = (h_init + 1) % 24
+        m_init = 0
+    st.session_state["heure_selectionnee_str"] = f"{h_init:02d}:{m_init:02d}"
 
 if "choix_jour" not in st.session_state:
     st.session_state["choix_jour"] = "Aujourd'hui"
 
 def reinitialiser_heure():
-    st.session_state["heure_selectionnee_str"] = datetime.now(tz_france).strftime("%H:%M")
+    m_curr = 15 * round(datetime.now(tz_france).minute / 15)
+    h_curr = datetime.now(tz_france).hour
+    if m_curr == 60:
+        h_curr = (h_curr + 1) % 24
+        m_curr = 0
+    st.session_state["heure_selectionnee_str"] = f"{h_curr:02d}:{m_curr:02d}"
     st.session_state["choix_jour"] = "Aujourd'hui"
 
 def evaluer_confort(temp_air, vitesse_vent, rad, pluie, est_abrite):
@@ -340,11 +350,9 @@ label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Au
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-# Logique de ciblage : Tranche actuelle (aujourd'hui et dans le quart d'heure actuel)
-diff_secondes = (dt_local - now_france).total_seconds()
-est_tranche_actuelle = (choix_jour == "Aujourd'hui" and -300 <= diff_secondes <= 900)
+# Condition : on applique le direct (données réelles mesurées) pour tout ce qui est dans le passé ou le présent d'aujourd'hui
+est_passe_ou_actuel = (choix_jour == "Aujourd'hui" and dt_local <= now_france + timedelta(minutes=10))
 
-# Récupération Open-Meteo (Données Live 'current' + Prévisions 'hourly')
 try:
     url_météo = (
         f"https://api.open-meteo.com/v1/forecast?latitude={LAT_SM}&longitude={LON_SM}"
@@ -353,16 +361,16 @@ try:
     )
     r = requests.get(url_météo, timeout=5).json()
     
-    if est_tranche_actuelle and "current" in r:
-        # Données réelles en direct
+    if est_passe_ou_actuel and "current" in r:
+        # Valeurs réelles du moment pour les heures passées et actuelles
         temp_air = round(r["current"]["temperature_2m"], 1)
         auto_v = int(r["current"]["wind_speed_10m"])
         auto_a = float(r["current"]["wind_direction_10m"])
-        rad = 300.0  # Valeur par défaut standard pour le live
+        rad = 300.0  
         pluie = 0.0
         soleil_txt = "☀️ Ensoleillé / Direct"
     else:
-        # Données prévisionnelles horaires
+        # Modèle prévisionnel uniquement pour le futur (plus tard aujourd'hui ou demain)
         iso_cible = dt_local.strftime("%Y-%m-%dT%H:00")
         if "hourly" in r and iso_cible in r["hourly"]["time"]:
             idx = r["hourly"]["time"].index(iso_cible)
