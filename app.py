@@ -102,7 +102,6 @@ def récupérer_temperature_mole():
         url = "https://www.infoclimat.fr/public-api/static/json/?id=000YV&auth=Tldx1OehbMsR6xzpQDzArHPJkGeBZX9Gb8dF0Qd3pqaUpart2w&format=json"
         resp = requests.get(url, timeout=4)
         data = resp.json()
-        # Extraction de la température courante sur la station StatIC
         return float(data.get("temperature", data.get("current", {}).get("temperature", None)))
     except Exception:
         return None
@@ -385,10 +384,10 @@ except:
     pluie = 0.0
     soleil_txt = "☀️ Ensoleillé"
 
-# Logique hybride : Température réelle du Môle des Noires pour l'heure actuelle, modèle global pour le reste
-est_heure_actuelle = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 3600)
+# Logique hybride : Température réelle du Môle des Noires pour aujourd'hui, modèle global pour le reste
+est_aujourdhui = (choix_jour == "Aujourd'hui")
 
-if est_heure_actuelle:
+if est_aujourdhui:
     temp_mole = récupérer_temperature_mole()
     temp_air = temp_mole if temp_mole is not None else temp_air_modele
 else:
