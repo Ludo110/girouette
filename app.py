@@ -523,12 +523,16 @@ elif st.session_state["onglet"] == "webcam":
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Le Sillon en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     st.markdown("""
-    <div class='rect-style' style='padding:20px; max-width:750px; margin:0 auto; text-align:center;'>
-        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-            <iframe src="https://www.windy.com/webcams/1302610945" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0;" allowfullscreen></iframe>
-        </div>
-        <p style="margin-top:15px; font-size:0.9em; color:#444;">
-            🌊 <i>Vue panoramique en direct sur la plage du Sillon et la baie de Saint-Malo. Idéal pour vérifier l'état de la mer et le vent en temps réel !</i>
+    <div class='rect-style' style='padding:30px; max-width:600px; margin:0 auto; text-align:center;'>
+        <h3 style='color:#436e64; margin-top:0;'>📹 Le Sillon en direct</h3>
+        <p style='color:#444; margin-bottom:25px;'>
+            Pour des raisons de sécurité imposées par l'hébergeur de la webcam, le flux direct doit s'ouvrir dans un onglet dédié.
+        </p>
+        <a href="https://www.windy.com/webcams/1302610945" target="_blank" style="background-color:#436e64; color:#f0ede6; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display:inline-block;">
+            🚀 Ouvrir la Webcam du Sillon
+        </a>
+        <p style="margin-top:25px; font-size:0.85em; color:#666;">
+            🌊 Idéal pour vérifier l'état exact des vagues, du clapot et du vent sur la digue en temps réel.
         </p>
     </div>
     """, unsafe_allow_html=True)
