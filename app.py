@@ -511,22 +511,28 @@ elif st.session_state["onglet"] == "plongee":
             <div><b>Pluie récente</b><br>{pluie} mm</div>
         </div>
         <div style='margin-top:20px; font-size:0.9em; text-align:center; color:#555;'>
-            💡 <i>Rappel : Pour la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
+            💡 <i>Rappel : For la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : WEBCAM THERMES MARINS (Direct YouTube)
+# ONGLET 4 : WEBCAM THERMES MARINS (Via lien direct sécurisé et pérenne)
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
     st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Thermes Marins / Le Sillon</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     st.markdown("""
-    <div class='rect-style' style='padding:25px; max-width:800px; margin:0 auto; text-align:center;'>
+    <div class='rect-style' style='padding:30px; max-width:600px; margin:0 auto; text-align:center;'>
         <h3 style='color:#436e64; margin-top:0;'>📹 La digue de Saint-Malo en direct</h3>
+        <p style='color:#444; margin-bottom:25px;'>
+            Accédez instantanément au flux vidéo officiel des Thermes Marins.
+        </p>
+        <a href="https://saintmaloinfo.fr/webcams/" target="_blank" style="background-color:#436e64; color:#f0ede6; padding:12px 24px; border-radius:10px; text-decoration:none; font-weight:bold; box-shadow: 0 4px 8px rgba(0,0,0,0.2); display:inline-block;">
+            🚀 Ouvrir la Webcam des Thermes Marins
+        </a>
+        <p style="margin-top:25px; font-size:0.85em; color:#666;">
+            🌊 Idéal pour observer l'état réel des vagues, du vent et de la marée sur la grande plage.
+        </p>
     </div>
     """, unsafe_allow_html=True)
-
-    # Intégration native et fluide du flux YouTube en direct des Thermes Marins
-    st.video("https://www.youtube.com/watch?v=Fj-yZomW5mU")
