@@ -350,8 +350,9 @@ label_jour = f"pour {heure_selectionnee.strftime('%H:%M')}" if choix_jour == "Au
 sol_alt = get_altitude(LAT_SM, LON_SM, dt_utc)
 sol_azi = get_azimuth(LAT_SM, LON_SM, dt_utc)
 
-# Condition : on applique le direct (données réelles mesurées) pour tout ce qui est dans le passé ou le présent d'aujourd'hui
-est_passe_ou_actuel = (choix_jour == "Aujourd'hui" and dt_local <= now_france + timedelta(minutes=10))
+# Détection si l'heure sélectionnée est dans le passé (par rapport à maintenant)
+est_passe = (choix_jour == "Aujourd'hui" and dt_local < now_france - timedelta(minutes=5))
+est_instant_present = (choix_jour == "Aujourd'hui" and abs((dt_local - now_france).total_seconds()) < 900)
 
 try:
     url_météo = (
@@ -361,8 +362,16 @@ try:
     )
     r = requests.get(url_météo, timeout=5).json()
     
-    if est_passe_ou_actuel and "current" in r:
-        # Valeurs réelles du moment pour les heures passées et actuelles
+    if est_passe:
+        # Heure passée : on bloque l'affichage météo
+        temp_air = None
+        auto_v = 0
+        auto_a = 0.0
+        rad = 0.0
+        pluie = 0.0
+        soleil_txt = "⏳ Heure passée (Non disponible)"
+    elif est_instant_present and "current" in r:
+        # Heure actuelle : Données réelles en direct
         temp_air = round(r["current"]["temperature_2m"], 1)
         auto_v = int(r["current"]["wind_speed_10m"])
         auto_a = float(r["current"]["wind_direction_10m"])
@@ -370,7 +379,7 @@ try:
         pluie = 0.0
         soleil_txt = "☀️ Ensoleillé / Direct"
     else:
-        # Modèle prévisionnel uniquement pour le futur (plus tard aujourd'hui ou demain)
+        # Heure future ou demain : Modèle prévisionnel
         iso_cible = dt_local.strftime("%Y-%m-%dT%H:00")
         if "hourly" in r and iso_cible in r["hourly"]["time"]:
             idx = r["hourly"]["time"].index(iso_cible)
@@ -427,9 +436,14 @@ ori_code = dirs_code_16[idx_dir]
 # ONGLET 1 : BRONZETTE
 # -----------------------------------------------------------------------------
 if st.session_state["onglet"] == "bronzette":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    if est_passe:
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
-    if sol_alt <= 2:
+    if est_passe:
+        st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>Veuillez sélectionner une heure future ou l'heure actuelle pour simuler les conditions.</b></div>", unsafe_allow_html=True)
+    elif sol_alt <= 2:
         st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil est couché à cette heure-là ! Pas de bronzette possible.</b></div>", unsafe_allow_html=True)
     else:
         plages = [
@@ -482,19 +496,23 @@ if st.session_state["onglet"] == "bronzette":
 # ONGLET 2 : APÉRO AU SOLEIL
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "apero":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    if est_passe:
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
             spots = json.load(f)
     except Exception as e:
-        st.error("Impossible de charger spots_apero.json")
         spots = []
 
-    spots_valides = []
-    if sol_alt <= 2:
+    if est_passe:
+        pass
+    elif sol_alt <= 2:
         st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>🌙 Le soleil sera couché à cette heure-là !</b></div>", unsafe_allow_html=True)
     else:
+        spots_valides = []
         v_compatibles = adjacents.get(ori_code, [ori_code])
 
         for s in spots:
@@ -522,27 +540,30 @@ elif st.session_state["onglet"] == "apero":
 # ONGLET 3 : PLONGÉE & CHASSE SOUS-MARINE
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "plongee":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b><br>Prochaine marée basse : {basse_mer} — Prochaine marée haute : {haute_mer}</div>", unsafe_allow_html=True)
+    if est_passe:
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b><br>Prochaine marée basse : {basse_mer} — Prochaine marée haute : {haute_mer}</div>", unsafe_allow_html=True)
 
-    statut, conseil, couleur = evaluer_conditions_chasse(vitesse, wave_height, pluie)
+        statut, conseil, couleur = evaluer_conditions_chasse(vitesse, wave_height, pluie)
 
-    st.markdown(f"""
-    <div class='rect-style' style='padding:25px; max-width:600px; margin:0 auto; color:#222;'>
-        <h3 style='text-align:center; color:#436e64; margin-top:0;'>Conditions Sous-Marines Estimées</h3>
-        <div style='text-align:center; font-size:1.2em; font-weight:bold; color:{couleur}; margin-bottom:10px;'>{statut}</div>
-        <p style='text-align:center; font-style:italic; margin-bottom:20px;'>{conseil}</p>
-        <hr style='border:0; border-top:1px solid #ccc; margin:15px 0;'>
-        <div style='display:flex; justify-content:space-around; flex-wrap:wrap; gap:15px; text-align:center;'>
-            <div><b>Hauteur de vagues</b><br>{wave_height} m</div>
-            <div><b>Période de houle</b><br>{wave_period} s</div>
-            <div><b>Température de l'eau</b><br>{temp_mer}°C</div>
-            <div><b>Pluie récente</b><br>{pluie} mm</div>
+        st.markdown(f"""
+        <div class='rect-style' style='padding:25px; max-width:600px; margin:0 auto; color:#222;'>
+            <h3 style='text-align:center; color:#436e64; margin-top:0;'>Conditions Sous-Marines Estimées</h3>
+            <div style='text-align:center; font-size:1.2em; font-weight:bold; color:{couleur}; margin-bottom:10px;'>{statut}</div>
+            <p style='text-align:center; font-style:italic; margin-bottom:20px;'>{conseil}</p>
+            <hr style='border:0; border-top:1px solid #ccc; margin:15px 0;'>
+            <div style='display:flex; justify-content:space-around; flex-wrap:wrap; gap:15px; text-align:center;'>
+                <div><b>Hauteur de vagues</b><br>{wave_height} m</div>
+                <div><b>Période de houle</b><br>{wave_period} s</div>
+                <div><b>Température de l'eau</b><br>{temp_mer}°C</div>
+                <div><b>Pluie récente</b><br>{pluie} mm</div>
+            </div>
+            <div style='margin-top:20px; font-size:0.9em; text-align:center; color:#555;'>
+                💡 <i>Rappel : Pour la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
+            </div>
         </div>
-        <div style='margin-top:20px; font-size:0.9em; text-align:center; color:#555;'>
-            💡 <i>Rappel : Pour la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # ONGLET 4 : WEBCAM THERMES MARINS
