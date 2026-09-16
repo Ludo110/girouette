@@ -663,7 +663,7 @@ elif st.session_state["onglet"] == "peche":
             Périodes solunaires indicatives (activité théorique des poissons). Marée et coefficient restent calculés.
         </p>
     </div>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # ONGLET 5 : WEBCAM THERMES MARINS
