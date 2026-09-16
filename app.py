@@ -630,7 +630,7 @@ elif st.session_state["onglet"] == "plongee":
         """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : PÊCHE & ACTIVITÉ SOLUNAIRE
+# ONGLET 4 : PÊCHE (Pêche à pied & Pêche sportive)
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "peche":
     st.markdown(f"""
@@ -641,39 +641,52 @@ elif st.session_state["onglet"] == "peche":
     </div>
     """, unsafe_allow_html=True)
 
-    components.html("""
-    <div class="rect-style" style="background-color: rgba(240, 237, 230, 0.85); border-radius: 15px; padding: 25px; max-width: 650px; margin: 0 auto; color: #222; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
-        <h3 style="color:#436e64; margin-top:0;">Activité modérée</h3>
-        <p style="margin: 5px 0 15px 0; font-size: 0.95em; color:#555;">🟣 Premier croissant · Coef. 74</p>
-        
-        <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 10px; margin-bottom: 20px; font-weight: bold; color:#333;">
-            Prochaine période dans 3 h 26
-        </div>
+    col_peche1, col_peche2 = st.columns(2)
 
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <b style="color:#436e64;">Période majeure</b>
-                <span>04h47 → 06h47 <i style="font-size:0.85em; color:#555;">Montante</i></span>
+    with col_peche1:
+        components.html("""
+        <div class="rect-style" style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; color: #222; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
+            <h3 style="color:#436e64; margin-top:0;">🦐 Pêche à pied</h3>
+            <p style="margin: 5px 0 15px 0; font-size: 0.95em; color:#555;">Coeff. de marée : <b>74</b> (Bonne marée)</p>
+            
+            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; font-size: 0.9em; color:#333;">
+                <b>Règle d'or :</b> Ciblez la zone découvre-bancs <b>2 heures avant la basse mer</b>.<br>
+                <br>
+                ⚠️ <b>Sécurité :</b> Surveillez le flux remontant très rapide en estuaire de Rance et le long des côtes malouines pour éviter de vous faire encercler par l'eau.
             </div>
-            <div style="background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <b style="color:#557a70;">Période mineure</b>
-                <span>13h39 → 14h39 <i style="font-size:0.85em; color:#555;">Descendante</i></span>
-            </div>
-            <div style="background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <b style="color:#436e64;">Période majeure</b>
-                <span>17h08 → 19h08 <i style="font-size:0.85em; color:#555;">Montante</i></span>
-            </div>
-            <div style="background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <b style="color:#557a70;">Période mineure</b>
-                <span>21h36 → 22h36 <i style="font-size:0.85em; color:#555;">Montante</i></span>
+
+            <div style="background: rgba(45,90,39,0.1); border-left: 4px solid #2d5a27; padding: 10px; border-radius: 4px; font-size: 0.85em; text-align: left; color:#333;">
+                <b>Spots conseillés :</b> Estrans rocheux de Rothéneuf, pieds des remparts ou secteurs de la Rance selon les espèces recherchées.
             </div>
         </div>
+        """, height=380, scrolling=False)
 
-        <p style="margin-top:20px; font-size:0.8em; font-style:italic; color:#666;">
-            Périodes solunaires indicatives (activité théorique des poissons). Marée et coefficient restent calculés.
-        </p>
-    </div>
-    """, height=410, scrolling=False)
+    with col_peche2:
+        components.html("""
+        <div class="rect-style" style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; color: #222; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
+            <h3 style="color:#436e64; margin-top:0;">🎣 Pêche sportive (Mer / Bord)</h3>
+            <p style="margin: 5px 0 10px 0; font-size: 0.95em; color:#555;">Activité solunaire : <b>Modérée</b> 🟣</p>
+            
+            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 10px; margin-bottom: 15px; font-weight: bold; color:#333; font-size: 0.9em;">
+                Prochaine période active dans 3 h 26
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 0.85em;">
+                <div style="background: rgba(255,255,255,0.5); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <b style="color:#436e64;">Majeure</b>
+                    <span>04h47 → 06h47 <i style="color:#555;">Montante</i></span>
+                </div>
+                <div style="background: rgba(255,255,255,0.5); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <b style="color:#557a70;">Mineure</b>
+                    <span>13h39 → 14h39 <i style="color:#555;">Descendante</i></span>
+                </div>
+                <div style="background: rgba(255,255,255,0.5); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <b style="color:#436e64;">Majeure</b>
+                    <span>17h08 → 19h08 <i style="color:#555;">Montante</i></span>
+                </div>
+            </div>
+        </div>
+        """, height=380, scrolling=False)
 
 # -----------------------------------------------------------------------------
 # ONGLET 5 : WEBCAM THERMES MARINS
