@@ -700,6 +700,28 @@ elif st.session_state["onglet"] == "peche":
         </div>
         """, height=380, scrolling=False)
 
+    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+
+    # Bloc des prochaines grandes marées (> 95)
+    components.html("""
+    <div class="rect-style" style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; max-width: 900px; margin: 0 auto; color: #222; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
+        <h3 style="color:#436e64; margin-top:0;">⚡ Prochaines grandes marées (> 95)</h3>
+        <p style="margin: 5px 0 15px 0; font-size: 0.9em; color:#555;">Calendrier des coefficients remarquables pour anticiper vos sorties à pied.</p>
+        
+        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+            <div style="background: rgba(255,255,255,0.7); padding: 10px 15px; border-radius: 10px; font-size: 0.9em; min-width: 180px;">
+                <b>26 Septembre</b><br><span style="color: #2d5a27; font-weight: bold;">Coeff : 98</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.7); padding: 10px 15px; border-radius: 10px; font-size: 0.9em; min-width: 180px;">
+                <b>27 Septembre</b><br><span style="color: #2d5a27; font-weight: bold;">Coeff : 102 🌟</span>
+            </div>
+            <div style="background: rgba(255,255,255,0.7); padding: 10px 15px; border-radius: 10px; font-size: 0.9em; min-width: 180px;">
+                <b>28 Septembre</b><br><span style="color: #2d5a27; font-weight: bold;">Coeff : 96</span>
+            </div>
+        </div>
+    </div>
+    """, height=180, scrolling=False)
+
 # -----------------------------------------------------------------------------
 # ONGLET 5 : WEBCAM THERMES MARINS
 # -----------------------------------------------------------------------------
