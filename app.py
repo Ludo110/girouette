@@ -120,18 +120,25 @@ def récupérer_marées_réelles(dt_cible):
     except Exception:
         return "--:--", "--:--"
 
-def récupérer_marées_rance(dt_cible):
+def récupérer_prochaines_marées_rance(dt_cible):
     data_rance = {
-        "2026-09-14": {"hauts": "00h-00h25 / 11h40-12h35", "bas": "07h30-08h / 19h45"},
-        "2026-09-15": {"hauts": "12h05-13h15 / 23h50-23h55", "bas": "08h / 20h10"},
-        "2026-09-16": {"hauts": "00h25-01h30 / 12h40-14h05", "bas": "08h20 / 20h25"},
-        "2026-09-17": {"hauts": "00h40-02h25 / 13h00-14h55", "bas": "08h30 / 20h45"},
-        "2026-09-18": {"hauts": "01h15-03h15 / 11h45-15h55", "bas": "08h45-08h50 / 21h20-21h30"},
-        "2026-09-19": {"hauts": "01h55-04h00 / 14h05-16h40", "bas": "09h30-09h55 / 22h10-22h40"},
-        "2026-09-20": {"hauts": "02h10-05h55 / 15h00-19h05", "bas": "10h10-11h00 / 23h40-23h55"}
+        "2026-09-14": {"hauts": ["00:00", "11:40"], "bas": ["07:30", "19:45"]},
+        "2026-09-15": {"hauts": ["12:05", "23:50"], "bas": ["08:00", "20:10"]},
+        "2026-09-16": {"hauts": ["00:25", "12:40"], "bas": ["08:20", "20:25"]},
+        "2026-09-17": {"hauts": ["00:40", "13:00"], "bas": ["08:30", "20:45"]},
+        "2026-09-18": {"hauts": ["01:15", "11:45"], "bas": ["08:45", "21:20"]},
+        "2026-09-19": {"hauts": ["01:55", "14:05"], "bas": ["09:30", "22:10"]},
+        "2026-09-20": {"hauts": ["02:10", "15:00"], "bas": ["10:10", "23:40"]}
     }
     date_str = dt_cible.strftime("%Y-%m-%d")
-    return data_rance.get(date_str, {"hauts": "Données non dispo", "bas": "Données non dispo"})
+    info = data_rance.get(date_str, {"hauts": ["--:--"], "bas": ["--:--"]})
+    
+    heure_curr_str = dt_cible.strftime("%H:%M")
+    
+    prochain_haut = next((h for h in info["hauts"] if h >= heure_curr_str), info["hauts"][0] if info["hauts"] else "--:--")
+    prochain_bas = next((b for b in info["bas"] if b >= heure_curr_str), info["bas"][0] if info["bas"] else "--:--")
+    
+    return prochain_haut, prochain_bas
 
 # Styles dynamiques des 5 onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -453,7 +460,7 @@ except:
 temp_mer = calculer_temperature_mer_plage(dt_local)
 
 haute_mer, basse_mer = récupérer_marées_réelles(dt_local)
-rance_info = récupérer_marées_rance(dt_local)
+rance_haut, rance_bas = récupérer_prochaines_marées_rance(dt_local)
 
 if use_manual:
     with st.expander("⚙️ Options & Horaire de simulation", expanded=True):
@@ -477,7 +484,7 @@ if st.session_state["onglet"] == "bronzette":
             <b>Bronzette {label_jour}</b><br>
             Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>~{temp_mer}°C</b> | <b>{soleil_txt}</b><br>
             🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-            🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+            🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
         </div>
         """, unsafe_allow_html=True)
 
@@ -544,7 +551,7 @@ elif st.session_state["onglet"] == "apero":
             <b>Apéro {label_jour}</b><br>
             Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>~{temp_mer}°C</b> | <b>{soleil_txt}</b><br>
             🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-            🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+            🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
         </div>
         """, unsafe_allow_html=True)
 
@@ -595,7 +602,7 @@ elif st.session_state["onglet"] == "plongee":
             <b>Plongée & Chasse {label_jour}</b><br>
             Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>~{temp_mer}°C</b><br>
             🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-            🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+            🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
         </div>
         """, unsafe_allow_html=True)
 
@@ -627,7 +634,7 @@ elif st.session_state["onglet"] == "peche":
     <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
         <b>Activité Pêche & Solunaire {label_jour}</b><br>
         🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-        🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+        🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
     </div>
     """, unsafe_allow_html=True)
 
@@ -673,7 +680,7 @@ elif st.session_state["onglet"] == "webcam":
     <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
         <b>Webcam Thermes Marins en direct</b><br>
         🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-        🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+        🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
     </div>
     """, unsafe_allow_html=True)
 
