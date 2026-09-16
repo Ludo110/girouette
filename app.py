@@ -623,6 +623,9 @@ elif st.session_state["onglet"] == "plongee":
             <div style='margin-top:20px; font-size:0.9em; text-align:center; color:#555;'>
                 💡 <i>Rappel : Pour la chasse sur Saint-Malo, ciblez idéalement une fenêtre de 2 heures autour de la basse ({basse_mer}) pour profiter de l'étale et d'une eau plus claire.</i>
             </div>
+            <div style='margin-top:15px; padding:12px; background-color: rgba(204,0,0,0.1); border-left: 4px solid #cc0000; border-radius: 4px; font-size:0.85em; text-align:left; color:#444;'>
+                ⚠️ <b>Avertissement de sécurité :</b> Ces données sont fournies à titre indicatif et ne se substituent en aucun cas à votre propre jugement sur place. En mer, les conditions peuvent changer rapidement. Ne prenez jamais de risques inutiles.
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
