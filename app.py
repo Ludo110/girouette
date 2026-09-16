@@ -661,17 +661,26 @@ elif st.session_state["onglet"] == "peche":
             <h3 style="color:#436e64; margin-top:0;">🦐 Pêche à pied</h3>
             <p style="margin: 5px 0 15px 0; font-size: 0.95em; color:#555;">Coeff. de marée : <b>{coefficient_maree}</b> — <span style="color: {couleur_coeff}; font-weight: bold;">{eval_coeff}</span></p>
             
-            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; font-size: 0.9em; color:#333;">
+            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: left; font-size: 0.85em; color:#333;">
                 <b>Règle d'or :</b> Ciblez la zone découvre-bancs <b>2 heures avant la basse mer</b>.<br>
                 <br>
-                ⚠️ <b>Sécurité :</b> Surveillez le flux remontant très rapide en estuaire de Rance et le long des côtes malouines pour éviter de vous faire encercler par l'eau.
+                ⚠️ <b>Sécurité :</b> Surveillez le flux remontant très rapide en Rance et le long des côtes pour éviter de vous faire encercler.
             </div>
 
-            <div style="background: rgba(45,90,39,0.1); border-left: 4px solid #2d5a27; padding: 10px; border-radius: 4px; font-size: 0.85em; text-align: left; color:#333;">
-                <b>Spots conseillés :</b> Estrans rocheux de Rothéneuf, pieds des remparts ou secteurs de la Rance selon les espèces recherchées.
+            <div style="background: rgba(45,90,39,0.1); border-left: 4px solid #2d5a27; padding: 8px; border-radius: 4px; font-size: 0.8em; text-align: left; color:#333; margin-bottom: 12px;">
+                <b>Spots conseillés :</b> Estrans de Rothéneuf, pieds des remparts ou secteurs de la Rance.
+            </div>
+
+            <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.85em;">
+                <b style="color:#436e64;">⚡ Prochaines grandes marées (> 95)</b>
+                <div style="display: flex; justify-content: space-around; margin-top: 8px; gap: 5px;">
+                    <div><b>26 Sept</b><br><span style="color: #2d5a27;">Coeff 98</span></div>
+                    <div><b>27 Sept</b><br><span style="color: #2d5a27;">Coeff 102 🌟</span></div>
+                    <div><b>28 Sept</b><br><span style="color: #2d5a27;">Coeff 96</span></div>
+                </div>
             </div>
         </div>
-        """, height=380, scrolling=False)
+        """, height=440, scrolling=False)
 
     with col_peche2:
         components.html("""
@@ -698,29 +707,7 @@ elif st.session_state["onglet"] == "peche":
                 </div>
             </div>
         </div>
-        """, height=380, scrolling=False)
-
-    st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
-
-    # Bloc des prochaines grandes marées (> 95)
-    components.html("""
-    <div class="rect-style" style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; max-width: 900px; margin: 0 auto; color: #222; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
-        <h3 style="color:#436e64; margin-top:0;">⚡ Prochaines grandes marées (> 95)</h3>
-        <p style="margin: 5px 0 15px 0; font-size: 0.9em; color:#555;">Calendrier des coefficients remarquables pour anticiper vos sorties à pied.</p>
-        
-        <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-            <div style="background: rgba(255,255,255,0.7); padding: 10px 15px; border-radius: 10px; font-size: 0.9em; min-width: 180px;">
-                <b>26 Septembre</b><br><span style="color: #2d5a27; font-weight: bold;">Coeff : 98</span>
-            </div>
-            <div style="background: rgba(255,255,255,0.7); padding: 10px 15px; border-radius: 10px; font-size: 0.9em; min-width: 180px;">
-                <b>27 Septembre</b><br><span style="color: #2d5a27; font-weight: bold;">Coeff : 102 🌟</span>
-            </div>
-            <div style="background: rgba(255,255,255,0.7); padding: 10px 15px; border-radius: 10px; font-size: 0.9em; min-width: 180px;">
-                <b>28 Septembre</b><br><span style="color: #2d5a27; font-weight: bold;">Coeff : 96</span>
-            </div>
-        </div>
-    </div>
-    """, height=180, scrolling=False)
+        """, height=440, scrolling=False)
 
 # -----------------------------------------------------------------------------
 # ONGLET 5 : WEBCAM THERMES MARINS
