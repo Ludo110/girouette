@@ -106,6 +106,20 @@ def récupérer_marées_réelles(dt_cible):
     except Exception:
         return "--:--", "--:--"
 
+def récupérer_marées_rance(dt_cible):
+    # Données officielles EDF (Estuaire de la Rance) extraites du tableau
+    data_rance = {
+        "2026-09-14": {"hauts": "00h-00h25 / 11h40-12h35", "bas": "07h30-08h / 19h45"},
+        "2026-09-15": {"hauts": "12h05-13h15 / 23h50-23h55", "bas": "08h / 20h10"},
+        "2026-09-16": {"hauts": "00h25-01h30 / 12h40-14h05", "bas": "08h20 / 20h25"},
+        "2026-09-17": {"hauts": "00h40-02h25 / 13h00-14h55", "bas": "08h30 / 20h45"},
+        "2026-09-18": {"hauts": "01h15-03h15 / 11h45-15h55", "bas": "08h45-08h50 / 21h20-21h30"},
+        "2026-09-19": {"hauts": "01h55-04h00 / 14h05-16h40", "bas": "09h30-09h55 / 22h10-22h40"},
+        "2026-09-20": {"hauts": "02h10-05h55 / 15h00-19h05", "bas": "10h10-11h00 / 23h40-23h55"}
+    }
+    date_str = dt_cible.strftime("%Y-%m-%d")
+    return data_rance.get(date_str, {"hauts": "Données non dispo", "bas": "Données non dispo"})
+
 # Styles dynamiques des 4 onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
@@ -418,6 +432,7 @@ except:
     wave_period = 6.0
 
 haute_mer, basse_mer = récupérer_marées_réelles(dt_local)
+rance_info = récupérer_marées_rance(dt_local)
 
 if use_manual:
     with st.expander("⚙️ Options & Horaire de simulation", expanded=True):
@@ -434,9 +449,16 @@ ori_code = dirs_code_16[idx_dir]
 # -----------------------------------------------------------------------------
 if st.session_state["onglet"] == "bronzette":
     if est_passe:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:650px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
+            <b>Bronzette {label_jour}</b><br>
+            Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>
+            🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
+            🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+        </div>
+        """, unsafe_allow_html=True)
 
     if est_passe:
         st.markdown("<div class='rect-style' style='padding:20px; text-align:center; color:#222;'><b>Veuillez sélectionner une heure future ou l'heure actuelle pour simuler les conditions.</b></div>", unsafe_allow_html=True)
@@ -494,9 +516,16 @@ if st.session_state["onglet"] == "bronzette":
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "apero":
     if est_passe:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:650px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
+            <b>Apéro {label_jour}</b><br>
+            Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b> | <b>{soleil_txt}</b><br>
+            🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
+            🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+        </div>
+        """, unsafe_allow_html=True)
 
     try:
         with open("spots_apero.json", "r", encoding="utf-8") as f:
@@ -538,9 +567,16 @@ elif st.session_state["onglet"] == "apero":
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "plongee":
     if est_passe:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:650px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br>Vent : {vitesse} km/h ({ori_code})<br>Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b><br>Prochaine marée basse : {basse_mer} — Prochaine marée haute : {haute_mer}</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
+            <b>Plongée & Chasse {label_jour}</b><br>
+            Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>{temp_mer}°C</b><br>
+            🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
+            🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+        </div>
+        """, unsafe_allow_html=True)
 
         statut, conseil, couleur = evaluer_conditions_chasse(vitesse, wave_height, pluie)
 
@@ -566,7 +602,13 @@ elif st.session_state["onglet"] == "plongee":
 # ONGLET 4 : WEBCAM THERMES MARINS
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
-    st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:580px; margin:15px auto 25px auto; color:#222;'><b>Webcam Thermes Marins en direct</b><br>Prochaine marée haute : {haute_mer} — Prochaine marée basse : {basse_mer}</div>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
+        <b>Webcam Thermes Marins en direct</b><br>
+        🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
+        🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+    </div>
+    """, unsafe_allow_html=True)
 
     components.html("""
     <div style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; max-width: 900px; margin: 0 auto; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
