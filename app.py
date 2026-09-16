@@ -641,13 +641,25 @@ elif st.session_state["onglet"] == "peche":
     </div>
     """, unsafe_allow_html=True)
 
+    coefficient_maree = 74 
+
+    if coefficient_maree < 80:
+        eval_coeff = "Pas terrible"
+        couleur_coeff = "#e69138" # Orange/Ambre
+    elif 80 <= coefficient_maree <= 100:
+        eval_coeff = "Bien"
+        couleur_coeff = "#38761d" # Vert
+    else:
+        eval_coeff = "Parfait"
+        couleur_coeff = "#2d5a27" # Vert foncé
+
     col_peche1, col_peche2 = st.columns(2)
 
     with col_peche1:
-        components.html("""
+        components.html(f"""
         <div class="rect-style" style="background-color: rgba(240, 237, 230, 0.9); border-radius: 15px; padding: 20px; color: #222; text-align: center; font-family: sans-serif; box-shadow: 0 8px 16px rgba(0,0,0,0.15);">
             <h3 style="color:#436e64; margin-top:0;">🦐 Pêche à pied</h3>
-            <p style="margin: 5px 0 15px 0; font-size: 0.95em; color:#555;">Coeff. de marée : <b>74</b> (Bonne marée)</p>
+            <p style="margin: 5px 0 15px 0; font-size: 0.95em; color:#555;">Coeff. de marée : <b>{coefficient_maree}</b> — <span style="color: {couleur_coeff}; font-weight: bold;">{eval_coeff}</span></p>
             
             <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; font-size: 0.9em; color:#333;">
                 <b>Règle d'or :</b> Ciblez la zone découvre-bancs <b>2 heures avant la basse mer</b>.<br>
