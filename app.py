@@ -661,14 +661,10 @@ elif st.session_state["onglet"] == "peche":
             <h3 style="color:#436e64; margin-top:0;">🦐 Pêche à pied</h3>
             <p style="margin: 5px 0 15px 0; font-size: 0.95em; color:#555;">Coeff. de marée : <b>{coefficient_maree}</b> — <span style="color: {couleur_coeff}; font-weight: bold;">{eval_coeff}</span></p>
             
-            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: left; font-size: 0.85em; color:#333;">
+            <div style="background: rgba(255,255,255,0.7); border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; font-size: 0.85em; color:#333;">
                 <b>Règle d'or :</b> Ciblez la zone découvre-bancs <b>2 heures avant la basse mer</b>.<br>
                 <br>
                 ⚠️ <b>Sécurité :</b> Surveillez le flux remontant très rapide en Rance et le long des côtes pour éviter de vous faire encercler.
-            </div>
-
-            <div style="background: rgba(45,90,39,0.1); border-left: 4px solid #2d5a27; padding: 8px; border-radius: 4px; font-size: 0.8em; text-align: left; color:#333; margin-bottom: 12px;">
-                <b>Spots conseillés :</b> Estrans de Rothéneuf, pieds des remparts ou secteurs de la Rance.
             </div>
 
             <div style="background: rgba(255,255,255,0.8); border-radius: 10px; padding: 10px; text-align: center; font-size: 0.85em;">
@@ -680,7 +676,7 @@ elif st.session_state["onglet"] == "peche":
                 </div>
             </div>
         </div>
-        """, height=440, scrolling=False)
+        """, height=360, scrolling=False)
 
     with col_peche2:
         components.html("""
@@ -707,7 +703,7 @@ elif st.session_state["onglet"] == "peche":
                 </div>
             </div>
         </div>
-        """, height=440, scrolling=False)
+        """, height=360, scrolling=False)
 
 # -----------------------------------------------------------------------------
 # ONGLET 5 : WEBCAM THERMES MARINS
