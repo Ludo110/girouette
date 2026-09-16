@@ -484,7 +484,7 @@ if st.session_state["onglet"] == "bronzette":
             <b>Bronzette {label_jour}</b><br>
             Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>~{temp_mer}°C</b> | <b>{soleil_txt}</b><br>
             🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-            🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
+            🔒 <b>Rance :</b> Haut {rance_haut} — Bas {rance_bas}
         </div>
         """, unsafe_allow_html=True)
 
@@ -551,7 +551,7 @@ elif st.session_state["onglet"] == "apero":
             <b>Apéro {label_jour}</b><br>
             Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>~{temp_mer}°C</b> | <b>{soleil_txt}</b><br>
             🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-            🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
+            🔒 <b>Rance :</b> Haut {rance_haut} — Bas {rance_bas}
         </div>
         """, unsafe_allow_html=True)
 
@@ -602,7 +602,7 @@ elif st.session_state["onglet"] == "plongee":
             <b>Plongée & Chasse {label_jour}</b><br>
             Vent : {vitesse} km/h ({ori_code}) | Air : <b>{temp_air}°C</b> | Mer : <b>~{temp_mer}°C</b><br>
             🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-            🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
+            🔒 <b>Rance :</b> Haut {rance_haut} — Bas {rance_bas}
         </div>
         """, unsafe_allow_html=True)
 
@@ -634,7 +634,7 @@ elif st.session_state["onglet"] == "peche":
     <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
         <b>Activité Pêche & Solunaire {label_jour}</b><br>
         🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-        🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
+        🔒 <b>Rance :</b> Haut {rance_haut} — Bas {rance_bas}
     </div>
     """, unsafe_allow_html=True)
 
@@ -680,7 +680,7 @@ elif st.session_state["onglet"] == "webcam":
     <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
         <b>Webcam Thermes Marins en direct</b><br>
         🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
-        🔒 <b>Rance (Amont) :</b> Haut {rance_haut} — Bas {rance_bas}
+        🔒 <b>Rance :</b> Haut {rance_haut} — Bas {rance_bas}
     </div>
     """, unsafe_allow_html=True)
 
