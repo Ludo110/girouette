@@ -7,6 +7,7 @@ from datetime import datetime, timezone, time, timedelta
 import zoneinfo
 from pysolar.solar import get_azimuth, get_altitude
 import streamlit.components.v1 as components
+from bs4 import BeautifulSoup
 
 st.set_page_config(page_title="Girouette Malouine", layout="wide")
 
@@ -74,6 +75,24 @@ def _fetch_horaire_maree_site():
         return resp.text
     except Exception:
         return ""
+
+@st.cache_data(ttl=1800)
+def récupérer_temperature_mer_live():
+    try:
+        url = "https://seatemperature.info/fr/saint-malo-temperature-de-leau-de-la-mer.html"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        resp = requests.get(url, headers=headers, timeout=5)
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, 'html.parser')
+            # Recherche de la température affichée sur la page
+            elem = soup.find(string=re.compile(r'\d+[.,]\d+°C'))
+            if elem:
+                match = re.search(r'(\d+[.,]\d+)', elem)
+                if match:
+                    return float(match.group(1).replace(',', '.'))
+        return 19.7
+    except Exception:
+        return 19.7
 
 def récupérer_marées_réelles(dt_cible):
     try:
@@ -429,18 +448,15 @@ except:
     soleil_txt = "☀️ Ensoleillé"
 
 try:
-    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=wave_height,wave_period,sea_surface_temperature", timeout=5).json()
-    marine_curr = rm.get("current", {})
-    wave_height = marine_curr.get("wave_height", 0.5)
-    wave_period = marine_curr.get("wave_period", 6.0)
-    
-    # Récupération dynamique de la température de l'eau côtière actualisée (SST Open-Meteo corrigée de l'inertie de plage de ~1.2°C pour coller au ~19.5°C/19.7°C observé)
-    sst_brute = marine_curr.get("sea_surface_temperature", 18.5)
-    temp_mer = round(sst_brute + 1.2, 1)
+    rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=wave_height,wave_period", timeout=5).json()
+    wave_height = rm.get("current", {}).get("wave_height", 0.5)
+    wave_period = rm.get("current", {}).get("wave_period", 6.0)
 except:
     wave_height = 0.5
     wave_period = 6.0
-    temp_mer = 19.7
+
+# Récupération en direct de la température de la mer du site de référence
+temp_mer = récupérer_temperature_mer_live()
 
 haute_mer, basse_mer = récupérer_marées_réelles(dt_local)
 rance_info = récupérer_marées_rance(dt_local)
