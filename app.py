@@ -107,7 +107,6 @@ def récupérer_marées_réelles(dt_cible):
         return "--:--", "--:--"
 
 def récupérer_marées_rance(dt_cible):
-    # Données officielles EDF (Estuaire de la Rance) extraites du tableau
     data_rance = {
         "2026-09-14": {"hauts": "00h-00h25 / 11h40-12h35", "bas": "07h30-08h / 19h45"},
         "2026-09-15": {"hauts": "12h05-13h15 / 23h50-23h55", "bas": "08h / 20h10"},
@@ -120,10 +119,11 @@ def récupérer_marées_rance(dt_cible):
     date_str = dt_cible.strftime("%Y-%m-%d")
     return data_rance.get(date_str, {"hauts": "Données non dispo", "bas": "Données non dispo"})
 
-# Styles dynamiques des 4 onglets
+# Styles dynamiques des 5 onglets
 style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_plongee = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "plongee" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+style_peche = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "peche" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 style_webcam = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "webcam" else "background-color: #f0ede6 !important; color: #436e64 !important;"
 
 st.markdown(f"""
@@ -229,18 +229,21 @@ st.markdown(f"""
         width: 100% !important;
     }}
     
-    /* Boutons de navigation */
-    div[data-testid="stColumn"]:nth-child(2) button {{ {style_bronzette} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 12px !important; }}
+    /* Boutons de navigation (5 colonnes) */
+    div[data-testid="stColumn"]:nth-child(2) button {{ {style_bronzette} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
     div[data-testid="stColumn"]:nth-child(2) button p {{ color: inherit !important; font-weight: bold !important; }}
 
-    div[data-testid="stColumn"]:nth-child(3) button {{ {style_apero} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 12px !important; }}
+    div[data-testid="stColumn"]:nth-child(3) button {{ {style_apero} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
     div[data-testid="stColumn"]:nth-child(3) button p {{ color: inherit !important; font-weight: bold !important; }}
 
-    div[data-testid="stColumn"]:nth-child(4) button {{ {style_plongee} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 12px !important; }}
+    div[data-testid="stColumn"]:nth-child(4) button {{ {style_plongee} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
     div[data-testid="stColumn"]:nth-child(4) button p {{ color: inherit !important; font-weight: bold !important; }}
 
-    div[data-testid="stColumn"]:nth-child(5) button {{ {style_webcam} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 12px !important; }}
+    div[data-testid="stColumn"]:nth-child(5) button {{ {style_peche} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
     div[data-testid="stColumn"]:nth-child(5) button p {{ color: inherit !important; font-weight: bold !important; }}
+
+    div[data-testid="stColumn"]:nth-child(6) button {{ {style_webcam} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
+    div[data-testid="stColumn"]:nth-child(6) button p {{ color: inherit !important; font-weight: bold !important; }}
 
     div[data-testid="stExpander"] button[kind="secondary"] {{
         background-color: #f0ede6 !important;
@@ -305,8 +308,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Barre de navigation à 4 onglets
-_, nav_col1, nav_col2, nav_col3, nav_col4, _ = st.columns([0.3, 1.8, 1.8, 1.8, 1.8, 0.3])
+# Barre de navigation à 5 onglets
+_, nav_col1, nav_col2, nav_col3, nav_col4, nav_col5, _ = st.columns([0.2, 1.6, 1.6, 1.6, 1.6, 1.6, 0.2])
 
 with nav_col1:
     if st.button("🏖️ Bronzette", use_container_width=True):
@@ -314,17 +317,22 @@ with nav_col1:
         st.rerun()
 
 with nav_col2:
-    if st.button("🍹 Apéro au Soleil", use_container_width=True):
+    if st.button("🍹 Apéro", use_container_width=True):
         st.session_state["onglet"] = "apero"
         st.rerun()
 
 with nav_col3:
-    if st.button("🤿 Plongée & Chasse", use_container_width=True):
+    if st.button("🤿 Plongée", use_container_width=True):
         st.session_state["onglet"] = "plongee"
         st.rerun()
 
 with nav_col4:
-    if st.button("📹 Webcam Thermes", use_container_width=True):
+    if st.button("🎣 Pêche", use_container_width=True):
+        st.session_state["onglet"] = "peche"
+        st.rerun()
+
+with nav_col5:
+    if st.button("📹 Webcam", use_container_width=True):
         st.session_state["onglet"] = "webcam"
         st.rerun()
 
@@ -449,7 +457,7 @@ ori_code = dirs_code_16[idx_dir]
 # -----------------------------------------------------------------------------
 if st.session_state["onglet"] == "bronzette":
     if est_passe:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:650px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'><b>Bronzette {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
@@ -516,7 +524,7 @@ if st.session_state["onglet"] == "bronzette":
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "apero":
     if est_passe:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:650px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'><b>Apéro {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
@@ -567,7 +575,7 @@ elif st.session_state["onglet"] == "apero":
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "plongee":
     if est_passe:
-        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:650px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'><b>Plongée & Chasse {label_jour}</b><br><i>Données non disponibles pour les heures passées.</i></div>", unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
@@ -599,7 +607,53 @@ elif st.session_state["onglet"] == "plongee":
         """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# ONGLET 4 : WEBCAM THERMES MARINS
+# ONGLET 4 : PÊCHE & ACTIVITÉ SOLUNAIRE
+# -----------------------------------------------------------------------------
+elif st.session_state["onglet"] == "peche":
+    st.markdown(f"""
+    <div class='rect-style' style='padding:12px; text-align:center; max-width:680px; margin:15px auto 25px auto; color:#222;'>
+        <b>Activité Pêche & Solunaire {label_jour}</b><br>
+        🌊 <b>Mer :</b> PM {haute_mer} — BM {basse_mer}<br>
+        🔒 <b>Rance (Amont) :</b> Hauts {rance_info['hauts']} — Bas {rance_info['bas']}
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class='rect-style' style='padding:25px; max-width:650px; margin:0 auto; color:#222; text-align:center;'>
+        <h3 style='color:#436e64; margin-top:0;'>Activité modérée</h3>
+        <p style='margin: 5px 0 15px 0; font-size: 0.95em; color:#555;'>🟣 Premier croissant · Coef. 74</p>
+        
+        <div style='background: rgba(255,255,255,0.7); border-radius: 12px; padding: 10px; margin-bottom: 20px; font-weight: bold; color:#333;'>
+            Prochaine période dans 3 h 26
+        </div>
+
+        <div style='display: flex; flex-direction: column; gap: 8px;'>
+            <div style='background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;'>
+                <b style='color:#436e64;'>Période majeure</b>
+                <span>04h47 → 06h47 <i style='font-size:0.85em; color:#555;'>Montante</i></span>
+            </div>
+            <div style='background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;'>
+                <b style='color:#557a70;'>Période mineure</b>
+                <span>13h39 → 14h39 <i style='font-size:0.85em; color:#555;'>Descendante</i></span>
+            </div>
+            <div style='background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;'>
+                <b style='color:#436e64;'>Période majeure</b>
+                <span>17h08 → 19h08 <i style='font-size:0.85em; color:#555;'>Montante</i></span>
+            </div>
+            <div style='background: rgba(255,255,255,0.5); padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;'>
+                <b style='color:#557a70;'>Période mineure</b>
+                <span>21h36 → 22h36 <i style='font-size:0.85em; color:#555;'>Montante</i></span>
+            </div>
+        </div>
+
+        <p style='margin-top:20px; font-size:0.8em; font-style:italic; color:#666;'>
+            Périodes solunaires indicatives (activité théorique des poissons). Marée et coefficient restent calculés.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# ONGLET 5 : WEBCAM THERMES MARINS
 # -----------------------------------------------------------------------------
 elif st.session_state["onglet"] == "webcam":
     st.markdown(f"""
