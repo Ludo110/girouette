@@ -494,7 +494,7 @@ if st.session_state["onglet"] == "bronzette":
             {"Nom": "Bon-Secours", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Bonsecours.jpg"},
             {"Nom": "L'Eventail", "Ville": "Saint-Malo", "Min": 360, "Max": 180, "Image": "Eventail.jpg"},
             {"Nom": "Le Sillon", "Ville": "Saint-Malo", "Min": 45, "Max": 225, "Image": "Sillon.jpg"},
-            {"Nom": "Le Môle", "Ville": "Saint-Malo", "Min": 270, "Max": 90, "Image": "Mole.jpg"},
+            {"Nom": "Le Môle", "Ville": "Saint-Malo", "Min": 180, "Max": 360, "Image": "Mole.jpg"},
             {"Nom": "Le Val", "Ville": "Rotheneuf", "Min": 45, "Max": 225, "Image": "Val.jpg"},
             {"Nom": "Les Chevrets", "Ville": "Saint-Coulomb", "Min": 22, "Max": 202, "Image": "Chevrets.jpg"},
             {"Nom": "La Touesse", "Ville": "Saint-Coulomb", "Min": 90, "Max": 270, "Image": "Touesse.jpg"},
