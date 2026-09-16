@@ -75,26 +75,36 @@ def _fetch_horaire_maree_site():
     except Exception:
         return ""
 
-def calculer_temperature_mer_dynamique(dt_cible):
-    """Calcule la température de l'eau en fonction de la période de l'année (cycle thermique de Saint-Malo)"""
-    # On récupère le jour de l'année (1 à 365)
+def calculer_temperature_mer_plage(dt_cible):
+    """Calcule la température réelle de l'eau sur les plages de Saint-Malo selon le jour de l'année (interpolation lissée)"""
     jour_annee = dt_cible.timetuple().tm_yday
     
-    try:
-        # Requête sur l'API marine pour récupérer la tendance brute locale
-        rm = requests.get(f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT_SM}&longitude={LON_SM}&current=wave_height,wave_period,sea_surface_temperature", timeout=5).json()
-        marine_curr = rm.get("current", {})
-        sst_brute = marine_curr.get("sea_surface_temperature", 18.5)
-    except:
-        sst_brute = 18.5
-
-    # Courbe d'inertie thermique côtière (les plages se réchauffent plus en été et se refroidissent en douceur à l'automne)
-    # Mi-septembre (jour ~260), la température réelle observée est de ~19.7°C
-    # On applique un offset de correction intelligent qui évolue selon la saison
-    offset_saisonnier = 1.2 if 150 <= jour_annee <= 280 else 0.8
-    temp_estimee = round(sst_brute + offset_saisonnier, 1)
+    # Points de repère climatologiques côtiers de Saint-Malo (mi-mois)
+    points_cotiers = [
+        (1, 9.8),    # Mi-janvier
+        (46, 9.5),   # Mi-février (au plus frais)
+        (74, 10.2),  # Mi-mars
+        (105, 11.8), # Mi-avril
+        (135, 13.8), # Mi-mai
+        (166, 16.5), # Mi-juin
+        (196, 18.8), # Mi-juillet
+        (227, 19.9), # Mi-août (au plus chaud)
+        (258, 19.7), # Mi-septembre (actuellement ~19.7°C)
+        (288, 17.2), # Mi-octobre
+        (319, 14.2), # Mi-novembre
+        (350, 11.8), # Mi-décembre
+        (366, 10.0)  # Fin décembre
+    ]
     
-    return temp_estimee
+    # Recherche de l'intervalle et interpolation linéaire fluide
+    for i in range(len(points_cotiers) - 1):
+        j1, t1 = points_cotiers[i]
+        j2, t2 = points_cotiers[i+1]
+        if j1 <= jour_annee <= j2:
+            fraction = (jour_annee - j1) / (j2 - j1)
+            return round(t1 + fraction * (t2 - t1), 1)
+            
+    return 19.7
 
 def récupérer_marées_réelles(dt_cible):
     try:
@@ -457,8 +467,8 @@ except:
     wave_height = 0.5
     wave_period = 6.0
 
-# Température mer actualisée automatiquement en fonction de la date et de la tendance marine live
-temp_mer = calculer_temperature_mer_dynamique(dt_local)
+# Température de la mer calée sur la climatologie côtière de Saint-Malo (évolue automatiquement toute seule au fil des semaines)
+temp_mer = calculer_temperature_mer_plage(dt_local)
 
 haute_mer, basse_mer = récupérer_marées_réelles(dt_local)
 rance_info = récupérer_marées_rance(dt_local)
