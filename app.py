@@ -140,35 +140,29 @@ def récupérer_prochaines_marées_rance(dt_cible):
     
     return prochain_haut, prochain_bas
 
-# Styles dynamiques des 5 onglets
-style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
-style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
-style_plongee = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "plongee" else "background-color: #f0ede6 !important; color: #436e64 !important;"
-style_peche = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "peche" else "background-color: #f0ede6 !important; color: #436e64 !important;"
-style_webcam = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "webcam" else "background-color: #f0ede6 !important; color: #436e64 !important;"
-
-st.markdown(f"""
+# Styles statiques globaux
+st.markdown("""
 <style>
-    #MainMenu {{visibility: hidden;}}
-    footer {{visibility: hidden;}}
-    header {{visibility: hidden;}}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     
-    .stApp {{ background-color: #64978b !important; }}
+    .stApp { background-color: #64978b !important; }
     
-    div[data-testid="stExpander"] button div p {{ color: #f0ede6 !important; font-weight: bold !important; }}
-    div[data-testid="stExpander"] label p {{ color: #f0ede6 !important; font-weight: bold !important; }}
+    div[data-testid="stExpander"] button div p { color: #f0ede6 !important; font-weight: bold !important; }
+    div[data-testid="stExpander"] label p { color: #f0ede6 !important; font-weight: bold !important; }
     
-    .centrage-fixe {{ display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }}
+    .centrage-fixe { display: flex; flex-direction: row; justify-content: center; gap: 20px; flex-wrap: wrap; }
     
-    .rect-style {{ 
+    .rect-style { 
         background-color: rgba(240, 237, 230, 0.85) !important; 
         border-radius: 15px; 
         box-shadow: 0 8px 16px rgba(0,0,0,0.15); 
         overflow: hidden; 
         backdrop-filter: blur(5px);
-    }}
+    }
     
-    .plage-card {{ 
+    .plage-card { 
         padding: 0px 0px 15px 0px; 
         text-align: center !important; 
         width: 260px; 
@@ -176,11 +170,11 @@ st.markdown(f"""
         flex-direction: column !important; 
         align-items: center !important; 
         justify-content: flex-start !important; 
-    }}
+    }
     
-    .card-img {{ width: 100%; height: 140px; object-fit: cover; display: block; }}
+    .card-img { width: 100%; height: 140px; object-fit: cover; display: block; }
     
-    .card-title-clickable {{ 
+    .card-title-clickable { 
         width: 100% !important; 
         margin: 10px 0 4px 0 !important; 
         padding: 0 !important;
@@ -191,17 +185,17 @@ st.markdown(f"""
         text-align: center !important;
         cursor: pointer !important;
         display: block !important;
-    }}
+    }
     
-    .card-text {{ width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; text-align: center !important; }}
+    .card-text { width: 100%; color: #444; margin: 0 0 10px 0; font-size: 0.85em; text-align: center !important; }
 
-    .title-wrapper {{
+    .title-wrapper {
         display: flex;
         justify-content: center;
         width: 100%;
-    }}
+    }
 
-    .title-box-full {{
+    .title-box-full {
         background-color: #f0ede6;
         border-radius: 12px;
         padding: 14px 20px;
@@ -214,22 +208,22 @@ st.markdown(f"""
         align-items: center;
         justify-content: center;
     }
-    .title-box-full h1 {{
+    .title-box-full h1 {
         margin: 0 !important;
         padding: 0 !important;
         color: #436e64 !important;
         font-size: 1.4em !important;
         text-align: center !important;
     }
-    .title-box-full p {{
+    .title-box-full p {
         margin: 6px 0 0 0 !important;
         padding: 0 !important;
         color: #557a70 !important;
         font-size: 0.9em !important;
         text-align: center !important;
-    }}
+    }
 
-    .title-box-section {{
+    .title-box-section {
         background-color: #f0ede6;
         border-radius: 12px;
         padding: 10px 20px;
@@ -241,16 +235,51 @@ st.markdown(f"""
         justify-content: center;
         align-items: center;
     }
-    .title-box-section h3 {{
+    .title-box-section h3 {
         margin: 0 !important;
         padding: 0 !important;
         color: #436e64 !important;
         font-size: 1.2em !important;
         text-align: center !important;
         width: 100% !important;
-    }}
-    
-    /* Boutons de navigation (5 colonnes) */
+    }
+
+    div[data-testid="stExpander"] button[kind="secondary"] {
+        background-color: #f0ede6 !important;
+        border: 1px solid #436e64 !important;
+        margin-top: 28px !important;
+    }
+    div[data-testid="stExpander"] button[kind="secondary"] p {
+        color: #436e64 !important;
+        font-weight: bold !important;
+        -webkit-text-fill-color: #436e64 !important;
+    }
+
+    div[data-testid="stSelectbox"] > div > div {
+        background-color: #f0ede6 !important;
+        border: 1px solid #436e64 !important;
+        color: #436e64 !important;
+        border-radius: 8px !important;
+    }
+    div[data-testid="stSelectbox"] div[role="combobox"] {
+        color: #436e64 !important;
+        font-weight: bold !important;
+        text-align: center !important;
+        justify-content: center !important;
+        -webkit-text-fill-color: #436e64 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Styles dynamiques des 5 onglets
+style_bronzette = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "bronzette" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+style_apero = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "apero" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+style_plongee = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "plongee" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+style_peche = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "peche" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+style_webcam = "background-color: #436e64 !important; color: #f0ede6 !important;" if st.session_state["onglet"] == "webcam" else "background-color: #f0ede6 !important; color: #436e64 !important;"
+
+st.markdown(f"""
+<style>
     div[data-testid="stColumn"]:nth-child(2) button {{ {style_bronzette} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
     div[data-testid="stColumn"]:nth-child(2) button p {{ color: inherit !important; font-weight: bold !important; }}
 
@@ -265,31 +294,6 @@ st.markdown(f"""
 
     div[data-testid="stColumn"]:nth-child(6) button {{ {style_webcam} border: 2px solid #436e64 !important; font-weight: bold !important; border-radius: 10px !important; padding: 6px 8px !important; font-size: 0.9em !important; }}
     div[data-testid="stColumn"]:nth-child(6) button p {{ color: inherit !important; font-weight: bold !important; }}
-
-    div[data-testid="stExpander"] button[kind="secondary"] {{
-        background-color: #f0ede6 !important;
-        border: 1px solid #436e64 !important;
-        margin-top: 28px !important;
-    }}
-    div[data-testid="stExpander"] button[kind="secondary"] p {{
-        color: #436e64 !important;
-        font-weight: bold !important;
-        -webkit-text-fill-color: #436e64 !important;
-    }}
-
-    div[data-testid="stSelectbox"] > div > div {{
-        background-color: #f0ede6 !important;
-        border: 1px solid #436e64 !important;
-        color: #436e64 !important;
-        border-radius: 8px !important;
-    }}
-    div[data-testid="stSelectbox"] div[role="combobox"] {{
-        color: #436e64 !important;
-        font-weight: bold !important;
-        text-align: center !important;
-        justify-content: center !important;
-        -webkit-text-fill-color: #436e64 !important;
-    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -688,7 +692,7 @@ elif st.session_state["onglet"] == "peche":
                 Prochaine période active dans 3 h 26
             </div>
 
-            <div style="display: flex; flexDirection: column; gap: 6px; text-align: left; font-size: 0.85em;">
+            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 0.85em;">
                 <div style="background: rgba(255,255,255,0.5); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <b style="color:#436e64;">Majeure</b>
                     <span>04h47 → 06h47 <i style="color:#555;">Montante</i></span>
