@@ -122,13 +122,13 @@ def récupérer_marées_réelles(dt_cible):
 
 def récupérer_prochaines_marées_rance(dt_cible):
     data_rance = {
-        "2026-09-14": {"hauts": ["00:00", "11:40"], "bas": ["07:30", "19:45"]},
-        "2026-09-15": {"hauts": ["12:05", "23:50"], "bas": ["08:00", "20:10"]},
-        "2026-09-16": {"hauts": ["00:25", "12:40"], "bas": ["08:20", "20:25"]},
-        "2026-09-17": {"hauts": ["00:40", "13:00"], "bas": ["08:30", "20:45"]},
-        "2026-09-18": {"hauts": ["01:15", "11:45"], "bas": ["08:45", "21:20"]},
-        "2026-09-19": {"hauts": ["01:55", "14:05"], "bas": ["09:30", "22:10"]},
-        "2026-09-20": {"hauts": ["02:10", "15:00"], "bas": ["10:10", "23:40"]}
+        "2026-09-21": {"hauts": ["05:15", "18:00"], "bas": ["00:00", "12:40"]},
+        "2026-09-22": {"hauts": ["07:00", "19:35"], "bas": ["01:40", "14:15"]},
+        "2026-09-23": {"hauts": ["08:00", "20:25"], "bas": ["02:45", "15:15"]},
+        "2026-09-24": {"hauts": ["08:40", "20:50"], "bas": ["03:40", "15:55"]},
+        "2026-09-25": {"hauts": ["09:05", "21:15"], "bas": ["04:25", "16:45"]},
+        "2026-09-26": {"hauts": ["09:25", "21:45"], "bas": ["05:10", "17:35"]},
+        "2026-09-27": {"hauts": ["10:00", "22:15"], "bas": ["05:55", "18:10"]}
     }
     date_str = dt_cible.strftime("%Y-%m-%d")
     info = data_rance.get(date_str, {"hauts": ["--:--"], "bas": ["--:--"]})
@@ -213,14 +213,14 @@ st.markdown(f"""
         flex-direction: column;
         align-items: center;
         justify-content: center;
-    }}
+    }
     .title-box-full h1 {{
         margin: 0 !important;
         padding: 0 !important;
         color: #436e64 !important;
         font-size: 1.4em !important;
         text-align: center !important;
-    }}
+    }
     .title-box-full p {{
         margin: 6px 0 0 0 !important;
         padding: 0 !important;
@@ -240,7 +240,7 @@ st.markdown(f"""
         display: flex;
         justify-content: center;
         align-items: center;
-    }}
+    }
     .title-box-section h3 {{
         margin: 0 !important;
         padding: 0 !important;
@@ -416,7 +416,7 @@ try:
         temp_air = round(r["current"]["temperature_2m"], 1)
         auto_v = int(r["current"]["wind_speed_10m"])
         auto_a = float(r["current"]["wind_direction_10m"])
-        rad = 300.0  
+        rad = 300.0 
         pluie = 0.0
         soleil_txt = "☀️ Ensoleillé / Direct"
     else:
@@ -645,13 +645,13 @@ elif st.session_state["onglet"] == "peche":
 
     if coefficient_maree < 80:
         eval_coeff = "Pas terrible"
-        couleur_coeff = "#e69138" # Orange/Ambre
+        couleur_coeff = "#e69138"
     elif 80 <= coefficient_maree <= 100:
         eval_coeff = "Bien"
-        couleur_coeff = "#38761d" # Vert
+        couleur_coeff = "#38761d"
     else:
         eval_coeff = "Parfait"
-        couleur_coeff = "#2d5a27" # Vert foncé
+        couleur_coeff = "#2d5a27"
 
     col_peche1, col_peche2 = st.columns(2)
 
@@ -688,7 +688,7 @@ elif st.session_state["onglet"] == "peche":
                 Prochaine période active dans 3 h 26
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 6px; text-align: left; font-size: 0.85em;">
+            <div style="display: flex; flexDirection: column; gap: 6px; text-align: left; font-size: 0.85em;">
                 <div style="background: rgba(255,255,255,0.5); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                     <b style="color:#436e64;">Majeure</b>
                     <span>04h47 → 06h47 <i style="color:#555;">Montante</i></span>
